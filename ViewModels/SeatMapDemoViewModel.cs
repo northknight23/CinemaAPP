@@ -18,6 +18,7 @@ namespace CinemaAPP.ViewModels
 
         public string MovieTitle { get; } = "Cuộc Phiêu Lưu Mùa Hè";
         public string AgeRating { get; } = "P";
+        public string AgeRatingNote { get; } = "Mọi lứa tuổi";
 
         public decimal StandardPrice { get; } = 75000;
         public decimal VipPrice { get; } = 90000;
@@ -73,6 +74,19 @@ namespace CinemaAPP.ViewModels
         public string ZoomText => $"{(int)Math.Round(Zoom * 100)}%";
         public bool IsZoomed => Zoom > MinZoom;
 
+        // Giao diện sáng / tối (View tự đổi bộ màu theo cờ này)
+        private bool isLightTheme;
+        public bool IsLightTheme
+        {
+            get => isLightTheme;
+            set
+            {
+                if (SetProperty(ref isLightTheme, value))
+                    OnPropertyChanged(nameof(ThemeButtonText));
+            }
+        }
+        public string ThemeButtonText => IsLightTheme ? "☾  Giao diện tối" : "☀  Giao diện sáng";
+
         public ICommand ToggleSeatCommand { get; }
         public ICommand ClearCommand { get; }
         public ICommand ContinueCommand { get; }
@@ -83,6 +97,7 @@ namespace CinemaAPP.ViewModels
         public ICommand ZoomInCommand { get; }
         public ICommand ZoomOutCommand { get; }
         public ICommand ResetZoomCommand { get; }
+        public ICommand ToggleThemeCommand { get; }
 
         public SeatMapDemoViewModel()
         {
@@ -152,6 +167,7 @@ namespace CinemaAPP.ViewModels
             ZoomInCommand = new RelayCommand(_ => Zoom = Math.Min(MaxZoom, Zoom + ZoomStep), _ => Zoom < MaxZoom);
             ZoomOutCommand = new RelayCommand(_ => Zoom = Math.Max(MinZoom, Zoom - ZoomStep), _ => Zoom > MinZoom);
             ResetZoomCommand = new RelayCommand(_ => Zoom = MinZoom, _ => Zoom > MinZoom);
+            ToggleThemeCommand = new RelayCommand(_ => IsLightTheme = !IsLightTheme);
         }
 
         private IEnumerable<SeatItem> AllSeats() => Rows.SelectMany(r => r.Seats).Where(s => !s.IsAisle);

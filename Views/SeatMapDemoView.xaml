@@ -1,4 +1,4 @@
-<UserControl x:Class="CinemaAPP.Views.SeatMapDemoView"
+﻿<UserControl x:Class="CinemaAPP.Views.SeatMapDemoView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:CinemaAPP.Views"
@@ -9,24 +9,15 @@
     </UserControl.InputBindings>
 
     <UserControl.Resources>
-        <local:DivideConverter x:Key="Divide"/>
+        <ResourceDictionary>
+        <!-- Bộ màu nằm ở Views/Themes (tối / sáng, cùng tên key). Mặc định nạp bộ tối;
+             code-behind thay MergedDictionaries[0] khi ViewModel.IsLightTheme đổi.
+             Mọi màu trong màn này dùng DynamicResource nên đổi bộ màu là cập nhật ngay. -->
+        <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="/CinemaAPP;component/Views/Themes/SeatMapDark.xaml"/>
+        </ResourceDictionary.MergedDictionaries>
 
-        <!-- Màu riêng của màn chọn ghế (tông tối giống phòng chiếu).
-             TODO: khi B push Styles.xaml thì đề xuất chuyển các màu này sang đó. -->
-        <SolidColorBrush x:Key="PageBg" Color="#14161C"/>
-        <SolidColorBrush x:Key="CardBg" Color="#1E2129"/>
-        <SolidColorBrush x:Key="CardBgRaised" Color="#262A33"/>
-        <SolidColorBrush x:Key="Divider" Color="#2D3340"/>
-        <SolidColorBrush x:Key="TextMain" Color="#F3F4F6"/>
-        <SolidColorBrush x:Key="TextMuted" Color="#9CA3AF"/>
-        <SolidColorBrush x:Key="Accent" Color="#E11D48"/>
-        <SolidColorBrush x:Key="StandardColor" Color="#64748B"/>
-        <SolidColorBrush x:Key="StandardFill" Color="#1F2937"/>
-        <SolidColorBrush x:Key="VipColor" Color="#F59E0B"/>
-        <SolidColorBrush x:Key="VipFill" Color="#2A2112"/>
-        <SolidColorBrush x:Key="CoupleColor" Color="#A855F7"/>
-        <SolidColorBrush x:Key="CoupleFill" Color="#241631"/>
-        <SolidColorBrush x:Key="SoldColor" Color="#374151"/>
+        <local:DivideConverter x:Key="Divide"/>
 
         <!-- ControlTemplate (chương 8): ô ghế là Border bo góc trên như lưng ghế -->
         <Style x:Key="SeatButton" TargetType="Button">
@@ -35,9 +26,9 @@
             <Setter Property="FontSize" Value="10"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
-            <Setter Property="Background" Value="{StaticResource StandardFill}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource StandardColor}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}"/>
+            <Setter Property="Background" Value="{DynamicResource StandardFill}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource StandardColor}"/>
             <Setter Property="ToolTip">
                 <Setter.Value>
                     <TextBlock>
@@ -65,23 +56,23 @@
             <Style.Triggers>
                 <!-- DataTrigger (chương 7): màu theo dữ liệu của ghế. Trigger đứng sau thắng trigger đứng trước. -->
                 <DataTrigger Binding="{Binding Type}" Value="Vip">
-                    <Setter Property="Background" Value="{StaticResource VipFill}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource VipColor}"/>
+                    <Setter Property="Background" Value="{DynamicResource VipFill}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource VipColor}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Type}" Value="Couple">
                     <Setter Property="Width" Value="70"/>
-                    <Setter Property="Background" Value="{StaticResource CoupleFill}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource CoupleColor}"/>
+                    <Setter Property="Background" Value="{DynamicResource CoupleFill}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource CoupleColor}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                    <Setter Property="Background" Value="{StaticResource Accent}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource Accent}"/>
+                    <Setter Property="Background" Value="{DynamicResource Accent}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource Accent}"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsSold}" Value="True">
-                    <Setter Property="Background" Value="{StaticResource SoldColor}"/>
-                    <Setter Property="BorderBrush" Value="{StaticResource SoldColor}"/>
-                    <Setter Property="Foreground" Value="#6B7280"/>
+                    <Setter Property="Background" Value="{DynamicResource SoldColor}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource SoldColor}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SoldText}"/>
                     <Setter Property="IsEnabled" Value="False"/>
                 </DataTrigger>
                 <!-- Ô lối đi: Hidden (không phải Collapsed) để vẫn giữ chỗ trống trên hàng -->
@@ -91,12 +82,31 @@
             </Style.Triggers>
         </Style>
 
+        <!-- Ô bo tròn chứa một mẩu thông tin (giờ, ngày, định dạng, phòng): nền tối nhẹ, viền mảnh -->
+        <Style x:Key="InfoChip" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource ChipBg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ChipBorder}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="10,3"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+        </Style>
+        <Style x:Key="ChipText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ChipFg}"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <!-- Nhãn độ tuổi: cùng dáng ô bo tròn, tông xanh lá rất nhạt -->
+        <Style x:Key="AgeChip" TargetType="Border" BasedOn="{StaticResource InfoChip}">
+            <Setter Property="Background" Value="{DynamicResource AgeChipBg}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AgeChipBorder}"/>
+        </Style>
+
         <Style x:Key="RowLabel" TargetType="TextBlock">
             <Setter Property="Width" Value="24"/>
             <Setter Property="TextAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{StaticResource TextMuted}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}"/>
         </Style>
 
         <!-- Ô màu trong phần chú thích -->
@@ -113,13 +123,13 @@
             <Setter Property="Margin" Value="0,4,20,4"/>
         </Style>
         <Style x:Key="LegendText" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
         <!-- Nút dạng chữ (link): "Đổi suất", "Xem chi tiết loại ghế" -->
         <Style x:Key="LinkButton" TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+            <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -141,8 +151,8 @@
             <Setter Property="Margin" Value="8,0,0,0"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
-            <Setter Property="Background" Value="#2D3340"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBg}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -173,17 +183,17 @@
 
         <!-- Lớp phủ tối phía sau hộp thoại, bấm vào thì đóng -->
         <Style x:Key="DialogBackdrop" TargetType="Border">
-            <Setter Property="Background" Value="#B3000000"/>
+            <Setter Property="Background" Value="{DynamicResource Backdrop}"/>
         </Style>
         <Style x:Key="DialogCard" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource CardBg}"/>
+            <Setter Property="Background" Value="{DynamicResource CardBg}"/>
             <Setter Property="CornerRadius" Value="16"/>
             <Setter Property="MaxWidth" Value="560"/>
             <Setter Property="Margin" Value="24,32"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
         <Style x:Key="DialogTitle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource TextMain}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMain}"/>
             <Setter Property="FontSize" Value="18"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
@@ -206,15 +216,16 @@
                 <Border Background="{Binding ColorHex}" CornerRadius="12,12,4,4" Margin="6,0,6,12"/>
                 <Border Background="{Binding ColorHex}" Opacity="0.75" CornerRadius="4" Height="14"
                         VerticalAlignment="Bottom" Margin="4,0"/>
-                <Border Background="#111318" CornerRadius="3" Width="7" Height="22"
+                <Border Background="{DynamicResource IllustrationArm}" CornerRadius="3" Width="7" Height="22"
                         HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                <Border Background="#111318" CornerRadius="3" Width="7" Height="22"
+                <Border Background="{DynamicResource IllustrationArm}" CornerRadius="3" Width="7" Height="22"
                         HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
             </Grid>
         </DataTemplate>
+        </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource PageBg}">
+    <Grid Background="{DynamicResource PageBg}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -222,25 +233,41 @@
         </Grid.RowDefinitions>
 
         <!-- ===== Đầu trang: phim + suất đang chọn + nút Đổi suất ===== -->
-        <Border Background="{StaticResource CardBg}" Padding="20,14">
+        <Border Background="{DynamicResource CardBg}" Padding="20,14">
             <DockPanel>
-                <Button DockPanel.Dock="Right" Style="{StaticResource LinkButton}" FontSize="15"
-                        Command="{Binding OpenShowtimesCommand}" Content="Đổi suất ›"/>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Nút đổi giao diện sáng / tối -->
+                    <Button Content="{Binding ThemeButtonText}" Command="{Binding ToggleThemeCommand}"
+                            Style="{StaticResource ActionButton}" Padding="14,6" Margin="0,0,20,0" FontSize="13"/>
+                    <Button Style="{StaticResource LinkButton}" FontSize="15"
+                            Command="{Binding OpenShowtimesCommand}" Content="Đổi suất ›"/>
+                </StackPanel>
                 <StackPanel VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <Border Background="#16A34A" CornerRadius="4" Padding="6,1" Margin="0,0,8,0"
-                                VerticalAlignment="Center">
-                            <TextBlock Text="{Binding AgeRating}" Foreground="White" FontWeight="Bold" FontSize="12"/>
+                    <TextBlock Text="{Binding MovieTitle}" Foreground="{DynamicResource TextMain}"
+                               FontSize="20" FontWeight="Bold"/>
+                    <!-- Mỗi mẩu thông tin một ô bo tròn; WrapPanel tự xuống dòng khi hẹp -->
+                    <WrapPanel Margin="0,8,0,0">
+                        <Border Style="{StaticResource InfoChip}">
+                            <TextBlock Text="{Binding CurrentShowtime.TimeRange}" Style="{StaticResource ChipText}"
+                                       FontWeight="SemiBold" Foreground="{DynamicResource TextMain}"/>
                         </Border>
-                        <TextBlock Text="{Binding MovieTitle}" Foreground="{StaticResource TextMain}"
-                                   FontSize="20" FontWeight="Bold"/>
-                    </StackPanel>
-                    <TextBlock Foreground="{StaticResource TextMuted}" Margin="0,4,0,0">
-                        <Run Text="{Binding CurrentShowtime.TimeRange, Mode=OneWay}"/><Run Text="  |  "/>
-                        <Run Text="{Binding CurrentShowtime.Date, Mode=OneWay}"/><Run Text="  |  "/>
-                        <Run Text="{Binding CurrentShowtime.Format, Mode=OneWay}"/><Run Text="  |  "/>
-                        <Run Text="{Binding CurrentShowtime.RoomName, Mode=OneWay}"/>
-                    </TextBlock>
+                        <Border Style="{StaticResource InfoChip}">
+                            <TextBlock Text="{Binding CurrentShowtime.Date}" Style="{StaticResource ChipText}"/>
+                        </Border>
+                        <Border Style="{StaticResource InfoChip}">
+                            <TextBlock Text="{Binding CurrentShowtime.Format}" Style="{StaticResource ChipText}"/>
+                        </Border>
+                        <Border Style="{StaticResource InfoChip}">
+                            <TextBlock Text="{Binding CurrentShowtime.RoomName}" Style="{StaticResource ChipText}"/>
+                        </Border>
+                        <Border Style="{StaticResource AgeChip}">
+                            <TextBlock Style="{StaticResource ChipText}" Foreground="{DynamicResource AgeChipText}">
+                                <Run Text="{Binding AgeRating, Mode=OneWay}" FontWeight="SemiBold"/>
+                                <Run Text="·"/>
+                                <Run Text="{Binding AgeRatingNote, Mode=OneWay}"/>
+                            </TextBlock>
+                        </Border>
+                    </WrapPanel>
                 </StackPanel>
             </DockPanel>
         </Border>
@@ -265,18 +292,11 @@
                             <!-- Màn hình chiếu: đường cong sáng + quầng sáng hắt xuống -->
                             <Grid Width="560" Height="70" Margin="0,0,0,8">
                                 <Path Stretch="Fill" Height="50" VerticalAlignment="Bottom" Margin="20,0"
-                                      Data="M 0,0 Q 50,-12 100,0 L 112,40 L -12,40 Z">
-                                    <Path.Fill>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#40BFDBFE" Offset="0"/>
-                                            <GradientStop Color="#00BFDBFE" Offset="1"/>
-                                        </LinearGradientBrush>
-                                    </Path.Fill>
-                                </Path>
+                                      Data="M 0,0 Q 50,-12 100,0 L 112,40 L -12,40 Z" Fill="{DynamicResource ScreenGlow}"/>
                                 <Path Stretch="Fill" Height="14" VerticalAlignment="Top" Margin="20,10,20,0"
-                                      Data="M 0,12 Q 50,0 100,12" Stroke="#E0F2FE" StrokeThickness="4"
+                                      Data="M 0,12 Q 50,0 100,12" Stroke="{DynamicResource ScreenLine}" StrokeThickness="4"
                                       StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                <TextBlock Text="M À N   H Ì N H" Foreground="{StaticResource TextMuted}" FontSize="12"
+                                <TextBlock Text="M À N   H Ì N H" Foreground="{DynamicResource TextMuted}" FontSize="12"
                                            FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                                            Margin="0,0,0,6"/>
                             </Grid>
@@ -317,12 +337,12 @@
 
             <!-- Nút phóng to / thu nhỏ: dòng riêng dưới sơ đồ để không đè lên ghế -->
             <Border Grid.Row="1" HorizontalAlignment="Left" Margin="16,0,16,10" Padding="4"
-                    Background="{StaticResource CardBg}" CornerRadius="10">
+                    Background="{DynamicResource CardBg}" CornerRadius="10">
                 <StackPanel Orientation="Horizontal">
                     <Button Content="−" Command="{Binding ZoomOutCommand}" Style="{StaticResource ZoomButton}"
                             ToolTip="Thu nhỏ"/>
                     <TextBlock Text="{Binding ZoomText}" Width="48" TextAlignment="Center" VerticalAlignment="Center"
-                               Foreground="{StaticResource TextMain}"/>
+                               Foreground="{DynamicResource TextMain}"/>
                     <Button Content="+" Command="{Binding ZoomInCommand}" Style="{StaticResource ZoomButton}"
                             ToolTip="Phóng to"/>
                     <Button Content="Vừa khung" Command="{Binding ResetZoomCommand}"
@@ -334,8 +354,8 @@
             <!-- Bản đồ thu nhỏ: chỉ hiện khi đang phóng to. VisualBrush "chụp" lại cả mặt sơ đồ (chưa phóng),
                  khung xanh = phần đang thấy trên màn hình, chạy theo khi cuộn. -->
             <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,12,28,0"
-                    Width="200" Padding="6" CornerRadius="10" Background="#0B0D12"
-                    BorderBrush="{StaticResource Divider}" BorderThickness="1" IsHitTestVisible="False">
+                    Width="200" Padding="6" CornerRadius="10" Background="{DynamicResource MinimapBg}"
+                    BorderBrush="{DynamicResource Divider}" BorderThickness="1" IsHitTestVisible="False">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -357,7 +377,7 @@
                         </Rectangle>
                         <Canvas>
                             <!-- Vị trí/kích thước khung = vị trí cuộn và vùng nhìn chia cho Zoom -->
-                            <Rectangle Stroke="#22C55E" StrokeThickness="12" Fill="#1A22C55E" RadiusX="16" RadiusY="16">
+                            <Rectangle Stroke="{DynamicResource ViewFrame}" StrokeThickness="12" Fill="{DynamicResource ViewFrameFill}" RadiusX="16" RadiusY="16">
                                 <Canvas.Left>
                                     <MultiBinding Converter="{StaticResource Divide}">
                                         <Binding Path="HorizontalOffset" ElementName="MapScroll"/>
@@ -390,10 +410,10 @@
         </Grid>
 
         <!-- ===== Cuối trang: chú thích + tạm tính + nút ===== -->
-        <Border Grid.Row="2" Background="{StaticResource CardBg}">
+        <Border Grid.Row="2" Background="{DynamicResource CardBg}">
             <StackPanel>
                 <!-- Chú thích: WrapPanel tự xuống dòng khi cửa sổ hẹp -->
-                <Border BorderBrush="{StaticResource Divider}" BorderThickness="0,0,0,1" Padding="20,10">
+                <Border BorderBrush="{DynamicResource Divider}" BorderThickness="0,0,0,1" Padding="20,10">
                     <DockPanel>
                         <Button DockPanel.Dock="Right" Style="{StaticResource LinkButton}"
                                 Command="{Binding OpenSeatInfoCommand}" VerticalAlignment="Center">
@@ -401,36 +421,36 @@
                         </Button>
                         <WrapPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
-                                <Border Style="{StaticResource LegendSwatch}" Background="{StaticResource SoldColor}"
-                                        BorderBrush="{StaticResource SoldColor}"/>
+                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource SoldColor}"
+                                        BorderBrush="{DynamicResource SoldColor}"/>
                                 <TextBlock Text="Đã bán" Style="{StaticResource LegendText}"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
-                                <Border Style="{StaticResource LegendSwatch}" Background="{StaticResource Accent}"
-                                        BorderBrush="{StaticResource Accent}"/>
+                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource Accent}"
+                                        BorderBrush="{DynamicResource Accent}"/>
                                 <TextBlock Text="Ghế bạn chọn" Style="{StaticResource LegendText}"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
-                                <Border Style="{StaticResource LegendSwatch}" Background="{StaticResource StandardFill}"
-                                        BorderBrush="{StaticResource StandardColor}"/>
+                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource StandardFill}"
+                                        BorderBrush="{DynamicResource StandardColor}"/>
                                 <TextBlock Style="{StaticResource LegendText}">
-                                    <Run Text="Thường "/><Run Foreground="{StaticResource TextMuted}"
+                                    <Run Text="Thường "/><Run Foreground="{DynamicResource TextMuted}"
                                          Text="{Binding StandardPrice, Mode=OneWay, StringFormat={}{0:N0}}"/>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
-                                <Border Style="{StaticResource LegendSwatch}" Background="{StaticResource VipFill}"
-                                        BorderBrush="{StaticResource VipColor}"/>
+                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource VipFill}"
+                                        BorderBrush="{DynamicResource VipColor}"/>
                                 <TextBlock Style="{StaticResource LegendText}">
-                                    <Run Text="VIP "/><Run Foreground="{StaticResource TextMuted}"
+                                    <Run Text="VIP "/><Run Foreground="{DynamicResource TextMuted}"
                                          Text="{Binding VipPrice, Mode=OneWay, StringFormat={}{0:N0}}"/>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
                                 <Border Style="{StaticResource LegendSwatch}" Width="30"
-                                        Background="{StaticResource CoupleFill}" BorderBrush="{StaticResource CoupleColor}"/>
+                                        Background="{DynamicResource CoupleFill}" BorderBrush="{DynamicResource CoupleColor}"/>
                                 <TextBlock Style="{StaticResource LegendText}">
-                                    <Run Text="Ghế đôi "/><Run Foreground="{StaticResource TextMuted}"
+                                    <Run Text="Ghế đôi "/><Run Foreground="{DynamicResource TextMuted}"
                                          Text="{Binding CouplePrice, Mode=OneWay, StringFormat={}{0:N0}}"/>
                                 </TextBlock>
                             </StackPanel>
@@ -443,21 +463,21 @@
                         <Button Content="Bỏ chọn" Command="{Binding ClearCommand}" Style="{StaticResource ActionButton}"/>
                         <Button Content="Tiếp tục" Command="{Binding ContinueCommand}" FontSize="15"
                                 Style="{StaticResource ActionButton}" Padding="40,10"
-                                Background="{StaticResource Accent}" Foreground="White"/>
+                                Background="{DynamicResource Accent}" Foreground="White"/>
                     </StackPanel>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Foreground="{StaticResource TextMuted}" TextTrimming="CharacterEllipsis">
+                        <TextBlock Foreground="{DynamicResource TextMuted}" TextTrimming="CharacterEllipsis">
                             <Run Text="Ghế: "/><Run Text="{Binding SelectedLabels, Mode=OneWay}"
-                                                    Foreground="{StaticResource TextMain}"/>
+                                                    Foreground="{DynamicResource TextMain}"/>
                         </TextBlock>
                         <TextBlock Margin="0,2,0,0">
-                            <Run Text="Tạm tính  " Foreground="{StaticResource TextMuted}" FontSize="14"/>
+                            <Run Text="Tạm tính  " Foreground="{DynamicResource TextMuted}" FontSize="14"/>
                             <Run Text="{Binding Total, Mode=OneWay, StringFormat={}{0:N0} đ}"
-                                 Foreground="{StaticResource TextMain}" FontSize="20" FontWeight="Bold"/>
-                            <Run Foreground="{StaticResource TextMuted}" FontSize="13"
+                                 Foreground="{DynamicResource TextMain}" FontSize="20" FontWeight="Bold"/>
+                            <Run Foreground="{DynamicResource TextMuted}" FontSize="13"
                                  Text="{Binding SelectedCount, Mode=OneWay, StringFormat=({0} ghế)}"/>
                         </TextBlock>
-                        <TextBlock Text="{Binding Message}" Foreground="#F87171" Margin="0,2,0,0"
+                        <TextBlock Text="{Binding Message}" Foreground="{DynamicResource ErrorText}" Margin="0,2,0,0"
                                    TextWrapping="Wrap"/>
                     </StackPanel>
                 </DockPanel>
@@ -486,24 +506,17 @@
                     <Grid DockPanel.Dock="Top" Margin="20,16">
                         <TextBlock Text="Chi tiết loại ghế" Style="{StaticResource DialogTitle}"/>
                         <Button Content="✕" HorizontalAlignment="Right" Style="{StaticResource LinkButton}"
-                                Foreground="{StaticResource TextMuted}" FontSize="16"
+                                Foreground="{DynamicResource TextMuted}" FontSize="16"
                                 Command="{Binding CloseDialogCommand}"/>
                     </Grid>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20,0,20,8">
                         <ItemsControl ItemsSource="{Binding SeatTypes}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="{StaticResource CardBgRaised}" CornerRadius="12" Margin="0,0,0,14">
+                                    <Border Background="{DynamicResource CardBgRaised}" CornerRadius="12" Margin="0,0,0,14">
                                         <StackPanel>
                                             <!-- Hình minh họa: một dãy ghế dưới ánh đèn phòng chiếu -->
-                                            <Border Height="110" CornerRadius="12,12,0,0">
-                                                <Border.Background>
-                                                    <RadialGradientBrush Center="0.5,0" GradientOrigin="0.5,0"
-                                                                         RadiusX="0.7" RadiusY="1.2">
-                                                        <GradientStop Color="#3B4252" Offset="0"/>
-                                                        <GradientStop Color="#111318" Offset="1"/>
-                                                    </RadialGradientBrush>
-                                                </Border.Background>
+                                            <Border Height="110" CornerRadius="12,12,0,0" Background="{DynamicResource IllustrationBg}">
                                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
                                                             VerticalAlignment="Bottom" Margin="0,0,0,16">
                                                     <ContentPresenter Content="{Binding}"
@@ -520,12 +533,12 @@
                                                                Foreground="{Binding ColorHex}"
                                                                Text="{Binding Price, StringFormat={}{0:N0} đ}"/>
                                                     <TextBlock Text="{Binding Name}" FontSize="17" FontWeight="Bold"
-                                                               Foreground="{StaticResource TextMain}"/>
+                                                               Foreground="{DynamicResource TextMain}"/>
                                                 </DockPanel>
-                                                <TextBlock Text="{Binding Position}" Foreground="{StaticResource TextMuted}"
+                                                <TextBlock Text="{Binding Position}" Foreground="{DynamicResource TextMuted}"
                                                            FontSize="12" Margin="0,2,0,6"/>
                                                 <TextBlock Text="{Binding Description}" TextWrapping="Wrap"
-                                                           Foreground="#D1D5DB" LineHeight="20"/>
+                                                           Foreground="{DynamicResource TextBody}" LineHeight="20"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
@@ -559,7 +572,7 @@
                     <Grid DockPanel.Dock="Top" Margin="20,16">
                         <TextBlock Text="Đổi suất chiếu" Style="{StaticResource DialogTitle}"/>
                         <Button Content="✕" HorizontalAlignment="Right" Style="{StaticResource LinkButton}"
-                                Foreground="{StaticResource TextMuted}" FontSize="16"
+                                Foreground="{DynamicResource TextMuted}" FontSize="16"
                                 Command="{Binding CloseDialogCommand}"/>
                     </Grid>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20,0,20,8">
@@ -572,7 +585,7 @@
                                             CommandParameter="{Binding}" Cursor="Hand" Margin="0,0,0,12">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
-                                                <Border x:Name="Card" Background="{StaticResource CardBgRaised}"
+                                                <Border x:Name="Card" Background="{DynamicResource CardBgRaised}"
                                                         BorderBrush="Transparent" BorderThickness="2"
                                                         CornerRadius="12" Padding="18,14">
                                                     <ContentPresenter/>
@@ -580,11 +593,11 @@
                                                 <ControlTemplate.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
                                                         <Setter TargetName="Card" Property="BorderBrush"
-                                                                Value="{StaticResource Divider}"/>
+                                                                Value="{DynamicResource Divider}"/>
                                                     </Trigger>
                                                     <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                                                         <Setter TargetName="Card" Property="BorderBrush"
-                                                                Value="{StaticResource Accent}"/>
+                                                                Value="{DynamicResource Accent}"/>
                                                     </DataTrigger>
                                                 </ControlTemplate.Triggers>
                                             </ControlTemplate>
@@ -595,25 +608,31 @@
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Setter Property="Text" Value="Chọn ngay"/>
-                                                        <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource Accent}"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                                                                 <Setter Property="Text" Value="Đang xem"/>
                                                                 <Setter Property="Foreground"
-                                                                        Value="{StaticResource TextMuted}"/>
+                                                                        Value="{DynamicResource TextMuted}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
                                                 </TextBlock.Style>
                                             </TextBlock>
                                             <StackPanel>
-                                                <TextBlock Foreground="{StaticResource TextMuted}">
-                                                    <Run Text="UIT Cinema  ·  "/><Run Text="{Binding RoomName, Mode=OneWay}"/>
-                                                    <Run Text="  ·  "/><Run Text="{Binding Date, Mode=OneWay}"/>
-                                                </TextBlock>
                                                 <TextBlock Text="{Binding TimeRange}" FontSize="20" FontWeight="Bold"
-                                                           Foreground="{StaticResource TextMain}" Margin="0,6,0,2"/>
-                                                <TextBlock Text="{Binding Format}" Foreground="{StaticResource TextMuted}"/>
+                                                           Foreground="{DynamicResource TextMain}" Margin="0,0,0,8"/>
+                                                <WrapPanel>
+                                                    <Border Style="{StaticResource InfoChip}">
+                                                        <TextBlock Text="{Binding Format}" Style="{StaticResource ChipText}"/>
+                                                    </Border>
+                                                    <Border Style="{StaticResource InfoChip}">
+                                                        <TextBlock Text="{Binding RoomName}" Style="{StaticResource ChipText}"/>
+                                                    </Border>
+                                                    <Border Style="{StaticResource InfoChip}">
+                                                        <TextBlock Text="{Binding Date}" Style="{StaticResource ChipText}"/>
+                                                    </Border>
+                                                </WrapPanel>
                                             </StackPanel>
                                         </DockPanel>
                                     </Button>
