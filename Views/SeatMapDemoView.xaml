@@ -1,0 +1,73 @@
+<UserControl x:Class="CinemaAPP.Views.SeatMapDemoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <!-- ControlTemplate (chương 8): ô ghế là một Border bo góc, màu do Trigger quyết định -->
+        <Style x:Key="SeatButton" TargetType="Button">
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Background" Value="#E5E7EB"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <!-- DataTrigger (chương 7): màu theo dữ liệu của ghế -->
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Background" Value="#F59E0B"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSold}" Value="True">
+                    <Setter Property="Background" Value="#9CA3AF"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <!-- TODO: khi B push Styles.xaml thì đổi thành Style="{StaticResource PageTitle}" -->
+        <TextBlock Text="Chọn ghế (dữ liệu giả)" FontSize="22" FontWeight="Bold" Margin="0,0,0,16"/>
+        <Border Grid.Row="1" Background="#D1D5DB" Height="8" CornerRadius="4" Margin="40,0,40,4"
+                VerticalAlignment="Top"/>
+        <TextBlock Grid.Row="1" Text="MÀN HÌNH" HorizontalAlignment="Center" Margin="0,12,0,12"/>
+
+        <!-- ItemsPanelTemplate (chương 8): xếp ghế thành lưới SeatsPerRow cột -->
+        <ItemsControl Grid.Row="2" ItemsSource="{Binding Seats}" VerticalAlignment="Top">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <UniformGrid Columns="{Binding SeatsPerRow}"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <!-- DataContext của mỗi nút là 1 SeatItem; lệnh nằm ở ViewModel cha nên -->
+                    <!-- dùng RelativeSource -->
+                    <Button Content="{Binding Label}" Style="{StaticResource SeatButton}"
+                            Command="{Binding DataContext.ToggleSeatCommand,
+                                      RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding}"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <TextBlock Grid.Row="3" FontSize="16" Margin="0,12,0,0">
+            <Run Text="Đã chọn: "/><Run Text="{Binding SelectedCount, Mode=OneWay}"/>
+            <Run Text=" ghế  –  Tổng tiền: "/>
+            <Run Text="{Binding Total, Mode=OneWay, StringFormat={}{0:N0} đ}"/>
+        </TextBlock>
+    </Grid>
+</UserControl>
