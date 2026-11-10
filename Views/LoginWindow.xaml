@@ -1,0 +1,452 @@
+﻿<Window x:Class="CinemaAPP.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="UIT Cinema – Đăng nhập"
+        WindowState="Maximized"
+        MinWidth="1100" MinHeight="720"
+        FontFamily="Segoe UI" Background="White">
+
+    <!-- Esc = xóa trắng form (Enter = Đăng nhập nhờ IsDefault ở nút) -->
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{Binding ClearCommand}"/>
+    </Window.InputBindings>
+
+    <Window.Resources>
+        <!-- Màu lấy từ bản thiết kế -->
+        <SolidColorBrush x:Key="NavyBrush" Color="#0F2A4A"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#1F6FC5"/>
+        <SolidColorBrush x:Key="AccentDarkBrush" Color="#185BA3"/>
+        <SolidColorBrush x:Key="GoldBrush" Color="#F5A524"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#4A5B70"/>
+        <SolidColorBrush x:Key="IconBrush" Color="#5F6B7A"/>
+        <SolidColorBrush x:Key="LightTextBrush" Color="#A9C3E0"/>
+
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+
+        <!-- Khung bao quanh mỗi ô nhập: viền sáng xanh khi đang gõ -->
+        <Style x:Key="FieldBox" TargetType="Border">
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#D5E3F3"/>
+            <Setter Property="Background" Value="#F7FAFE"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#A9C9EC"/>
+                </Trigger>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                    <Setter Property="Background" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Ô nhập trong suốt, không viền (khung đã do Border lo) -->
+        <Style x:Key="FieldText" TargetType="TextBox">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Foreground" Value="{StaticResource NavyBrush}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="FieldPassword" TargetType="PasswordBox">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="Foreground" Value="{StaticResource NavyBrush}"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Nhãn phía trên ô nhập -->
+        <Style x:Key="FieldLabel" TargetType="Label">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource NavyBrush}"/>
+        </Style>
+
+        <!-- Icon nét mảnh 24x24 -->
+        <Style x:Key="IconStroke" TargetType="Shape">
+            <Setter Property="Stroke" Value="{StaticResource IconBrush}"/>
+            <Setter Property="StrokeThickness" Value="1.8"/>
+            <Setter Property="StrokeStartLineCap" Value="Round"/>
+            <Setter Property="StrokeEndLineCap" Value="Round"/>
+            <Setter Property="StrokeLineJoin" Value="Round"/>
+        </Style>
+        <!-- Icon trong dải phim -->
+        <Style x:Key="FilmIcon" TargetType="Shape">
+            <Setter Property="Stroke" Value="#6EA8E6"/>
+            <Setter Property="StrokeThickness" Value="1.5"/>
+            <Setter Property="StrokeStartLineCap" Value="Round"/>
+            <Setter Property="StrokeEndLineCap" Value="Round"/>
+            <Setter Property="StrokeLineJoin" Value="Round"/>
+        </Style>
+        <!-- Nút Đăng nhập: ControlTemplate riêng để màu khi di chuột hoạt động đúng -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Height" Value="52"/>
+            <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentDarkBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#134B87"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Nút chữ "Thoát ứng dụng" -->
+        <Style x:Key="TextButton" TargetType="Button">
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#F1F5FA"/>
+                                <Setter Property="Foreground" Value="{StaticResource NavyBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Nhãn trạng thái kết nối: đổi màu theo dữ liệu (DataTrigger) -->
+        <Style x:Key="StatusPill" TargetType="Border">
+            <Setter Property="Background" Value="#F1F5FA"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDbConnected}" Value="True">
+                    <Setter Property="Background" Value="#EEF7F0"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsDbFailed}" Value="True">
+                    <Setter Property="Background" Value="#FDECEC"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="StatusText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDbConnected}" Value="True">
+                    <Setter Property="Foreground" Value="#166534"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsDbFailed}" Value="True">
+                    <Setter Property="Foreground" Value="#B91C1C"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="StatusDot" TargetType="Ellipse">
+            <Setter Property="Fill" Value="#9AA6B2"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsDbConnected}" Value="True">
+                    <Setter Property="Fill" Value="#22A35A"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsDbFailed}" Value="True">
+                    <Setter Property="Fill" Value="#DC2626"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="6*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ===================== CỘT TRÁI ===================== -->
+        <Border Grid.Column="0" Background="{StaticResource NavyBrush}" Padding="56" ClipToBounds="True">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- logo -->
+                    <RowDefinition Height="*"/>
+                    <!-- tiêu đề -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- dải phim -->
+                    <RowDefinition Height="Auto"/>
+                    <!-- đồng hồ -->
+                </Grid.RowDefinitions>
+
+                <!-- Logo: vẽ bằng XAML theo bản thiết kế -->
+                <StackPanel Orientation="Horizontal">
+                    <Viewbox Width="72" Height="72">
+                        <Canvas Width="72" Height="72">
+                            <Rectangle Width="72" Height="72" RadiusX="18" RadiusY="18" Fill="{StaticResource AccentBrush}"/>
+                            <Canvas>
+                                <Canvas.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="0.1867" ScaleY="0.1867"/>
+                                        <TranslateTransform X="8" Y="21"/>
+                                    </TransformGroup>
+                                </Canvas.RenderTransform>
+                                <!-- chữ U -->
+                                <Path Data="M42,30 V92 A36,36 0 0 0 114,92 V30" Stroke="White" StrokeThickness="28"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                <!-- nút play trong chữ U -->
+                                <Path Data="M66,64 L66,94 L91,79 Z" Fill="{StaticResource GoldBrush}"
+                                      Stroke="{StaticResource GoldBrush}" StrokeThickness="6" StrokeLineJoin="Round"/>
+                                <!-- chữ I là dải phim -->
+                                <Rectangle Canvas.Left="142" Canvas.Top="16" Width="36" Height="128" RadiusX="12" RadiusY="12" Fill="{StaticResource NavyBrush}"/>
+                                <Rectangle Canvas.Left="148" Canvas.Top="30" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                                <Rectangle Canvas.Left="148" Canvas.Top="60" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                                <Rectangle Canvas.Left="148" Canvas.Top="90" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                                <Rectangle Canvas.Left="148" Canvas.Top="120" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                                <Rectangle Canvas.Left="165" Canvas.Top="30" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                                <Rectangle Canvas.Left="165" Canvas.Top="60" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                                <Rectangle Canvas.Left="165" Canvas.Top="90" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                                <Rectangle Canvas.Left="165" Canvas.Top="120" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                                <!-- chữ T -->
+                                <Path Data="M200,30 H284 M242,30 V130" Stroke="White" StrokeThickness="28"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Canvas>
+                        </Canvas>
+                    </Viewbox>
+                    <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="UIT" FontSize="34" FontWeight="ExtraBold" Foreground="White"/>
+                        <TextBlock Text="C I N E M A" FontSize="12" FontWeight="SemiBold" Foreground="#9CC3EA"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Tiêu đề + mô tả -->
+                <Viewbox Grid.Row="1" Stretch="Uniform" StretchDirection="UpOnly" MaxWidth="680"
+                         HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,24">
+                    <StackPanel Width="380">
+                        <TextBlock Text="Hệ thống quản lý rạp chiếu phim" FontSize="40" FontWeight="Bold"
+                                   Foreground="White" TextWrapping="Wrap" LineHeight="48"/>
+                        <TextBlock Margin="0,16,0,0" FontSize="16" Foreground="{StaticResource LightTextBrush}"
+                                   TextWrapping="Wrap" LineHeight="26"
+                                   Text="Bán vé, quản lý suất chiếu và phòng chiếu — dành cho nhân viên quầy vé và quản trị viên."/>
+                    </StackPanel>
+                </Viewbox>
+                <!-- Dải phim nghiêng: kéo rộng ra 2 bên (Margin âm), xoay -4 độ; Border cha có ClipToBounds cắt phần thừa -->
+                <Grid Grid.Row="2" Height="150" Margin="-140,0,-140,40" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <RotateTransform Angle="-4"/>
+                    </Grid.RenderTransform>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="28"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="28"/>
+                    </Grid.RowDefinitions>
+                    <Rectangle Grid.RowSpan="3" Fill="#0A2240"/>
+
+                    <!-- Lỗ phim: 1 hình chữ nhật, tô bằng họa tiết lặp lại mỗi 40px -->
+                    <Rectangle Grid.Row="0" Height="13" Margin="10,0,0,0">
+                        <Rectangle.Fill>
+                            <DrawingBrush TileMode="Tile" Viewport="0,0,40,13" ViewportUnits="Absolute">
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <!-- ô 40x13 trong suốt, bên trong 1 lỗ 20x13 bo góc -->
+                                        <GeometryDrawing Brush="Transparent" Geometry="M0,0 H40 V13 H0 Z"/>
+                                        <GeometryDrawing Brush="#1E4672">
+                                            <GeometryDrawing.Geometry>
+                                                <RectangleGeometry Rect="0,0,20,13" RadiusX="3" RadiusY="3"/>
+                                            </GeometryDrawing.Geometry>
+                                        </GeometryDrawing>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                    <Rectangle Grid.Row="2" Height="13" Margin="10,0,0,0">
+                        <Rectangle.Fill>
+                            <DrawingBrush TileMode="Tile" Viewport="0,0,40,13" ViewportUnits="Absolute">
+                                <DrawingBrush.Drawing>
+                                    <DrawingGroup>
+                                        <GeometryDrawing Brush="Transparent" Geometry="M0,0 H40 V13 H0 Z"/>
+                                        <GeometryDrawing Brush="#1E4672">
+                                            <GeometryDrawing.Geometry>
+                                                <RectangleGeometry Rect="0,0,20,13" RadiusX="3" RadiusY="3"/>
+                                            </GeometryDrawing.Geometry>
+                                        </GeometryDrawing>
+                                    </DrawingGroup>
+                                </DrawingBrush.Drawing>
+                            </DrawingBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+
+                    <!-- 5 khung hình, mỗi khung 1 biểu tượng -->
+                    <UniformGrid Grid.Row="1" Rows="1" Columns="5" Margin="20,0">
+                        <!-- vé -->
+                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
+                            <Viewbox Width="44" Height="44">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M3,7 H21 V10 A2,2 0 0 0 21,14 V17 H3 V14 A2,2 0 0 0 3,10 Z" Style="{StaticResource FilmIcon}"/>
+                                    <Path Data="M9,7 V17" StrokeDashArray="1 1.3" Style="{StaticResource FilmIcon}"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <!-- clapper -->
+                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
+                            <Viewbox Width="44" Height="44">
+                                <Canvas Width="24" Height="24">
+                                    <Rectangle Canvas.Left="3" Canvas.Top="10" Width="18" Height="10" RadiusX="1.5" RadiusY="1.5" Style="{StaticResource FilmIcon}"/>
+                                    <Path Data="M3,10 L4.2,5.4 L20.2,3.2 L21,8.2 Z M8.5,4.7 L10,9.4 M14,4 L15.6,8.8" Style="{StaticResource FilmIcon}"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <!-- nút play (vàng) -->
+                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
+                            <Viewbox Width="44" Height="44">
+                                <Canvas Width="24" Height="24">
+                                    <Ellipse Canvas.Left="3" Canvas.Top="3" Width="18" Height="18" Style="{StaticResource FilmIcon}" Stroke="{StaticResource GoldBrush}"/>
+                                    <Path Data="M10,8.5 V15.5 L16,12 Z" Fill="{StaticResource GoldBrush}" Style="{StaticResource FilmIcon}" Stroke="{StaticResource GoldBrush}"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <!-- ghế -->
+                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
+                            <Viewbox Width="44" Height="44">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M6,11 V6 A2,2 0 0 1 8,4 H16 A2,2 0 0 1 18,6 V11 M6,16 V20 M18,16 V20" Style="{StaticResource FilmIcon}"/>
+                                    <Rectangle Canvas.Left="4" Canvas.Top="11" Width="16" Height="5" RadiusX="1.5" RadiusY="1.5" Style="{StaticResource FilmIcon}"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                        <!-- ngôi sao -->
+                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
+                            <Viewbox Width="44" Height="44">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M12,3 L14.7,8.6 L20.8,9.5 L16.4,13.8 L17.4,19.9 L12,17 L6.6,19.9 L7.6,13.8 L3.2,9.5 L9.3,8.6 Z" Style="{StaticResource FilmIcon}"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                    </UniformGrid>
+                </Grid>
+
+                <!-- Đồng hồ (trái) + phiên bản (phải) -->
+                <DockPanel Grid.Row="3" LastChildFill="False">
+                    <StackPanel DockPanel.Dock="Left">
+                        <TextBlock Text="{Binding TimeText}" FontSize="44" FontWeight="Light" Foreground="White"/>
+                        <TextBlock Text="{Binding DateText}" Margin="0,6,0,0" FontSize="14" FontWeight="Medium"
+                                   Foreground="{StaticResource LightTextBrush}"/>
+                    </StackPanel>
+                    <TextBlock DockPanel.Dock="Right" VerticalAlignment="Bottom" FontSize="12" Foreground="#8FB0D4"
+                               Text="Phiên bản 1.0 · Đồ án Lập Trình Trực Quan"/>
+                </DockPanel>
+            </Grid>
+        </Border>
+
+        <!-- ===================== CỘT PHẢI ===================== -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel MaxWidth="400" Margin="24,56" VerticalAlignment="Center">
+
+                <TextBlock Text="Đăng nhập" FontSize="30" FontWeight="Bold" Foreground="{StaticResource NavyBrush}"/>
+                <TextBlock Text="Nhập tài khoản được cấp để tiếp tục." Margin="0,8,0,24" FontSize="15"
+                           Foreground="{StaticResource MutedBrush}"/>
+
+                <!-- Thông báo lỗi: chỉ hiện khi HasMessage = true -->
+                <Border Background="#FDECEC" CornerRadius="12" Padding="14,12" Margin="0,0,0,20"
+                        Visibility="{Binding HasMessage, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel Orientation="Horizontal">
+                        <Viewbox Width="18" Height="18" VerticalAlignment="Center">
+                            <Canvas Width="24" Height="24">
+                                <Ellipse Canvas.Left="3" Canvas.Top="3" Width="18" Height="18" Stroke="#B91C1C" StrokeThickness="2"/>
+                                <Path Data="M12,8 V13 M12,16 V16.01" Stroke="#B91C1C" StrokeThickness="2"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBlock Text="{Binding Message}" Margin="10,0,0,0" FontSize="14" FontWeight="Medium"
+                                   Foreground="#B91C1C" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Ô tên đăng nhập -->
+                <Label Content="Tên đăng nhập" Target="{Binding ElementName=txtUser}" Style="{StaticResource FieldLabel}"/>
+                <Border Style="{StaticResource FieldBox}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="44"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Viewbox Width="18" Height="18">
+                            <Canvas Width="24" Height="24">
+                                <Ellipse Canvas.Left="8" Canvas.Top="4" Width="8" Height="8" Style="{StaticResource IconStroke}"/>
+                                <Path Data="M4,21 C4,16.8 7.6,14 12,14 C16.4,14 20,16.8 20,21" Style="{StaticResource IconStroke}"/>
+                            </Canvas>
+                        </Viewbox>
+                        <TextBox x:Name="txtUser" Grid.Column="1" Margin="0,0,12,0" Style="{StaticResource FieldText}"
+                                 Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
+                    </Grid>
+                </Border>
+
+                <!-- Ô mật khẩu + con mắt -->
+                <Label Content="Mật khẩu" Target="{Binding ElementName=pwdBox}" Margin="0,20,0,8" Style="{StaticResource FieldLabel}"/>
+                <Border Style="{StaticResource FieldBox}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="44"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="44"/>
+                        </Grid.ColumnDefinitions>
+                        <Viewbox Width="18" Height="18">
+                            <Canvas Width="24" Height="24">
+                                <Rectangle Canvas.Left="4" Canvas.Top="11" Width="16" Height="10" RadiusX="2" RadiusY="2" Style="{StaticResource IconStroke}"/>
+                                <Path Data="M8,11 V7 A4,4 0 0 1 16,7 V11" Style="{StaticResource IconStroke}"/>
+                            </Canvas>
+                        </Viewbox>
+                        <!-- PasswordBox (ẩn chữ) và TextBox (hiện chữ) chồng cùng một chỗ -->
+                        <PasswordBox x:Name="pwdBox" Grid.Column="1" Style="{StaticResource FieldPassword}"
+                                     PasswordChanged="PwdBox_PasswordChanged"/>
+                        <TextBox x:Name="txtPassReveal" Grid.Column="1" Style="{StaticResource FieldText}"
+                                 IsReadOnly="True" IsHitTestVisible="False" Visibility="Collapsed"/>
+                        <!-- Con mắt: giữ chuột để xem -->
+                        <Border Grid.Column="2" Background="Transparent" Cursor="Hand" ToolTip="Giữ để xem mật khẩu"
+                                MouseLeftButtonDown="Eye_MouseDown"
+                                MouseLeftButtonUp="Eye_Release"
+                                MouseLeave="Eye_Release">
+                            <Viewbox Width="20" Height="20">
+                                <Canvas Width="24" Height="24">
+                                    <Path Data="M2,12 C2,12 5.5,5 12,5 C18.5,5 22,12 22,12 C22,12 18.5,19 12,19 C5.5,19 2,12 2,12 Z"
+                                          Style="{StaticResource IconStroke}"/>
+                                    <Ellipse Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" Style="{StaticResource IconStroke}"/>
+                                </Canvas>
+                            </Viewbox>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <CheckBox Content="Ghi nhớ tên đăng nhập" IsChecked="{Binding RememberMe}" Margin="0,16,0,20"
+                          FontSize="14" Foreground="#33475E" VerticalContentAlignment="Center" Cursor="Hand"/>
+
+                <Button Content="Đăng nhập" Style="{StaticResource PrimaryButton}" IsDefault="True"
+                        Command="{Binding LoginCommand}"/>
+                <Button Content="Thoát ứng dụng" Style="{StaticResource TextButton}" Margin="0,8,0,0"
+                        Command="{Binding ExitCommand}"/>
+
+                <!-- Nhãn trạng thái kết nối CSDL -->
+                <Border Style="{StaticResource StatusPill}" CornerRadius="999" Padding="12,6" Margin="0,32,0,0"
+                        HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="8" Height="8" VerticalAlignment="Center" Style="{StaticResource StatusDot}"/>
+                        <TextBlock Text="{Binding DbStatusText}" Margin="8,0,0,0" FontSize="13" FontWeight="Medium"
+                                   Style="{StaticResource StatusText}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>
