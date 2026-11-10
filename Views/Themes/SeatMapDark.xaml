@@ -1,0 +1,53 @@
+﻿<!-- Bộ màu GIAO DIỆN TỐI của màn chọn ghế. Phải có ĐỦ các key giống SeatMapLight.xaml,
+     vì View dùng DynamicResource: đổi bộ màu là cả màn đổi theo ngay. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="PageBg" Color="#14161C"/>
+    <SolidColorBrush x:Key="CardBg" Color="#1E2129"/>
+    <SolidColorBrush x:Key="CardBgRaised" Color="#262A33"/>
+    <SolidColorBrush x:Key="Divider" Color="#2D3340"/>
+    <SolidColorBrush x:Key="TextMain" Color="#F3F4F6"/>
+    <SolidColorBrush x:Key="TextMuted" Color="#9CA3AF"/>
+    <SolidColorBrush x:Key="TextBody" Color="#D1D5DB"/>
+    <SolidColorBrush x:Key="ErrorText" Color="#F87171"/>
+    <SolidColorBrush x:Key="Accent" Color="#E11D48"/>
+    <SolidColorBrush x:Key="ButtonBg" Color="#2D3340"/>
+
+    <!-- Ghế -->
+    <SolidColorBrush x:Key="StandardColor" Color="#64748B"/>
+    <SolidColorBrush x:Key="StandardFill" Color="#1F2937"/>
+    <SolidColorBrush x:Key="VipColor" Color="#F59E0B"/>
+    <SolidColorBrush x:Key="VipFill" Color="#2A2112"/>
+    <SolidColorBrush x:Key="CoupleColor" Color="#A855F7"/>
+    <SolidColorBrush x:Key="CoupleFill" Color="#241631"/>
+    <SolidColorBrush x:Key="SoldColor" Color="#374151"/>
+    <SolidColorBrush x:Key="SoldText" Color="#6B7280"/>
+
+    <!-- Ô thông tin bo tròn -->
+    <SolidColorBrush x:Key="ChipBg" Color="#262A33"/>
+    <SolidColorBrush x:Key="ChipBorder" Color="#343A46"/>
+    <SolidColorBrush x:Key="ChipFg" Color="#D1D5DB"/>
+    <SolidColorBrush x:Key="AgeChipBg" Color="#16241C"/>
+    <SolidColorBrush x:Key="AgeChipBorder" Color="#24402F"/>
+    <SolidColorBrush x:Key="AgeChipText" Color="#86EFAC"/>
+
+    <!-- Màn hình chiếu -->
+    <SolidColorBrush x:Key="ScreenLine" Color="#E0F2FE"/>
+    <LinearGradientBrush x:Key="ScreenGlow" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#40BFDBFE" Offset="0"/>
+        <GradientStop Color="#00BFDBFE" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- Bản đồ thu nhỏ -->
+    <SolidColorBrush x:Key="MinimapBg" Color="#0B0D12"/>
+    <SolidColorBrush x:Key="ViewFrame" Color="#22C55E"/>
+    <SolidColorBrush x:Key="ViewFrameFill" Color="#1A22C55E"/>
+
+    <!-- Hộp thoại -->
+    <SolidColorBrush x:Key="Backdrop" Color="#B3000000"/>
+    <SolidColorBrush x:Key="IllustrationArm" Color="#111318"/>
+    <RadialGradientBrush x:Key="IllustrationBg" Center="0.5,0" GradientOrigin="0.5,0" RadiusX="0.7" RadiusY="1.2">
+        <GradientStop Color="#3B4252" Offset="0"/>
+        <GradientStop Color="#111318" Offset="1"/>
+    </RadialGradientBrush>
+</ResourceDictionary>
