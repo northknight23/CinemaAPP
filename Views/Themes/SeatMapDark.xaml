@@ -45,7 +45,6 @@
 
     <!-- Hộp thoại -->
     <SolidColorBrush x:Key="Backdrop" Color="#B3000000"/>
-    <SolidColorBrush x:Key="IllustrationArm" Color="#111318"/>
     <RadialGradientBrush x:Key="IllustrationBg" Center="0.5,0" GradientOrigin="0.5,0" RadiusX="0.7" RadiusY="1.2">
         <GradientStop Color="#3B4252" Offset="0"/>
         <GradientStop Color="#111318" Offset="1"/>

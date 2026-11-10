@@ -111,13 +111,13 @@ namespace CinemaAPP.ViewModels
             SeatTypes = new List<SeatTypeInfo>
             {
                 new SeatTypeInfo { Type = SeatType.Standard, Name = "Ghế thường", Position = "Hàng A – C",
-                    Price = StandardPrice, ColorHex = "#94A3B8",
+                    Price = StandardPrice, ColorHex = "#94A3B8", ImagePath = SeatImage("standard.jpg"),
                     Description = "Ghế ngồi êm, có chỗ để tay và chỗ để ly. Gần màn hình, phù hợp phim hành động." },
                 new SeatTypeInfo { Type = SeatType.Vip, Name = "Ghế VIP", Position = "Hàng D – H",
-                    Price = VipPrice, ColorHex = "#F59E0B",
+                    Price = VipPrice, ColorHex = "#F59E0B", ImagePath = SeatImage("vip.jpg"),
                     Description = "Đệm dày, tựa lưng cao. Nằm giữa phòng chiếu nên góc nhìn và âm thanh tốt nhất." },
                 new SeatTypeInfo { Type = SeatType.Couple, Name = "Ghế đôi", Position = "Hàng J (cuối phòng)",
-                    Price = CouplePrice, ColorHex = "#A855F7",
+                    Price = CouplePrice, ColorHex = "#A855F7", ImagePath = SeatImage("couple.jpg"),
                     Description = "Hai chỗ liền nhau không có tay vịn ở giữa, có vách ngăn riêng. Giá tính cho cả 2 người." },
             };
 
@@ -169,6 +169,9 @@ namespace CinemaAPP.ViewModels
             ResetZoomCommand = new RelayCommand(_ => Zoom = MinZoom, _ => Zoom > MinZoom);
             ToggleThemeCommand = new RelayCommand(_ => IsLightTheme = !IsLightTheme);
         }
+
+        // Ảnh nhúng trong project (Build Action = Resource), đường dẫn pack URI
+        private static string SeatImage(string file) => $"pack://application:,,,/CinemaAPP;component/Assets/Seats/{file}";
 
         private IEnumerable<SeatItem> AllSeats() => Rows.SelectMany(r => r.Seats).Where(s => !s.IsAisle);
 
