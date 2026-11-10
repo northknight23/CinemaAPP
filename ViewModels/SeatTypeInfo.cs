@@ -9,5 +9,6 @@ namespace CinemaAPP.ViewModels
         public string Description { get; init; } = "";
         public decimal Price { get; init; }
         public string ColorHex { get; init; } = "";     // màu của loại ghế, trùng với sơ đồ
+        public string ImagePath { get; init; } = "";    // ảnh thật của loại ghế (Assets/Seats)
     }
 }

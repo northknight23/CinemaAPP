@@ -198,30 +198,6 @@
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
-
-        <!-- Hình minh họa một chiếc ghế (vẽ bằng XAML): lưng ghế, đệm, 2 tay vịn.
-             Màu lấy từ ColorHex của loại ghế; ghế đôi rộng hơn. -->
-        <Style x:Key="IllustrationSeat" TargetType="Grid">
-            <Setter Property="Width" Value="46"/>
-            <Setter Property="Height" Value="48"/>
-            <Setter Property="Margin" Value="5,0"/>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding Type}" Value="Couple">
-                    <Setter Property="Width" Value="104"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        <DataTemplate x:Key="SeatIllustration">
-            <Grid Style="{StaticResource IllustrationSeat}">
-                <Border Background="{Binding ColorHex}" CornerRadius="12,12,4,4" Margin="6,0,6,12"/>
-                <Border Background="{Binding ColorHex}" Opacity="0.75" CornerRadius="4" Height="14"
-                        VerticalAlignment="Bottom" Margin="4,0"/>
-                <Border Background="{DynamicResource IllustrationArm}" CornerRadius="3" Width="7" Height="22"
-                        HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
-                <Border Background="{DynamicResource IllustrationArm}" CornerRadius="3" Width="7" Height="22"
-                        HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
-            </Grid>
-        </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -278,7 +254,9 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <ScrollViewer x:Name="MapScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <!-- Lăn chuột trên sơ đồ = phóng to / thu nhỏ quanh vị trí con trỏ (xử lý ở code-behind) -->
+            <ScrollViewer x:Name="MapScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                          PreviewMouseWheel="MapScroll_PreviewMouseWheel">
                 <!-- Khung bằng đúng vùng nhìn thấy; Zoom > 1 thì phóng to khung → xuất hiện thanh cuộn -->
                 <Grid x:Name="MapSurface" Background="Transparent"
                       Width="{Binding ViewportWidth, ElementName=MapScroll}"
@@ -515,17 +493,14 @@
                                 <DataTemplate>
                                     <Border Background="{DynamicResource CardBgRaised}" CornerRadius="12" Margin="0,0,0,14">
                                         <StackPanel>
-                                            <!-- Hình minh họa: một dãy ghế dưới ánh đèn phòng chiếu -->
-                                            <Border Height="110" CornerRadius="12,12,0,0" Background="{DynamicResource IllustrationBg}">
-                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                                                            VerticalAlignment="Bottom" Margin="0,0,0,16">
-                                                    <ContentPresenter Content="{Binding}"
-                                                                      ContentTemplate="{StaticResource SeatIllustration}"/>
-                                                    <ContentPresenter Content="{Binding}"
-                                                                      ContentTemplate="{StaticResource SeatIllustration}"/>
-                                                    <ContentPresenter Content="{Binding}"
-                                                                      ContentTemplate="{StaticResource SeatIllustration}"/>
-                                                </StackPanel>
+                                            <!-- Ảnh thật của loại ghế. Dùng ImageBrush làm nền Border
+                                                 để ảnh được bo góc theo thẻ (Image thì không bo được) -->
+                                            <Border Height="160" CornerRadius="12,12,0,0" Background="{DynamicResource IllustrationBg}">
+                                                <Border CornerRadius="12,12,0,0">
+                                                    <Border.Background>
+                                                        <ImageBrush ImageSource="{Binding ImagePath}" Stretch="UniformToFill"/>
+                                                    </Border.Background>
+                                                </Border>
                                             </Border>
                                             <StackPanel Margin="18,14,18,16">
                                                 <DockPanel>
