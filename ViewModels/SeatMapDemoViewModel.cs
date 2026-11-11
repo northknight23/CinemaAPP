@@ -1,32 +1,57 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Windows.Input;
+using System.Windows.Threading;
 using CinemaAPP.Helpers;
 
 namespace CinemaAPP.ViewModels
 {
-    // Sơ đồ ghế dùng DỮ LIỆU GIẢ (chưa cần CSDL): 3 loại ghế Thường / VIP / Đôi, lối đi,
-    // đổi suất, xem chi tiết loại ghế, phóng to.
-    // Khi ghép với CSDL: lấy ghế từ bảng SEAT của phòng, IsSold lấy từ
-    // ShowtimeService.GetSoldSeatIds.
+    // Màn BÁN VÉ TẠI QUẦY, dùng DỮ LIỆU GIẢ (chưa cần CSDL):
+    // trái = suất chiếu hôm nay, giữa = sơ đồ ghế của suất đang chọn, phải = đơn hiện tại + thu tiền.
+    // Khi ghép với CSDL: suất lấy từ SHOWTIME, ghế từ SEAT của phòng, ghế đã bán từ
+    // ShowtimeService.GetSoldSeatIds, thanh toán gọi BookingService.CreateBooking.
     public class SeatMapDemoViewModel : ObservableObject
     {
-        public const int MaxSeats = 8;          // tối đa số ghế một lần đặt
+        public const int MaxSeats = 8;          // tối đa số ghế một đơn
         private const int SeatsPerRow = 12;
         private static readonly int[] AisleBefore = { 3, 11 };   // lối đi trước ghế số 3 và số 11
+        private static readonly CultureInfo Vi = new CultureInfo("vi-VN");
 
-        private const double ZoomStep = 0.25, MinZoom = 1, MaxZoom = 2;
+        // Thành viên giả (sau này tra bảng CUSTOMER theo Phone)
+        private static readonly Dictionary<string, (string Name, int Points)> Members = new()
+        {
+            ["0901234567"] = ("Nguyễn Văn An", 120),
+            ["0912345678"] = ("Trần Thị Bình", 45),
+        };
 
-        public string MovieTitle { get; } = "Cuộc Phiêu Lưu Mùa Hè";
-        public string AgeRating { get; } = "P";
-        public string AgeRatingNote { get; } = "Mọi lứa tuổi";
+        // Nhân viên đang đứng quầy (giả, sau này lấy từ màn Đăng nhập)
+        public string StaffName { get; } = "Nhân viên 01";
+        public string StaffInitials { get; } = "NV";
+        public string CounterInfo { get; } = "Quầy số 1 · Staff";
+        public string TodayText { get; } = Capitalize(DateTime.Today.ToString("dddd, dd/MM/yyyy", Vi));
+
+        private string clock = DateTime.Now.ToString("HH:mm:ss");
+        public string Clock { get => clock; set => SetProperty(ref clock, value); }
+
+        // Giao diện sáng / tối (View tự đổi bộ màu theo cờ này)
+        private bool isDarkTheme;
+        public bool IsDarkTheme
+        {
+            get => isDarkTheme;
+            set
+            {
+                if (SetProperty(ref isDarkTheme, value))
+                    OnPropertyChanged(nameof(ThemeButtonText));
+            }
+        }
+        public string ThemeButtonText => IsDarkTheme ? "☀  Sáng" : "☾  Tối";
 
         public decimal StandardPrice { get; } = 75000;
         public decimal VipPrice { get; } = 90000;
         public decimal CouplePrice { get; } = 180000;
 
-        public ObservableCollection<SeatRowItem> Rows { get; } = new ObservableCollection<SeatRowItem>();
-        public List<SeatTypeInfo> SeatTypes { get; }
-        public ObservableCollection<ShowtimeOption> Showtimes { get; } = new ObservableCollection<ShowtimeOption>();
+        public List<MovieShowtimes> Movies { get; } = new List<MovieShowtimes>();
+        public int ShowtimeCount => Movies.Sum(m => m.Showtimes.Count);
 
         private ShowtimeOption currentShowtime = null!;
         public ShowtimeOption CurrentShowtime
@@ -35,68 +60,116 @@ namespace CinemaAPP.ViewModels
             set => SetProperty(ref currentShowtime, value);
         }
 
+        public ObservableCollection<SeatRowItem> Rows { get; } = new ObservableCollection<SeatRowItem>();
+        public int TotalSeats { get; }
+
+        // Ghế trong đơn, theo thứ tự bấm
+        public ObservableCollection<SeatItem> SelectedSeats { get; } = new ObservableCollection<SeatItem>();
+
         private int selectedCount;
         public int SelectedCount { get => selectedCount; set => SetProperty(ref selectedCount, value); }
 
         private decimal total;
         public decimal Total { get => total; set => SetProperty(ref total, value); }
 
-        private string selectedLabels = "Chưa chọn ghế";
-        public string SelectedLabels { get => selectedLabels; set => SetProperty(ref selectedLabels, value); }
+        // Ghế trong đơn gom theo loại vé
+        public ObservableCollection<OrderLine> OrderLines { get; } = new ObservableCollection<OrderLine>();
 
-        private string message = "";
-        public string Message { get => message; set => SetProperty(ref message, value); }
+        // 1 điểm cho mỗi 10.000 đ, chỉ cộng khi có khách thành viên
+        public const decimal MoneyPerPoint = 10000;
+        private string pointsText = "—";
+        public string PointsText { get => pointsText; set => SetProperty(ref pointsText, value); }
 
-        // Hai hộp thoại hiện đè lên màn (không mở cửa sổ mới, View chỉ cần Binding vào cờ này)
-        private bool isSeatInfoOpen;
-        public bool IsSeatInfoOpen { get => isSeatInfoOpen; set => SetProperty(ref isSeatInfoOpen, value); }
-
-        private bool isShowtimePickerOpen;
-        public bool IsShowtimePickerOpen
+        // ----- Khách thành viên -----
+        private string memberPhone = "";
+        public string MemberPhone
         {
-            get => isShowtimePickerOpen;
-            set => SetProperty(ref isShowtimePickerOpen, value);
-        }
-
-        private double zoom = 1;
-        public double Zoom
-        {
-            get => zoom;
+            get => memberPhone;
             set
             {
-                if (SetProperty(ref zoom, value))
+                if (SetProperty(ref memberPhone, value))
                 {
-                    OnPropertyChanged(nameof(ZoomText));
-                    OnPropertyChanged(nameof(IsZoomed));
+                    MemberText = "";      // gõ số khác thì bỏ kết quả tìm cũ
+                    IsMemberFound = false;
                 }
             }
         }
-        public string ZoomText => $"{(int)Math.Round(Zoom * 100)}%";
-        public bool IsZoomed => Zoom > MinZoom;
 
-        // Giao diện sáng / tối (View tự đổi bộ màu theo cờ này)
-        private bool isLightTheme;
-        public bool IsLightTheme
+        private string memberText = "";
+        public string MemberText { get => memberText; set => SetProperty(ref memberText, value); }
+
+        private bool isMemberFound;
+        public bool IsMemberFound
         {
-            get => isLightTheme;
+            get => isMemberFound;
             set
             {
-                if (SetProperty(ref isLightTheme, value))
-                    OnPropertyChanged(nameof(ThemeButtonText));
+                if (SetProperty(ref isMemberFound, value))
+                    UpdatePoints();
             }
         }
-        public string ThemeButtonText => IsLightTheme ? "☾  Giao diện tối" : "☀  Giao diện sáng";
 
+        // ----- Phương thức thanh toán -----
+        // 3 cờ Is... để RadioButton Binding vào; gán true cho cờ nào thì đổi phương thức sang cái đó.
+        private PaymentMethod method = PaymentMethod.Cash;
+        public PaymentMethod Method
+        {
+            get => method;
+            set
+            {
+                if (SetProperty(ref method, value))
+                {
+                    OnPropertyChanged(nameof(IsCash));
+                    OnPropertyChanged(nameof(IsTransfer));
+                    OnPropertyChanged(nameof(IsCard));
+                }
+            }
+        }
+        public bool IsCash { get => Method == PaymentMethod.Cash; set { if (value) Method = PaymentMethod.Cash; } }
+        public bool IsTransfer { get => Method == PaymentMethod.Transfer; set { if (value) Method = PaymentMethod.Transfer; } }
+        public bool IsCard { get => Method == PaymentMethod.Card; set { if (value) Method = PaymentMethod.Card; } }
+
+        // Mã QR minh họa 21×21 ô (không quét được, chỉ để demo bố cục) và nội dung chuyển khoản
+        public List<bool> QrCells { get; } = BuildQrCells();
+        public string TransferNote => $"UT{nextBookingId}";
+
+        // ----- Thu tiền -----
+        private string cashText = "";
+        public string CashText
+        {
+            get => cashText;
+            set
+            {
+                if (SetProperty(ref cashText, value))
+                    UpdateChange();
+            }
+        }
+
+        private decimal cash;
+        public decimal Cash { get => cash; set => SetProperty(ref cash, value); }
+
+        private string changeText = "0 đ";
+        public string ChangeText { get => changeText; set => SetProperty(ref changeText, value); }
+
+        private bool isCashShort;
+        public bool IsCashShort { get => isCashShort; set => SetProperty(ref isCashShort, value); }
+
+        // ----- Thông báo cuối cột phải -----
+        private string message = "";
+        public string Message { get => message; set => SetProperty(ref message, value); }
+
+        private bool isMessageError;
+        public bool IsMessageError { get => isMessageError; set => SetProperty(ref isMessageError, value); }
+
+        private int nextBookingId = 1001;
+
+        public ICommand SelectShowtimeCommand { get; }
         public ICommand ToggleSeatCommand { get; }
         public ICommand ClearCommand { get; }
-        public ICommand ContinueCommand { get; }
-        public ICommand OpenSeatInfoCommand { get; }
-        public ICommand OpenShowtimesCommand { get; }
-        public ICommand PickShowtimeCommand { get; }
-        public ICommand CloseDialogCommand { get; }
-        public ICommand ZoomInCommand { get; }
-        public ICommand ZoomOutCommand { get; }
-        public ICommand ResetZoomCommand { get; }
+        public ICommand FindMemberCommand { get; }
+        public ICommand SetCashCommand { get; }
+        public ICommand PayCommand { get; }
+        public ICommand LogoutCommand { get; }
         public ICommand ToggleThemeCommand { get; }
 
         public SeatMapDemoViewModel()
@@ -107,99 +180,237 @@ namespace CinemaAPP.ViewModels
             foreach (string row in new[] { "D", "E", "F", "G", "H" })
                 Rows.Add(BuildRow(row, SeatType.Vip, VipPrice, ref id));
             Rows.Add(BuildCoupleRow("J", ref id));
+            TotalSeats = AllSeats().Count();
 
-            SeatTypes = new List<SeatTypeInfo>
+            BuildShowtimes();
+
+            // Mặc định chọn suất sắp chiếu gần nhất; hết suất thì chọn suất đầu tiên
+            List<ShowtimeOption> all = Movies.SelectMany(m => m.Showtimes).ToList();
+            SelectShowtime(all.Where(s => s.StartTime > DateTime.Now).MinBy(s => s.StartTime) ?? all[0]);
+
+            SelectShowtimeCommand = new RelayCommand(p =>
             {
-                new SeatTypeInfo { Type = SeatType.Standard, Name = "Ghế thường", Position = "Hàng A – C",
-                    Price = StandardPrice, ColorHex = "#94A3B8", ImagePath = SeatImage("standard.jpg"),
-                    Description = "Ghế ngồi êm, có chỗ để tay và chỗ để ly. Gần màn hình, phù hợp phim hành động." },
-                new SeatTypeInfo { Type = SeatType.Vip, Name = "Ghế VIP", Position = "Hàng D – H",
-                    Price = VipPrice, ColorHex = "#F59E0B", ImagePath = SeatImage("vip.jpg"),
-                    Description = "Đệm dày, tựa lưng cao. Nằm giữa phòng chiếu nên góc nhìn và âm thanh tốt nhất." },
-                new SeatTypeInfo { Type = SeatType.Couple, Name = "Ghế đôi", Position = "Hàng J (cuối phòng)",
-                    Price = CouplePrice, ColorHex = "#A855F7", ImagePath = SeatImage("couple.jpg"),
-                    Description = "Hai chỗ liền nhau không có tay vịn ở giữa, có vách ngăn riêng. Giá tính cho cả 2 người." },
-            };
+                if (p is ShowtimeOption option) SelectShowtime(option);
+            });
 
-            Showtimes.Add(new ShowtimeOption { ShowtimeID = 1, TimeRange = "18:00 – 20:00", Date = "20/11/2026", Format = "2D Phụ đề", RoomName = "Phòng 2" });
-            Showtimes.Add(new ShowtimeOption { ShowtimeID = 2, TimeRange = "20:15 – 22:15", Date = "20/11/2026", Format = "2D Lồng tiếng", RoomName = "Phòng 4" });
-            Showtimes.Add(new ShowtimeOption { ShowtimeID = 3, TimeRange = "22:30 – 00:30", Date = "20/11/2026", Format = "2D Phụ đề", RoomName = "Phòng 6" });
-            Showtimes.Add(new ShowtimeOption { ShowtimeID = 4, TimeRange = "23:45 – 01:45", Date = "20/11/2026", Format = "IMAX 2D", RoomName = "Phòng 1" });
-            ChangeShowtime(Showtimes[2]);
-
-            // CommandParameter là chính ô ghế được bấm
+            // CommandParameter là chính ô ghế được bấm (trên sơ đồ hoặc trong danh sách đơn)
             ToggleSeatCommand = new RelayCommand(p =>
             {
                 if (p is not SeatItem seat || seat.IsSold || seat.IsAisle) return;
                 if (!seat.IsSelected && SelectedCount >= MaxSeats)
                 {
-                    Message = $"Mỗi lần chỉ đặt tối đa {MaxSeats} ghế.";
+                    ShowMessage($"Mỗi đơn chỉ đặt tối đa {MaxSeats} ghế.", true);
                     return;
                 }
                 seat.IsSelected = !seat.IsSelected;
+                if (seat.IsSelected) SelectedSeats.Add(seat);
+                else SelectedSeats.Remove(seat);
                 Message = "";
                 UpdateSummary();
             });
 
-            ClearCommand = new RelayCommand(_ =>
+            ClearCommand = new RelayCommand(_ => ResetOrder(), _ => SelectedCount > 0 || CashText != "" || MemberPhone != "");
+
+            FindMemberCommand = new RelayCommand(_ => FindMember());
+
+            // Tham số: "exact" = vừa đủ tổng tiền, còn lại là số tiền (vd "200000")
+            SetCashCommand = new RelayCommand(p =>
             {
-                ClearSelection();
-                Message = "";
-            }, _ => SelectedCount > 0);
+                decimal amount = p as string == "exact" ? Total : decimal.Parse((string)p!, CultureInfo.InvariantCulture);
+                CashText = amount.ToString("N0", Vi);
+            }, p => p as string != "exact" || Total > 0);
 
-            // Tuần 3 mới ghép thanh toán thật (BookingService.CreateBooking)
-            ContinueCommand = new RelayCommand(
-                _ => Message = "Thanh toán sẽ được ghép với CSDL ở tuần 3.",
-                _ => SelectedCount > 0);
+            // Tiền mặt phải đưa đủ; chuyển khoản / thẻ thì nhân viên bấm sau khi đã nhận tiền
+            PayCommand = new RelayCommand(_ => Pay(),
+                _ => SelectedCount > 0 && (Method != PaymentMethod.Cash || Cash >= Total));
 
-            OpenSeatInfoCommand = new RelayCommand(_ => IsSeatInfoOpen = true);
-            OpenShowtimesCommand = new RelayCommand(_ => IsShowtimePickerOpen = true);
-            CloseDialogCommand = new RelayCommand(_ => { IsSeatInfoOpen = false; IsShowtimePickerOpen = false; });
+            LogoutCommand = new RelayCommand(_ => ShowMessage("Đăng xuất sẽ nối với màn Đăng nhập khi ghép app.", false));
+            ToggleThemeCommand = new RelayCommand(_ => IsDarkTheme = !IsDarkTheme);
 
-            PickShowtimeCommand = new RelayCommand(p =>
-            {
-                if (p is not ShowtimeOption option || option.IsCurrent) return;
-                ChangeShowtime(option);
-                IsShowtimePickerOpen = false;
-                Message = $"Đã đổi sang suất {option.TimeRange}. Ghế đã chọn được bỏ chọn.";
-            });
-
-            ZoomInCommand = new RelayCommand(_ => Zoom = Math.Min(MaxZoom, Zoom + ZoomStep), _ => Zoom < MaxZoom);
-            ZoomOutCommand = new RelayCommand(_ => Zoom = Math.Max(MinZoom, Zoom - ZoomStep), _ => Zoom > MinZoom);
-            ResetZoomCommand = new RelayCommand(_ => Zoom = MinZoom, _ => Zoom > MinZoom);
-            ToggleThemeCommand = new RelayCommand(_ => IsLightTheme = !IsLightTheme);
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            timer.Tick += (_, _) => Clock = DateTime.Now.ToString("HH:mm:ss");
+            timer.Start();
         }
-
-        // Ảnh nhúng trong project (Build Action = Resource), đường dẫn pack URI
-        private static string SeatImage(string file) => $"pack://application:,,,/CinemaAPP;component/Assets/Seats/{file}";
 
         private IEnumerable<SeatItem> AllSeats() => Rows.SelectMany(r => r.Seats).Where(s => !s.IsAisle);
 
-        // Đổi suất: bỏ ghế đang chọn và nạp lại ghế đã bán của suất mới.
-        private void ChangeShowtime(ShowtimeOption option)
+        private void BuildShowtimes()
         {
-            foreach (ShowtimeOption s in Showtimes) s.IsCurrent = s == option;
-            CurrentShowtime = option;
-            ClearSelection();
+            DateTime today = DateTime.Today;
+            var summer = new MovieShowtimes { Title = "Cuộc Phiêu Lưu Mùa Hè", AgeRating = "P", Genre = "Phiêu lưu", DurationMin = 120 };
+            var ghost = new MovieShowtimes { Title = "Bóng Ma Rạp Cũ", AgeRating = "T16", Genre = "Kinh dị", DurationMin = 100 };
+            var cats = new MovieShowtimes { Title = "Đội Cứu Hộ Mèo", AgeRating = "P", Genre = "Hoạt hình", DurationMin = 95 };
 
-            // Giả lập ghế đã bán: mỗi suất một bộ khác nhau nhưng cố định (seed theo ShowtimeID)
-            var random = new Random(option.ShowtimeID * 7919);
-            foreach (SeatItem seat in AllSeats())
-                seat.IsSold = random.NextDouble() < 0.18;
+            int id = 1;
+            void Add(MovieShowtimes movie, int hour, int minute, string room, string format, string audio)
+            {
+                var showtime = new ShowtimeOption
+                {
+                    ShowtimeID = id++, MovieTitle = movie.Title, DurationMin = movie.DurationMin,
+                    StartTime = today.AddHours(hour).AddMinutes(minute),
+                    RoomName = room, ShowFormat = format, AudioType = audio
+                };
+                // Giả lập vé đã bán: mỗi suất một bộ khác nhau nhưng cố định (seed theo ShowtimeID)
+                var random = new Random(showtime.ShowtimeID * 7919);
+                foreach (SeatItem seat in AllSeats())
+                    if (random.NextDouble() < 0.1) showtime.SoldSeatIds.Add(seat.SeatID);
+                showtime.FreeSeats = TotalSeats - showtime.SoldSeatIds.Count;
+                movie.Showtimes.Add(showtime);
+            }
+
+            Add(summer, 9, 30, "Phòng 1", "2D", "Phụ đề");
+            Add(summer, 14, 0, "Phòng 2", "2D", "Phụ đề");
+            Add(summer, 20, 15, "Phòng 4", "2D", "Lồng tiếng");
+            Add(ghost, 18, 45, "Phòng 3", "2D", "Phụ đề");
+            Add(ghost, 21, 30, "Phòng 1", "2D", "Phụ đề");
+            Add(cats, 10, 15, "Phòng 3", "3D", "Lồng tiếng");
+            Add(cats, 16, 30, "Phòng 2", "3D", "Lồng tiếng");
+            Movies.AddRange(new[] { summer, ghost, cats });
         }
 
-        private void ClearSelection()
+        // Đổi suất: bỏ đơn đang làm dở và tô lại ghế đã bán của suất mới.
+        private void SelectShowtime(ShowtimeOption option)
         {
-            foreach (SeatItem s in AllSeats()) s.IsSelected = false;
+            if (option == CurrentShowtime) return;
+            foreach (MovieShowtimes movie in Movies)
+            {
+                foreach (ShowtimeOption s in movie.Showtimes) s.IsCurrent = s == option;
+                movie.IsCurrent = movie.Showtimes.Contains(option);
+            }
+            CurrentShowtime = option;
+            ResetOrder();
+            foreach (SeatItem seat in AllSeats())
+                seat.IsSold = option.SoldSeatIds.Contains(seat.SeatID);
+        }
+
+        private void FindMember()
+        {
+            string phone = MemberPhone.Trim();
+            if (phone == "")
+            {
+                IsMemberFound = false;
+                MemberText = "Nhập số điện thoại để tìm.";
+            }
+            else if (Members.TryGetValue(phone, out var member))
+            {
+                IsMemberFound = true;
+                MemberText = $"{member.Name} · {member.Points} điểm";
+            }
+            else
+            {
+                IsMemberFound = false;
+                MemberText = "Không tìm thấy thành viên.";
+            }
+        }
+
+        // Giả lập BookingService.CreateBooking: đánh dấu ghế đã bán cho suất hiện tại.
+        private void Pay()
+        {
+            string labels = string.Join(", ", SelectedSeats.Select(s => s.Label));
+            string paid = Money(Total);
+            string how = Method switch
+            {
+                PaymentMethod.Cash => $"Tiền mặt, thối {Money(Cash - Total)}",
+                PaymentMethod.Transfer => "Chuyển khoản",
+                _ => "Thẻ (POS)",
+            };
+            string points = IsMemberFound ? $" Cộng {PointsText} cho thành viên." : "";
+            foreach (SeatItem seat in SelectedSeats)
+            {
+                CurrentShowtime.SoldSeatIds.Add(seat.SeatID);
+                seat.IsSelected = false;
+                seat.IsSold = true;
+            }
+            CurrentShowtime.FreeSeats -= SelectedSeats.Count;
+            int bookingId = nextBookingId++;
+            OnPropertyChanged(nameof(TransferNote));
+
+            ResetOrder();
+            ShowMessage($"Đã thanh toán đơn #{bookingId}: ghế {labels} – {paid} ({how}).{points}", false);
+        }
+
+        // Xóa đơn đang làm: bỏ chọn ghế, tiền khách đưa, khách thành viên, về lại tiền mặt.
+        private void ResetOrder()
+        {
+            foreach (SeatItem s in SelectedSeats) s.IsSelected = false;
+            SelectedSeats.Clear();
+            CashText = "";
+            MemberPhone = "";
+            IsMemberFound = false;
+            Method = PaymentMethod.Cash;
+            Message = "";
             UpdateSummary();
         }
 
         private void UpdateSummary()
         {
-            List<SeatItem> selected = AllSeats().Where(s => s.IsSelected).ToList();
-            SelectedCount = selected.Count;
-            Total = selected.Sum(s => s.Price);
-            SelectedLabels = selected.Count == 0 ? "Chưa chọn ghế" : string.Join(", ", selected.Select(s => s.Label));
+            SelectedCount = SelectedSeats.Count;
+            Total = SelectedSeats.Sum(s => s.Price);
+
+            OrderLines.Clear();
+            foreach (var group in SelectedSeats.GroupBy(s => s.Type).OrderBy(g => g.Key))
+            {
+                string name = group.Key switch { SeatType.Vip => "Vé VIP", SeatType.Couple => "Vé Đôi", _ => "Vé Thường" };
+                OrderLines.Add(new OrderLine
+                {
+                    Title = $"{name} · {string.Join(", ", group.Select(s => s.Label))}",
+                    Count = group.Count(),
+                    Subtotal = group.Sum(s => s.Price)
+                });
+            }
+
+            UpdatePoints();
+            UpdateChange();
+        }
+
+        private void UpdatePoints()
+        {
+            PointsText = IsMemberFound ? $"+{(int)(Total / MoneyPerPoint)} điểm" : "—";
+        }
+
+        // Tiền khách đưa chỉ lấy các chữ số (gõ "200.000" hay "200000" đều được).
+        private void UpdateChange()
+        {
+            string digits = new string(CashText.Where(char.IsDigit).ToArray());
+            Cash = digits == "" ? 0 : decimal.Parse(digits, CultureInfo.InvariantCulture);
+            IsCashShort = Cash > 0 && Cash < Total;
+            ChangeText = IsCashShort ? "Còn thiếu " + Money(Total - Cash) : Money(Math.Max(0, Cash - Total));
+        }
+
+        private void ShowMessage(string text, bool isError)
+        {
+            IsMessageError = isError;
+            Message = text;
+        }
+
+        private static string Money(decimal value) => value.ToString("N0", Vi) + " đ";
+
+        private static string Capitalize(string text) => text.Length == 0 ? text : char.ToUpper(text[0]) + text[1..];
+
+        // 3 ô vuông định vị ở 3 góc giống mã QR thật, phần còn lại ngẫu nhiên cố định
+        private static List<bool> BuildQrCells()
+        {
+            const int n = 21;
+            var random = new Random(2026);
+            var cells = new List<bool>(n * n);
+            for (int r = 0; r < n; r++)
+                for (int c = 0; c < n; c++)
+                {
+                    int fr = r < 7 ? r : r >= n - 7 ? r - (n - 7) : -1;
+                    int fc = c < 7 ? c : c >= n - 7 ? c - (n - 7) : -1;
+                    bool inFinder = fr >= 0 && fc >= 0 && !(r >= n - 7 && c >= n - 7);
+                    if (inFinder)
+                    {
+                        int d = Math.Min(Math.Min(fr, fc), Math.Min(6 - fr, 6 - fc));   // khoảng cách tới mép ô định vị
+                        cells.Add(d != 1);
+                    }
+                    else
+                    {
+                        bool nearFinder = (r < 8 && (c < 8 || c >= n - 8)) || (r >= n - 8 && c < 8);
+                        cells.Add(!nearFinder && random.NextDouble() < 0.5);
+                    }
+                }
+            return cells;
         }
 
         private static SeatRowItem BuildRow(string rowLabel, SeatType type, decimal price, ref int id)
