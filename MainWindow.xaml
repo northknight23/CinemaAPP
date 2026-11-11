@@ -1,12 +1,125 @@
 ﻿<Window x:Class="CinemaAPP.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CinemaAPP"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
+        Title="UIT Cinema"
+        Height="760" Width="1280"
+        MinHeight="620" MinWidth="980"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource PageBrush}">
 
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <!-- Nội dung tạm cho từng mục menu -->
+        <DataTemplate DataType="{x:Type vm:NavigationPage}">
+            <StackPanel Margin="36" VerticalAlignment="Center">
+                <TextBlock Text="{Binding Title}"
+                           FontSize="30"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextBrush}" />
+
+                <TextBlock Text="{Binding Description}"
+                           Margin="0,10,0,0"
+                           FontSize="15"
+                           Foreground="{StaticResource TextMutedBrush}" />
+
+                <TextBlock Text="Màn hình sẽ được bổ sung ở bước tiếp theo."
+                           Margin="0,24,0,0"
+                           Foreground="{StaticResource TextMutedBrush}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <Style x:Key="MenuButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource OnNavyMutedBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="14,12" />
+            <Setter Property="Margin" Value="0,3" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8">
+                            <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder"
+                                        Property="Background"
+                                        Value="#183B61" />
+                                <Setter Property="Foreground" Value="White" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Menu bên trái -->
+        <Border Grid.Column="0" Background="{StaticResource NavyBrush}">
+            <DockPanel Margin="18">
+                <StackPanel DockPanel.Dock="Top" Margin="8,4,8,28">
+                    <TextBlock Text="UIT CINEMA"
+                               FontSize="21"
+                               FontWeight="Bold"
+                               Foreground="White" />
+                    <TextBlock Text="QUẢN LÝ RẠP CHIẾU PHIM"
+                               Margin="0,5,0,0"
+                               FontSize="10"
+                               Foreground="{StaticResource OnNavyMutedBrush}" />
+                </StackPanel>
+
+                <ItemsControl ItemsSource="{Binding Pages}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Content="{Binding Title}"
+                                    Style="{StaticResource MenuButtonStyle}"
+                                    Command="{Binding DataContext.NavigateCommand,
+                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </DockPanel>
+        </Border>
+
+        <!-- Thanh tiêu đề và nội dung -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="64" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Background="{StaticResource CardBrush}"
+                    BorderBrush="{StaticResource CardBorderBrush}"
+                    BorderThickness="0,0,0,1">
+                <TextBlock Text="{Binding SelectedPage.Title}"
+                           Margin="28,0"
+                           VerticalAlignment="Center"
+                           FontSize="17"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TextBrush}" />
+            </Border>
+
+            <ContentControl Grid.Row="1"
+                            Background="{StaticResource PageBrush}"
+                            Content="{Binding SelectedPage}" />
+        </Grid>
     </Grid>
 </Window>
