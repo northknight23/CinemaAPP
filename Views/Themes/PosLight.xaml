@@ -1,0 +1,58 @@
+<!-- GIAO DIỆN SÁNG của màn Bán vé tại quầy. Mọi màu lấy đúng từ Resources/Styles.xaml
+     (ghi tên key gốc ở cuối dòng). Phải có ĐỦ các key giống PosDark.xaml vì View dùng DynamicResource. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Nền, khung, chữ -->
+    <SolidColorBrush x:Key="PosPage" Color="#F3F6FA"/>          <!-- PageBrush -->
+    <SolidColorBrush x:Key="PosHeader" Color="#0F2A4A"/>        <!-- NavyBrush -->
+    <SolidColorBrush x:Key="PosCard" Color="#FFFFFF"/>          <!-- CardBrush -->
+    <SolidColorBrush x:Key="PosCardBorder" Color="#DCE5F0"/>    <!-- CardBorderBrush -->
+    <SolidColorBrush x:Key="PosSubtle" Color="#F5F8FC"/>        <!-- SubtleBrush -->
+    <SolidColorBrush x:Key="PosInput" Color="#F7FAFE"/>         <!-- InputBrush -->
+    <SolidColorBrush x:Key="PosInputBorder" Color="#D5E3F3"/>   <!-- InputBorderBrush -->
+    <SolidColorBrush x:Key="PosInputHover" Color="#A9C9EC"/>    <!-- InputHoverBrush -->
+    <SolidColorBrush x:Key="PosText" Color="#0F2A4A"/>          <!-- TextBrush -->
+    <SolidColorBrush x:Key="PosTextMuted" Color="#4A5B70"/>     <!-- TextMutedBrush -->
+    <SolidColorBrush x:Key="PosAccent" Color="#1F6FC5"/>        <!-- PrimaryBrush -->
+    <SolidColorBrush x:Key="PosAccentHover" Color="#185BA3"/>   <!-- PrimaryHoverBrush -->
+    <SolidColorBrush x:Key="PosChip" Color="#EAF2FC"/>          <!-- InfoBgBrush -->
+    <SolidColorBrush x:Key="PosChipText" Color="#0F2A4A"/>      <!-- TextBrush -->
+    <SolidColorBrush x:Key="PosTotal" Color="#0F2A4A"/>         <!-- TextBrush -->
+
+    <!-- Trạng thái -->
+    <SolidColorBrush x:Key="PosGood" Color="#166534"/>          <!-- SuccessBrush -->
+    <SolidColorBrush x:Key="PosGoodBg" Color="#EEF7F0"/>        <!-- SuccessBgBrush -->
+    <SolidColorBrush x:Key="PosBad" Color="#B91C1C"/>           <!-- ErrorBrush -->
+    <SolidColorBrush x:Key="PosBadBg" Color="#FDECEC"/>         <!-- ErrorBgBrush -->
+    <SolidColorBrush x:Key="PosWarn" Color="#9A3412"/>          <!-- WarningBrush -->
+    <SolidColorBrush x:Key="PosWarnBg" Color="#FFF4DF"/>        <!-- WarningBgBrush -->
+    <SolidColorBrush x:Key="PosInfo" Color="#164F8F"/>          <!-- InfoBrush -->
+    <SolidColorBrush x:Key="PosInfoBg" Color="#EAF2FC"/>        <!-- InfoBgBrush -->
+
+    <!-- Ghế -->
+    <SolidColorBrush x:Key="PosSeatStd" Color="#FFFFFF"/>           <!-- SeatStdBrush -->
+    <SolidColorBrush x:Key="PosSeatStdBorder" Color="#B9C7D8"/>     <!-- SeatStdBorderBrush -->
+    <SolidColorBrush x:Key="PosSeatStdText" Color="#0F2A4A"/>       <!-- TextBrush -->
+    <SolidColorBrush x:Key="PosSeatVip" Color="#FFF4DF"/>           <!-- SeatVipBrush -->
+    <SolidColorBrush x:Key="PosSeatVipBorder" Color="#E09B1F"/>     <!-- SeatVipBorderBrush -->
+    <SolidColorBrush x:Key="PosSeatVipText" Color="#0F2A4A"/>       <!-- TextBrush -->
+    <SolidColorBrush x:Key="PosSeatCouple" Color="#F1ECFC"/>        <!-- SeatCoupleBrush -->
+    <SolidColorBrush x:Key="PosSeatCoupleBorder" Color="#8466D1"/>  <!-- SeatCoupleBorderBrush -->
+    <SolidColorBrush x:Key="PosSeatCoupleText" Color="#0F2A4A"/>    <!-- TextBrush -->
+    <SolidColorBrush x:Key="PosSeatSel" Color="#1F6FC5"/>           <!-- PrimaryBrush -->
+    <SolidColorBrush x:Key="PosSeatSelBorder" Color="#1F6FC5"/>     <!-- PrimaryBrush -->
+    <SolidColorBrush x:Key="PosSeatSold" Color="#DDE3EA"/>          <!-- SeatSoldBrush -->
+    <SolidColorBrush x:Key="PosSeatSoldText" Color="#5F6B7A"/>      <!-- IconBrush -->
+    <SolidColorBrush x:Key="PosScreen" Color="#A9C9EC"/>            <!-- InputHoverBrush -->
+    <!-- Quầng sáng màn hình hắt xuống: đậm ở mép màn, nhạt dần về phía ghế -->
+    <LinearGradientBrush x:Key="PosScreenGlow" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#401F6FC5" Offset="0"/>                <!-- PrimaryBrush 25% -->
+        <GradientStop Color="#001F6FC5" Offset="1"/>                <!-- PrimaryBrush 0% -->
+    </LinearGradientBrush>
+
+    <!-- Thanh toán -->
+    <SolidColorBrush x:Key="PosPay" Color="#166534"/>               <!-- SuccessBrush -->
+    <SolidColorBrush x:Key="PosMethodSel" Color="#EEF7F0"/>         <!-- SuccessBgBrush -->
+    <SolidColorBrush x:Key="PosMethodSelBorder" Color="#166534"/>   <!-- SuccessBrush -->
+    <SolidColorBrush x:Key="PosMethodSelText" Color="#166534"/>     <!-- SuccessBrush -->
+</ResourceDictionary>

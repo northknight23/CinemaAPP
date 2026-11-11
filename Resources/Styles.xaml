@@ -1,0 +1,43 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- ===== Thương hiệu ===== -->
+    <SolidColorBrush x:Key="NavyBrush"         Color="#0F2A4A"/>
+    <SolidColorBrush x:Key="NavyDarkBrush"     Color="#0A2240"/>
+    <SolidColorBrush x:Key="PrimaryBrush"      Color="#1F6FC5"/>
+    <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#185BA3"/>
+    <SolidColorBrush x:Key="PrimaryPressBrush" Color="#134B87"/>
+    <SolidColorBrush x:Key="GoldBrush"         Color="#F5A524"/>
+
+    <!-- ===== Nền, viền, chữ ===== -->
+    <SolidColorBrush x:Key="PageBrush"         Color="#F3F6FA"/>
+    <SolidColorBrush x:Key="CardBrush"         Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="CardBorderBrush"   Color="#DCE5F0"/>
+    <SolidColorBrush x:Key="SubtleBrush"       Color="#F5F8FC"/>
+    <SolidColorBrush x:Key="InputBrush"        Color="#F7FAFE"/>
+    <SolidColorBrush x:Key="InputBorderBrush"  Color="#D5E3F3"/>
+    <SolidColorBrush x:Key="InputHoverBrush"   Color="#A9C9EC"/>
+    <SolidColorBrush x:Key="TextBrush"         Color="#0F2A4A"/>
+    <SolidColorBrush x:Key="TextMutedBrush"    Color="#4A5B70"/>
+    <SolidColorBrush x:Key="IconBrush"         Color="#5F6B7A"/>
+    <SolidColorBrush x:Key="OnNavyMutedBrush"  Color="#A9C3E0"/>
+
+    <!-- ===== Trạng thái ===== -->
+    <SolidColorBrush x:Key="SuccessBgBrush"    Color="#EEF7F0"/>
+    <SolidColorBrush x:Key="SuccessBrush"      Color="#166534"/>
+    <SolidColorBrush x:Key="ErrorBgBrush"      Color="#FDECEC"/>
+    <SolidColorBrush x:Key="ErrorBrush"        Color="#B91C1C"/>
+    <SolidColorBrush x:Key="DangerBrush"       Color="#DC2626"/>
+    <SolidColorBrush x:Key="WarningBgBrush"    Color="#FFF4DF"/>
+    <SolidColorBrush x:Key="WarningBrush"      Color="#9A3412"/>
+    <SolidColorBrush x:Key="InfoBgBrush"       Color="#EAF2FC"/>
+    <SolidColorBrush x:Key="InfoBrush"         Color="#164F8F"/>
+
+    <!-- ===== Ghế ===== -->
+    <SolidColorBrush x:Key="SeatStdBrush"          Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="SeatStdBorderBrush"    Color="#B9C7D8"/>
+    <SolidColorBrush x:Key="SeatVipBrush"          Color="#FFF4DF"/>
+    <SolidColorBrush x:Key="SeatVipBorderBrush"    Color="#E09B1F"/>
+    <SolidColorBrush x:Key="SeatCoupleBrush"       Color="#F1ECFC"/>
+    <SolidColorBrush x:Key="SeatCoupleBorderBrush" Color="#8466D1"/>
+    <SolidColorBrush x:Key="SeatSoldBrush"         Color="#DDE3EA"/>
+</ResourceDictionary>
