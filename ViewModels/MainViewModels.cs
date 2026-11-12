@@ -50,9 +50,16 @@ namespace CinemaAPP.ViewModels
         // Mục chỉ nhân viên thấy (Bán vé): Quản trị viên không bán vé, chỉ xem Giao dịch & Đối soát
         public Visibility StaffVisibility => IsAdmin ? Visibility.Collapsed : Visibility.Visible;
 
-        public string UserFullName => IsAdmin ? "Quản trị viên" : "Nguyễn Văn An";
-        public string UserRoleSubtext => IsAdmin ? "Quản trị · admin" : "Nhân viên · nv01";
-        public string UserInitials => IsAdmin ? "QV" : "NA";
+        public string UserFullName => AppSession.CurrentUser?.FullName 
+            ?? (IsAdmin ? "Quản trị viên" : "Nguyễn Văn An");
+
+        public string UserRoleSubtext => AppSession.CurrentUser != null
+            ? $"{AppSession.CurrentUser.RoleText} · {AppSession.CurrentUser.Username}"
+            : (IsAdmin ? "Quản trị · admin" : "Nhân viên · nv01");
+
+        public string UserInitials => AppSession.CurrentUser != null
+            ? AppSession.CurrentUser.Initials
+            : (IsAdmin ? "QV" : "NA");
 
         public string CurrentPageId
         {
@@ -153,8 +160,18 @@ namespace CinemaAPP.ViewModels
             {
                 AppSession.Logout();
                 var loginWin = new LoginWindow();
+                Application.Current.MainWindow = loginWin;
                 loginWin.Show();
-                Application.Current.MainWindow?.Close();
+
+                // Đóng MainWindow hiện tại
+                foreach (Window w in Application.Current.Windows)
+                {
+                    if (w is MainWindow)
+                    {
+                        w.Close();
+                        break;
+                    }
+                }
             });
 
             // Đồng hồ thời gian thực
@@ -169,17 +186,24 @@ namespace CinemaAPP.ViewModels
 
         private void NavigateTo(string pageId)
         {
+            // Kiểm tra phân quyền: Staff không truy cập các mục Quản lý và Báo cáo
+            if (!IsAdmin && (pageId == "Movies" || pageId == "Rooms" || pageId == "Showtimes" || pageId == "Accounts" || pageId == "Revenue"))
+            {
+                pageId = "Overview";
+            }
+
             CurrentPageId = pageId;
 
             // Khi ấn nút nào thì giao diện tương ứng sẽ hiện ra ở vùng bên phải
             CurrentView = pageId switch
             {
+                "Movies" => new MovieManagementView(),
                 "Tickets" => new SeatMapDemoView(),
                 "Transactions" => new TransactionsView(),
                 "Customers" => new CustomerManagementView(),
                 "Accounts" => new AccountManagementView(),
                 "Revenue" => new RevenueView(),
-                _ => null // "Overview", "Movies", "Rooms", "Showtimes": Để trống sẵn sàng nạp giao diện khi phát triển
+                _ => null // "Overview", "Rooms", "Showtimes": Để trống sẵn sàng nạp giao diện khi phát triển
             };
         }
 
