@@ -1,0 +1,691 @@
+<UserControl x:Class="CinemaAPP.Views.ShowtimeManagementView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1600" d:DesignHeight="800"
+             Language="vi-VN">
+    <!-- Màn QUẢN LÝ SUẤT CHIẾU (chỉ Quản trị viên): dải 7 ngày, bộ lọc, 4 ô số của ngày, bảng suất,
+         hộp thoại thêm / sửa (kèm lịch phòng trong ngày để chọn giờ trống) và hộp thoại hủy suất. -->
+    <UserControl.DataContext>
+        <vm:ShowtimeManagementViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CinemaAPP;component/Views/Themes/SalesControls.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Ô ngày trên dải chọn ngày -->
+            <Style x:Key="DayItem" TargetType="ListBoxItem">
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListBoxItem">
+                            <Border x:Name="bg" CornerRadius="8" Padding="12,5" Margin="2,0" MinWidth="96" Background="Transparent">
+                                <StackPanel>
+                                    <TextBlock x:Name="top" Text="{Binding Top}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource PosText}"/>
+                                    <TextBlock x:Name="bottom" FontSize="11" Foreground="{DynamicResource PosTextMuted}">
+                                        <Run Text="{Binding Bottom, Mode=OneWay}"/> · <Run Text="{Binding CountText, Mode=OneWay}"/>
+                                    </TextBlock>
+                                </StackPanel>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bg" Property="Background" Value="{DynamicResource PosSubtle}"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="bg" Property="Background" Value="{DynamicResource PosAccent}"/>
+                                    <Setter TargetName="top" Property="Foreground" Value="White"/>
+                                    <Setter TargetName="bottom" Property="Foreground" Value="White"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Nút biểu tượng nhỏ (mũi tên tuần, sửa, hủy) -->
+            <Style x:Key="IconButton" TargetType="Button">
+                <Setter Property="Width" Value="32"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="bg" CornerRadius="8" Background="Transparent">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bg" Property="Background" Value="{DynamicResource PosChip}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Nhãn độ tuổi: P xanh lá, T13 xanh dương, T16 cam, T18 đỏ -->
+            <Style x:Key="AgeChip" TargetType="Border" BasedOn="{StaticResource Chip}">
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="Padding" Value="5,1"/>
+                <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource PosGood}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding AgeRating}" Value="T13">
+                        <Setter Property="Background" Value="{DynamicResource PosInfoBg}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosInfo}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding AgeRating}" Value="T16">
+                        <Setter Property="Background" Value="{DynamicResource PosWarnBg}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosWarn}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding AgeRating}" Value="T18">
+                        <Setter Property="Background" Value="{DynamicResource PosBadBg}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosBad}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Chip trạng thái suất -->
+            <Style x:Key="ShowStatusChip" TargetType="Border" BasedOn="{StaticResource Chip}">
+                <Setter Property="Background" Value="{DynamicResource PosInfoBg}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource PosInfo}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:ShowStatus.NotOnSale}">
+                        <Setter Property="Background" Value="{DynamicResource PosWarnBg}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosWarn}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:ShowStatus.SoldOut}">
+                        <Setter Property="Background" Value="{DynamicResource PosBadBg}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosBad}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:ShowStatus.Showing}">
+                        <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosGood}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:ShowStatus.Ended}">
+                        <Setter Property="Background" Value="{DynamicResource PosSubtle}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosTextMuted}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Thông báo: xanh khi thành công, cam khi lỗi; ẩn khi rỗng -->
+            <Style x:Key="BannerBox" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource PosGood}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Message}" Value="">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsMessageError}" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource PosWarnBg}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosWarn}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Ẩn khi chuỗi rỗng -->
+            <Style x:Key="HideWhenEmpty" TargetType="Border">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Ô số: nhãn, số lớn + chip, dòng phụ, biểu tượng bên phải -->
+            <Style x:Key="KpiLabel" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+                <Setter Property="FontSize" Value="13"/>
+            </Style>
+            <Style x:Key="KpiBig" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="26"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+            </Style>
+            <Style x:Key="KpiChip" TargetType="Border" BasedOn="{StaticResource Chip}">
+                <Setter Property="Margin" Value="10,4,0,0"/>
+                <Setter Property="Padding" Value="9,3"/>
+                <Setter Property="TextElement.FontSize" Value="12"/>
+                <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
+            </Style>
+            <Style x:Key="KpiSub" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Margin" Value="0,6,0,0"/>
+            </Style>
+            <Style x:Key="KpiIcon" TargetType="Border">
+                <Setter Property="Width" Value="46"/>
+                <Setter Property="Height" Value="46"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="12,0,0,0"/>
+            </Style>
+            <Style x:Key="KpiIconPath" TargetType="Path">
+                <Setter Property="Width" Value="20"/>
+                <Setter Property="Height" Value="20"/>
+                <Setter Property="Stretch" Value="Uniform"/>
+                <Setter Property="StrokeThickness" Value="1.8"/>
+                <Setter Property="StrokeStartLineCap" Value="Round"/>
+                <Setter Property="StrokeEndLineCap" Value="Round"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+
+            <!-- Khung poster: hiện đang trống, sau này gắn ảnh từ MOVIE.PosterPath (mục Phim của B) -->
+            <Style x:Key="PosterFrame" TargetType="Border">
+                <Setter Property="Width" Value="40"/>
+                <Setter Property="Height" Value="56"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource PosCardBorder}"/>
+                <Setter Property="Background" Value="{DynamicResource PosSubtle}"/>
+                <Setter Property="Margin" Value="0,0,12,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+
+            <!-- Màu theo độ lấp đầy: dưới 50% xanh lá, 50–80% vàng, từ 80% đỏ -->
+            <Style x:Key="FillBar" TargetType="Border">
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="Background" Value="{DynamicResource PosGood}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding FillLevel}" Value="Mid">
+                        <Setter Property="Background" Value="{StaticResource GoldBrush}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding FillLevel}" Value="High">
+                        <Setter Property="Background" Value="{StaticResource DangerBrush}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="FillText" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{DynamicResource PosGood}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding FillLevel}" Value="Mid">
+                        <Setter Property="Foreground" Value="{DynamicResource PosSeatVipBorder}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding FillLevel}" Value="High">
+                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- ===== Dải 7 ngày + nút ===== -->
+            <DockPanel>
+                <Border DockPanel.Dock="Left" Style="{StaticResource Card}" Padding="4">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource IconButton}" Command="{Binding PrevWeekCommand}" ToolTip="7 ngày trước">
+                            <Path Data="M15 18l-6-6 6-6" Stroke="{DynamicResource PosText}" StrokeThickness="2" Width="10" Height="12" Stretch="Uniform"/>
+                        </Button>
+                        <ListBox ItemsSource="{Binding Days}" SelectedItem="{Binding SelectedDay}"
+                                 BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource DayItem}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                        </ListBox>
+                        <Button Style="{StaticResource IconButton}" Command="{Binding NextWeekCommand}" ToolTip="7 ngày sau">
+                            <Path Data="M9 18l6-6-6-6" Stroke="{DynamicResource PosText}" StrokeThickness="2" Width="10" Height="12" Stretch="Uniform"/>
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Style="{StaticResource OutlineButton}" Padding="0" Width="96" Command="{Binding TodayCommand}" Content="Hôm nay"/>
+                    <Button Style="{StaticResource OutlineButton}" Width="104" Margin="8,0,0,0" Command="{Binding ReloadCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 4v5h-5" Stroke="{DynamicResource PosText}" StrokeThickness="2"
+                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            <TextBlock Text="Tải lại"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource SolidButton}" Background="{DynamicResource PosAccent}" Width="178" Margin="8,0,0,0"
+                            Command="{Binding NewCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M12 5v14 M5 12h14" Stroke="White" StrokeThickness="2.2" Width="12" Height="12" Stretch="Uniform"
+                                  Margin="0,0,8,0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                            <TextBlock Text="Thêm suất chiếu"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- ===== Bộ lọc ===== -->
+            <DockPanel Grid.Row="1" Margin="0,10,0,0">
+                <TextBox DockPanel.Dock="Left" Style="{StaticResource InputBox}" Width="280" Height="40" Tag="⌕  Tìm mã suất, tên phim"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                <ComboBox DockPanel.Dock="Left" Style="{StaticResource FilterCombo}" Width="230" Height="40" Margin="10,0,0,0"
+                          ItemsSource="{Binding MovieFilterOptions}" SelectedItem="{Binding SelectedMovieFilter}"/>
+                <ComboBox DockPanel.Dock="Left" Style="{StaticResource FilterCombo}" Width="170" Height="40" Margin="10,0,0,0"
+                          ItemsSource="{Binding RoomFilterOptions}" SelectedItem="{Binding SelectedRoomFilter}"/>
+                <ComboBox DockPanel.Dock="Left" Style="{StaticResource FilterCombo}" Width="190" Height="40" Margin="10,0,0,0"
+                          ItemsSource="{Binding StatusFilterOptions}" SelectedItem="{Binding SelectedStatusFilter}"/>
+                <Button DockPanel.Dock="Left" Style="{StaticResource OutlineButton}" Height="40" Width="140" Margin="10,0,0,0"
+                        Command="{Binding ResetFiltersCommand}" Content="Đặt lại bộ lọc" FontSize="12.5"/>
+                <TextBlock Text="{Binding WeekText, StringFormat='Đang xem {0}'}" Style="{StaticResource Muted}"
+                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
+            </DockPanel>
+
+            <!-- ===== 4 ô số của ngày đang chọn ===== -->
+            <UniformGrid Grid.Row="2" Rows="1" Margin="0,10,0,10">
+                <Border Style="{StaticResource Card}" Margin="0,0,5,0" Padding="18,14">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiIcon}" Background="{DynamicResource PosChip}">
+                            <Path Data="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z M16 2v4 M8 2v4 M3 10h18"
+                                  Stroke="{DynamicResource PosAccent}" Style="{StaticResource KpiIconPath}"/>
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Text="Suất chiếu trong ngày" Style="{StaticResource KpiLabel}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock Text="{Binding ShowCountText}" Style="{StaticResource KpiBig}"/>
+                                <Border Style="{StaticResource KpiChip}" Background="{DynamicResource PosGoodBg}">
+                                    <TextBlock Text="{Binding ShowCountSub}" Foreground="{DynamicResource PosGood}"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Tự động cộng 15 phút dọn phòng mỗi suất" Style="{StaticResource KpiSub}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="5,0" Padding="18,14">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiIcon}" Background="{DynamicResource PosGoodBg}">
+                            <Path Data="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z M14 5v14"
+                                  Stroke="{DynamicResource PosGood}" Style="{StaticResource KpiIconPath}"/>
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Text="Đang mở bán vé" Style="{StaticResource KpiLabel}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock Text="{Binding OnSaleText}" Style="{StaticResource KpiBig}" Foreground="{DynamicResource PosAccent}"/>
+                                <Border Style="{StaticResource KpiChip}" Background="{DynamicResource PosInfoBg}">
+                                    <TextBlock Text="{Binding OnSaleSub}" Foreground="{DynamicResource PosInfo}"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Suất hôm nay, mai, kia được bán tại quầy" Style="{StaticResource KpiSub}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="5,0" Padding="18,14">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiIcon}" Background="{DynamicResource PosWarnBg}">
+                            <Path Data="M4 18v3 M20 18v3 M2 11a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7H2v-7z M6 9V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4"
+                                  Stroke="{DynamicResource PosWarn}" Style="{StaticResource KpiIconPath}"/>
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Text="Ghế đã bán trong ngày" Style="{StaticResource KpiLabel}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock Text="{Binding SeatsSoldText}" Style="{StaticResource KpiBig}"/>
+                                <Border Style="{StaticResource KpiChip}" Background="{DynamicResource PosWarnBg}">
+                                    <TextBlock Text="{Binding SeatsSoldSub}" Foreground="{DynamicResource PosWarn}"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Tỷ lệ lấp đầy các suất trong ngày" Style="{StaticResource KpiSub}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="5,0,0,0" Padding="18,14">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Right" Style="{StaticResource KpiIcon}" Background="{DynamicResource PosSeatCouple}">
+                            <Path Data="M12 2v20 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                                  Stroke="{DynamicResource PosSeatCoupleBorder}" Style="{StaticResource KpiIconPath}"/>
+                        </Border>
+                        <StackPanel>
+                            <TextBlock Text="Doanh thu vé" Style="{StaticResource KpiLabel}"/>
+                            <TextBlock Text="{Binding RevenueText}" Style="{StaticResource KpiBig}" Foreground="{DynamicResource PosGood}" Margin="0,4,0,0"/>
+                            <TextBlock Text="Tính từ vé đã bán, bỏ đơn đã hủy" Style="{StaticResource KpiSub}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </UniformGrid>
+
+            <!-- ===== Thông báo ===== -->
+            <Border Grid.Row="3" Style="{StaticResource BannerBox}" CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
+                <TextBlock Text="{Binding Message}" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap"/>
+            </Border>
+
+            <!-- ===== Bảng suất chiếu ===== -->
+            <Border Grid.Row="4" Style="{StaticResource Card}" Padding="0">
+                <DockPanel>
+                    <DockPanel DockPanel.Dock="Top" Margin="22,14,22,12">
+                        <TextBlock Text="{Binding TableTitle}" Style="{StaticResource Title}"/>
+                        <TextBlock Style="{StaticResource Muted}" FontSize="12.5" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Text="Giờ chiếu: bắt đầu → hết phim. Phòng trống sau khi dọn 15 phút."/>
+                    </DockPanel>
+                    <Border DockPanel.Dock="Top" Padding="22,11" Background="{DynamicResource PosSubtle}"
+                            BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="0,1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="86"/><ColumnDefinition Width="*"/><ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="170"/><ColumnDefinition Width="190"/><ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="120"/><ColumnDefinition Width="136"/><ColumnDefinition Width="84"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="MÃ SUẤT" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="1" Text="THÔNG TIN PHIM" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="2" Text="PHÒNG · ĐỊNH DẠNG" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="3" Text="KHUNG GIỜ CHIẾU" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="4" Text="TÌNH TRẠNG GHẾ" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="5" Text="GIÁ CƠ BẢN" Style="{StaticResource Head}" HorizontalAlignment="Right" Margin="0,0,14,0"/>
+                            <TextBlock Grid.Column="6" Text="DOANH THU" Style="{StaticResource Head}" HorizontalAlignment="Right" Margin="0,0,14,0"/>
+                            <TextBlock Grid.Column="7" Text="TRẠNG THÁI" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="8" Text="THAO TÁC" Style="{StaticResource Head}" HorizontalAlignment="Right"/>
+                        </Grid>
+                    </Border>
+                    <Grid>
+                        <ListBox Style="{StaticResource Table}" Margin="10,6" ItemsSource="{Binding Showtimes}">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource RowItem}">
+                                    <Setter Property="Padding" Value="9,10"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="86"/><ColumnDefinition Width="*"/><ColumnDefinition Width="150"/>
+                                            <ColumnDefinition Width="170"/><ColumnDefinition Width="190"/><ColumnDefinition Width="110"/>
+                                            <ColumnDefinition Width="120"/><ColumnDefinition Width="136"/><ColumnDefinition Width="84"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border Style="{StaticResource Chip}" Background="{DynamicResource PosSubtle}" CornerRadius="7" Padding="10,4"
+                                                BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="1">
+                                            <TextBlock Text="{Binding Code}" FontSize="12.5" FontWeight="Bold" Foreground="{DynamicResource PosText}"/>
+                                        </Border>
+
+                                        <DockPanel Grid.Column="1" Margin="0,0,12,0">
+                                            <Border DockPanel.Dock="Left" Style="{StaticResource PosterFrame}">
+                                                <Path Data="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2zM7 2v20M17 2v20M2 12h20"
+                                                      Stroke="{DynamicResource PosInputHover}" StrokeThickness="1.4" Width="18" Height="18" Stretch="Uniform"/>
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border Style="{StaticResource AgeChip}" Margin="0,0,8,0">
+                                                        <TextBlock Text="{Binding AgeRating}" FontSize="11" FontWeight="Bold"/>
+                                                    </Border>
+                                                    <TextBlock Text="{Binding Title}" Style="{StaticResource Cell}" FontSize="14" FontWeight="SemiBold"/>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding MovieInfo}" Style="{StaticResource Muted}" FontSize="12" Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                        </DockPanel>
+
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding RoomName}" Style="{StaticResource Cell}" FontSize="13.5" FontWeight="SemiBold"/>
+                                            <Border Style="{StaticResource Chip}" Background="{DynamicResource PosChip}" CornerRadius="5" Padding="8,2" Margin="0,4,0,0">
+                                                <TextBlock Text="{Binding FormatText}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PosInfo}"/>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal">
+                                                <Border CornerRadius="6" Padding="8,2" BorderThickness="1" BorderBrush="{DynamicResource PosAccent}"
+                                                        Background="{DynamicResource PosChip}">
+                                                    <TextBlock Text="{Binding StartText}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource PosAccent}"/>
+                                                </Border>
+                                                <TextBlock Text="→" Margin="8,0" FontSize="13" VerticalAlignment="Center" Foreground="{DynamicResource PosTextMuted}"/>
+                                                <TextBlock Text="{Binding EndText}" FontSize="14" VerticalAlignment="Center" Foreground="{DynamicResource PosText}"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding FreeAtText}" Style="{StaticResource Muted}" FontSize="11.5" Margin="0,4,0,0"/>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Column="4" VerticalAlignment="Center" Margin="0,0,22,0">
+                                            <DockPanel>
+                                                <TextBlock DockPanel.Dock="Right" Text="{Binding FillText}" Style="{StaticResource FillText}"/>
+                                                <TextBlock Text="{Binding SeatsText}" Style="{StaticResource Cell}" FontSize="13" FontWeight="SemiBold"/>
+                                            </DockPanel>
+                                            <Border Height="8" CornerRadius="4" Margin="0,6,0,0" Background="{DynamicResource PosCardBorder}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="{Binding SoldWidth}"/>
+                                                        <ColumnDefinition Width="{Binding FreeWidth}"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Style="{StaticResource FillBar}"/>
+                                                </Grid>
+                                            </Border>
+                                        </StackPanel>
+
+                                        <TextBlock Grid.Column="5" Text="{Binding PriceText}" Style="{StaticResource Cell}" FontSize="14" FontWeight="Bold"
+                                                   HorizontalAlignment="Right" Margin="0,0,16,0"/>
+                                        <TextBlock Grid.Column="6" Text="{Binding RevenueText}" Style="{StaticResource Cell}" FontSize="13"
+                                                   HorizontalAlignment="Right" Margin="0,0,16,0"/>
+
+                                        <Border Grid.Column="7" Style="{StaticResource ShowStatusChip}" Padding="10,4" CornerRadius="12">
+                                            <TextBlock FontSize="12" FontWeight="SemiBold">
+                                                <Run Text="●" FontSize="9"/> <Run Text="{Binding StatusText, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </Border>
+
+                                        <StackPanel Grid.Column="8" Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Style="{StaticResource IconButton}" ToolTip="Sửa / xem suất" CommandParameter="{Binding}"
+                                                    Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                <Path Data="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                                                      Stroke="{DynamicResource PosText}" StrokeThickness="1.6" Width="14" Height="14" Stretch="Uniform"/>
+                                            </Button>
+                                            <Button Style="{StaticResource IconButton}" ToolTip="Hủy suất (chỉ khi chưa bán vé)" CommandParameter="{Binding}"
+                                                    Command="{Binding DataContext.AskDeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                                                <Path Data="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                                                      Stroke="{DynamicResource PosBad}" StrokeThickness="1.6" Width="14" Height="14" Stretch="Uniform"/>
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock Text="{Binding EmptyText}" Style="{StaticResource Muted}" FontSize="13"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}"/>
+                    </Grid>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <!-- ================= HỘP THOẠI THÊM / SỬA SUẤT ================= -->
+        <Grid Background="#660F2A4A" Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVis}}">
+            <Border Style="{StaticResource Card}" Width="840" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel>
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Command="{Binding CloseEditorCommand}" ToolTip="Đóng" VerticalAlignment="Top">
+                            <Path Data="M6 6l12 12 M18 6L6 18" Stroke="{DynamicResource PosTextMuted}" StrokeThickness="2" Width="12" Height="12" Stretch="Uniform"/>
+                        </Button>
+                        <StackPanel>
+                            <TextBlock Text="{Binding EditorTitle}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PosText}"/>
+                            <TextBlock Text="{Binding EditorSubtitle}" Style="{StaticResource Muted}" Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </DockPanel>
+
+                    <Border Style="{StaticResource HideWhenEmpty}" Tag="{Binding LockText}" Background="{DynamicResource PosWarnBg}"
+                            CornerRadius="8" Padding="12,8" Margin="0,14,0,0">
+                        <TextBlock Text="{Binding LockText}" TextWrapping="Wrap" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource PosWarn}"/>
+                    </Border>
+
+                    <Grid Margin="0,6,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="300"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Các ô nhập; khóa khi suất đã bán vé / đã chiếu -->
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Opacity" Value="0.75"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+
+                            <TextBlock Text="Phim *" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox Style="{StaticResource FilterCombo}" Margin="0" Height="40"
+                                      ItemsSource="{Binding MovieOptions}" SelectedItem="{Binding FormMovie}"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Phòng chiếu *" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Style="{StaticResource FilterCombo}" Margin="0" Height="40"
+                                              ItemsSource="{Binding RoomOptions}" SelectedItem="{Binding FormRoom}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Ngày chiếu *" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Style="{StaticResource FilterCombo}" Margin="0" Height="40"
+                                              ItemsSource="{Binding DateOptions}" SelectedItem="{Binding FormDate}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Giờ bắt đầu *" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Style="{StaticResource InputBox}" Height="40" Tag="HH:mm, ví dụ 19:30"
+                                             Text="{Binding FormTime, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Giá vé cơ bản (đ) *" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Style="{StaticResource InputBox}" Height="40" Tag="Ví dụ 75.000"
+                                             Text="{Binding FormPrice, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="{Binding EndPreviewText}" Style="{StaticResource Muted}" Margin="0,6,0,0" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource PosInfo}"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/><ColumnDefinition Width="12"/><ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Định dạng" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Style="{StaticResource FilterCombo}" Margin="0" Height="40"
+                                              ItemsSource="{Binding FormatOptions}" SelectedItem="{Binding FormFormat}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Âm thanh" Style="{StaticResource FieldLabel}"/>
+                                    <ComboBox Style="{StaticResource FilterCombo}" Margin="0" Height="40"
+                                              ItemsSource="{Binding AudioOptions}" SelectedItem="{Binding FormAudio}"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Style="{StaticResource Muted}" Margin="0,8,0,0" TextWrapping="Wrap"
+                                       Text="Ghế VIP và ghế đôi cộng phụ thu trên giá cơ bản khi bán vé. Định dạng IMAX chỉ xếp được ở phòng IMAX."/>
+                        </StackPanel>
+
+                        <!-- Lịch phòng trong ngày: thấy giờ trống, suất bị trùng tô đỏ -->
+                        <Border Grid.Column="2" Background="{DynamicResource PosSubtle}" CornerRadius="10" Padding="14" Margin="0,10,0,0">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="{Binding RoomDayTitle}" Style="{StaticResource Title}" FontSize="13"/>
+                                <TextBlock DockPanel.Dock="Top" Style="{StaticResource Muted}" FontSize="11" Margin="0,2,0,8"
+                                           Text="Mỗi khung đã gồm 15 phút dọn phòng."/>
+
+                                <Border DockPanel.Dock="Bottom" Style="{StaticResource HideWhenEmpty}" Tag="{Binding SuggestText}"
+                                        Background="{DynamicResource PosBadBg}" CornerRadius="8" Padding="10" Margin="0,8,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding SuggestText}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource PosBad}"/>
+                                        <Button Style="{StaticResource OutlineButton}" Height="30" Margin="0,8,0,0" HorizontalAlignment="Left" Width="150"
+                                                Content="Dùng giờ trống này" FontSize="12" Command="{Binding UseSuggestCommand}"
+                                                Visibility="{Binding HasSuggestTime, Converter={StaticResource BoolToVis}}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Grid>
+                                    <ItemsControl ItemsSource="{Binding RoomSlots}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border x:Name="slot" CornerRadius="7" Padding="10,6" Margin="0,0,0,5" BorderThickness="1"
+                                                        Background="{DynamicResource PosCard}" BorderBrush="{DynamicResource PosCardBorder}">
+                                                    <DockPanel>
+                                                        <TextBlock x:Name="time" DockPanel.Dock="Left" Text="{Binding TimeText}" Width="96"
+                                                                   FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PosText}"/>
+                                                        <TextBlock Text="{Binding Title}" FontSize="12" Foreground="{DynamicResource PosTextMuted}"
+                                                                   TextTrimming="CharacterEllipsis"/>
+                                                    </DockPanel>
+                                                </Border>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding IsConflict}" Value="True">
+                                                        <Setter TargetName="slot" Property="Background" Value="{DynamicResource PosBadBg}"/>
+                                                        <Setter TargetName="slot" Property="BorderBrush" Value="{DynamicResource PosBad}"/>
+                                                        <Setter TargetName="time" Property="Foreground" Value="{DynamicResource PosBad}"/>
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="Phòng còn trống cả ngày." Style="{StaticResource Muted}" Margin="0,4,0,0"
+                                               Visibility="{Binding HasNoRoomSlots, Converter={StaticResource BoolToVis}}"/>
+                                </Grid>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Lỗi + nút -->
+                    <DockPanel Margin="0,18,0,0">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button Style="{StaticResource OutlineButton}" Width="110" Content="Đóng" Command="{Binding CloseEditorCommand}"/>
+                            <Button Width="170" Margin="10,0,0,0" Content="Lưu suất chiếu" Command="{Binding SaveCommand}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource SolidButton}">
+                                        <Setter Property="Background" Value="{DynamicResource PosAccent}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </StackPanel>
+                        <TextBlock Text="{Binding FormError}" TextWrapping="Wrap" FontSize="12.5" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource PosBad}" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- ================= HỘP THOẠI HỦY SUẤT ================= -->
+        <Grid Background="#660F2A4A" Visibility="{Binding IsDeleteOpen, Converter={StaticResource BoolToVis}}">
+            <Border Style="{StaticResource Card}" Width="440" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <StackPanel DataContext="{Binding DeleteTarget}">
+                    <TextBlock FontSize="17" FontWeight="Bold" Foreground="{DynamicResource PosText}">
+                        <Run Text="Hủy suất"/> <Run Text="{Binding Code, Mode=OneWay}"/>?
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource Muted}" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap">
+                        <Run Text="{Binding Title, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource PosText}"/>
+                        <Run Text="·"/> <Run Text="{Binding RoomName, Mode=OneWay}"/>
+                        <Run Text="·"/> <Run Text="{Binding StartText, Mode=OneWay}"/>
+                        <Run Text="{Binding Data.StartTime, Mode=OneWay, StringFormat='ngày {0:dd/MM/yyyy}'}"/>
+                    </TextBlock>
+                    <TextBlock Style="{StaticResource Muted}" FontSize="12.5" Margin="0,8,0,0" TextWrapping="Wrap"
+                               Text="Suất chưa bán vé nào. Hủy sẽ xóa suất khỏi lịch chiếu, không hoàn tác được."/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,18,0,0">
+                        <Button Style="{StaticResource OutlineButton}" Width="110" Content="Giữ lại"
+                                Command="{Binding DataContext.CloseDeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        <Button Style="{StaticResource SolidButton}" Background="{DynamicResource PosBad}" Width="130" Margin="10,0,0,0"
+                                Content="Hủy suất"
+                                Command="{Binding DataContext.ConfirmDeleteCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
