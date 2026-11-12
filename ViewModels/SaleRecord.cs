@@ -6,13 +6,13 @@ namespace CinemaAPP.ViewModels
     // Một ghế trong đơn đã bán (chỉ để hiện chip ghế ở màn Giao dịch).
     public record SoldSeat(string Label, SeatType Type);
 
-    // Một nhân viên bán vé (giả lập bảng ACCOUNT có AccountRole = Staff).
+    // Một nhân viên bán vé (lấy từ người bán của đơn; sau này là ACCOUNT có AccountRole = Staff).
     public record StaffInfo(string FullName, string Username, string Shift)
     {
         public string Initials => string.Concat(FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).TakeLast(2).Select(w => char.ToUpper(w[0])));
     }
 
-    // Một đơn đã bán = một dòng BOOKING + các TICKET của nó (dữ liệu giả, xem SalesDemoStore).
+    // Một đơn đã bán = một dòng BOOKING + các TICKET của nó (tạm giữ trong SalesDemoStore).
     // Khi ghép CSDL: cột hủy đơn là BOOKING.CancelReason / CancelledAt / CancelledBy (nhờ A thêm).
     public class SaleRecord : ObservableObject
     {
@@ -59,9 +59,11 @@ namespace CinemaAPP.ViewModels
         public string ShowText => $"{ShowStart:HH:mm} · {RoomName.Replace("Phòng ", "P")} · {ShowFormat}";
         public string ShowLong => $"{ShowStart:HH:mm} · {RoomName} · {ShowFormat}";
         public int TicketCount => Seats.Count;
+        public string SeatsText => string.Join(", ", Seats.Select(s => s.Label));
         public string AmountText => Money(Total);
         public string MethodText => MethodName(Method);
         public string StatusText => IsCancelled ? "Đã hủy" : "Đã thanh toán";
+        public string CustomerShort => CustomerName ?? "Khách vãng lai";
         public string CustomerText => CustomerPhone == null ? "Khách vãng lai" : $"{CustomerName} · {CustomerPhone}";
         public string PointsText => CustomerPhone == null ? "—" : $"+{Points} điểm";
         public string StaffText => $"{StaffName} · {CreatedAt:HH:mm}";

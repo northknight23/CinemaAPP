@@ -15,7 +15,7 @@ namespace CinemaAPP.ViewModels
     }
 
     // Màn GIAO DỊCH & ĐỐI SOÁT (chỉ Quản trị viên): tra cứu đơn đã bán, hủy đơn, đối soát tiền cuối ca.
-    // Dữ liệu lấy từ SalesDemoStore (giả); khi ghép CSDL đổi sang BookingService, giao diện giữ nguyên.
+    // Dữ liệu lấy từ SalesDemoStore (đơn bán ở màn Bán vé trong lần chạy này); khi ghép CSDL đổi sang BookingService, giao diện giữ nguyên.
     public class TransactionsViewModel : ObservableObject
     {
         public const string AllStaff = "Tất cả nhân viên";
@@ -87,7 +87,7 @@ namespace CinemaAPP.ViewModels
 
         // Hủy đơn: chọn lý do → bấm Hủy → xác nhận lần nữa (thao tác không hoàn tác được)
         public bool IsAdmin => AppSession.CurrentUser == null || AppSession.IsAdmin;
-        public List<string> CancelReasons { get; } = new() { "Khách đổi ý", "Bấm nhầm", "Sự cố phòng chiếu" };
+        public List<string> CancelReasons => SalesDemoStore.CancelReasons;
 
         private string? selectedReason;
         public string? SelectedReason
@@ -139,8 +139,9 @@ namespace CinemaAPP.ViewModels
             {
                 if (SetProperty(ref selectedStaffRow, value))
                 {
-                    CountedCashText = value?.Handover?.CountedCash.ToString("N0", Vi) ?? "";
-                    HandoverNote = value?.Handover?.Note ?? "";
+                    // Chưa bàn giao mà nhân viên đã nộp chốt ca thì điền sẵn số tiền nhân viên báo
+                    CountedCashText = (value?.Handover?.CountedCash ?? value?.Report?.CountedCash)?.ToString("N0", Vi) ?? "";
+                    HandoverNote = value?.Handover?.Note ?? value?.Report?.Note ?? "";
                     OnPropertyChanged(nameof(HasStaffSelection));
                     OnPropertyChanged(nameof(HandoverDoneText));
                     OnPropertyChanged(nameof(CanEditHandover));
@@ -191,7 +192,9 @@ namespace CinemaAPP.ViewModels
         public bool CanEditHandover => SelectedStaffRow != null && !SelectedStaffRow.IsHandedOver && SelectedDate.IsSingleDay;
         public string HandoverDoneText => SelectedStaffRow?.Handover is Handover h
             ? $"Đã bàn giao lúc {h.At:HH:mm} · xác nhận bởi {h.By}"
-            : SelectedDate.IsSingleDay ? "" : "Chọn một ngày cụ thể để bàn giao ca.";
+            : SelectedStaffRow?.Report is ShiftReport r
+                ? $"Nhân viên đã nộp chốt ca lúc {r.At:HH:mm}. Đếm lại két rồi bấm xác nhận."
+                : SelectedDate.IsSingleDay ? "" : "Chọn một ngày cụ thể để bàn giao ca.";
 
         // ================= Thông báo =================
         private string message = "";
@@ -219,8 +222,7 @@ namespace CinemaAPP.ViewModels
             selectedDate = DateOptions[0];
 
             StaffOptions = new List<string> { AllStaff };
-            StaffOptions.AddRange(SalesDemoStore.Staff.Select(s => s.FullName)
-                .Concat(SalesDemoStore.Sales.Select(s => s.StaffName)).Distinct());
+            StaffOptions.AddRange(SalesDemoStore.Sales.Select(s => s.StaffName).Distinct());
 
             AskCancelCommand = new RelayCommand(_ => IsConfirmingCancel = true,
                 _ => CanShowCancelBox && SelectedReason != null);
@@ -266,14 +268,13 @@ namespace CinemaAPP.ViewModels
 
             // ---- Tab 2 ----
             StaffRows.Clear();
-            var sellers = SalesDemoStore.Staff.Concat(inRange.Select(s => new StaffInfo(s.StaffName, s.StaffUsername, "Ca quầy")))
+            var sellers = inRange.Select(s => new StaffInfo(s.StaffName, s.StaffUsername, "Ca quầy"))
                 .GroupBy(s => s.Username).Select(g => g.First())
                 .Where(s => SelectedStaffFilter == AllStaff || s.FullName == SelectedStaffFilter);
             foreach (StaffInfo staff in sellers)
             {
                 var mine = inRange.Where(s => s.StaffUsername == staff.Username).ToList();
                 var ok = mine.Where(s => !s.IsCancelled).ToList();
-                if (mine.Count == 0 && !SalesDemoStore.Staff.Contains(staff)) continue;
                 StaffRows.Add(new StaffSummary
                 {
                     Staff = staff,
@@ -285,6 +286,7 @@ namespace CinemaAPP.ViewModels
                     CancelledCount = mine.Count(s => s.IsCancelled),
                     CancelledAmount = mine.Where(s => s.IsCancelled).Sum(s => s.Total),
                     Handover = SelectedDate.IsSingleDay && SalesDemoStore.Handovers.TryGetValue((SelectedDate.From, staff.Username), out var h) ? h : null,
+                    Report = SelectedDate.IsSingleDay && SalesDemoStore.ShiftReports.TryGetValue((SelectedDate.From, staff.Username), out var r) ? r : null,
                 });
             }
 
@@ -296,10 +298,10 @@ namespace CinemaAPP.ViewModels
             TotalTransfer = transfer.ToString("N0", Vi);
             TotalCard = card.ToString("N0", Vi);
             TotalAll = all.ToString("N0", Vi);
-            // Cột thanh cơ cấu dùng độ rộng sao (*) theo số tiền; chưa có đơn thì chia đều
-            CashWidth = new GridLength(all == 0 ? 1 : (double)cash, GridUnitType.Star);
-            TransferWidth = new GridLength(all == 0 ? 1 : (double)transfer, GridUnitType.Star);
-            CardWidth = new GridLength(all == 0 ? 1 : (double)card, GridUnitType.Star);
+            // Cột thanh cơ cấu dùng độ rộng sao (*) theo số tiền; chưa có đơn thì cả 3 bằng 0, chỉ còn nền xám
+            CashWidth = new GridLength((double)cash, GridUnitType.Star);
+            TransferWidth = new GridLength((double)transfer, GridUnitType.Star);
+            CardWidth = new GridLength((double)card, GridUnitType.Star);
             CashPercent = Percent(cash, all);
             TransferPercent = Percent(transfer, all);
             CardPercent = Percent(card, all);

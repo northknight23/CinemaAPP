@@ -1,0 +1,338 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:CinemaAPP.ViewModels">
+    <!-- Style dùng chung cho màn Giao dịch & Đối soát (Quản trị viên) và màn Hóa đơn ca (Nhân viên):
+         thẻ, chữ, tab, ô lọc, ô nhập, nút, dòng bảng, chip thanh toán / trạng thái.
+         Màu lấy từ PosLight.xaml (giá trị gốc ở Resources/Styles.xaml). -->
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/CinemaAPP;component/Views/Themes/PosLight.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
+    <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+    <!-- ===== Khung, chữ ===== -->
+    <Style x:Key="Card" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource PosCard}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource PosCardBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="16"/>
+    </Style>
+    <Style x:Key="Title" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="15"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+    </Style>
+    <Style x:Key="Muted" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosTextMuted}"/>
+    </Style>
+    <Style x:Key="Cell" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
+    <Style x:Key="Head" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11.5"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosTextMuted}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="FieldLabel" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+        <Setter Property="Margin" Value="0,10,0,4"/>
+    </Style>
+    <Style x:Key="KpiValue" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+        <Setter Property="Margin" Value="0,4,0,0"/>
+    </Style>
+    <Style x:Key="Chip" TargetType="Border">
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="8,2"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="DetailRow" TargetType="Grid">
+        <Setter Property="Margin" Value="0,0,0,6"/>
+    </Style>
+
+    <!-- ===== Tab dạng phân đoạn ===== -->
+    <Style x:Key="TabButton" TargetType="RadioButton">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosTextMuted}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="bg" CornerRadius="7" Padding="14,0" Background="Transparent">
+                        <ContentPresenter VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource PosSubtle}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource PosAccent}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Ô chọn bộ lọc ===== -->
+    <Style x:Key="FilterItem" TargetType="ComboBoxItem">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="bg" CornerRadius="6" Padding="10,7" Background="Transparent">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource PosSubtle}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource PosChip}"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="FilterCombo" TargetType="ComboBox">
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="Margin" Value="8,0,0,0"/>
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="ItemContainerStyle" Value="{StaticResource FilterItem}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <ToggleButton Focusable="False" ClickMode="Press"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border x:Name="bd" Background="{DynamicResource PosCard}" BorderBrush="{DynamicResource PosInputBorder}"
+                                            BorderThickness="1" CornerRadius="8">
+                                        <Path Data="M0,0 L4,4 L8,0" Stroke="{DynamicResource PosTextMuted}" StrokeThickness="1.6"
+                                              HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource PosInputHover}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+                        <ContentPresenter Margin="12,0,30,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                                          Content="{TemplateBinding SelectionBoxItem}"
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"/>
+                        <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom"
+                               AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                            <Border Background="{DynamicResource PosCard}" BorderBrush="{DynamicResource PosCardBorder}"
+                                    BorderThickness="1" CornerRadius="8" Margin="0,4,0,0" Padding="4"
+                                    MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ScrollViewer MaxHeight="260" VerticalScrollBarVisibility="Auto">
+                                    <ItemsPresenter/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Ô nhập (Tag = chữ gợi ý khi ô trống) ===== -->
+    <Style x:Key="InputBox" TargetType="TextBox">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+        <Setter Property="Background" Value="{DynamicResource PosInput}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource PosInputBorder}"/>
+        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="box" CornerRadius="8" BorderThickness="1"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
+                        <Grid Margin="{TemplateBinding Padding}">
+                            <TextBlock x:Name="hint" Text="{TemplateBinding Tag}" Foreground="{DynamicResource PosTextMuted}"
+                                       VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                       IsHitTestVisible="False" Visibility="Collapsed"/>
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="False"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Text" Value="">
+                            <Setter TargetName="hint" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="box" Property="BorderBrush" Value="{DynamicResource PosInputHover}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="box" Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="box" Property="Background" Value="{DynamicResource PosSubtle}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource PosTextMuted}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Nút ===== -->
+    <Style x:Key="SolidButton" TargetType="Button">
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" CornerRadius="8" Background="{TemplateBinding Background}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.9"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="OutlineButton" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" CornerRadius="8" Background="{DynamicResource PosCard}"
+                            BorderBrush="{DynamicResource PosInputBorder}" BorderThickness="1">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource PosSubtle}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Dòng bảng (ListBoxItem): đang chọn = nền xanh nhạt + vạch trái ===== -->
+    <Style x:Key="RowItem" TargetType="ListBoxItem">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="row" CornerRadius="8" Margin="0,1" BorderThickness="3,0,0,0"
+                            BorderBrush="Transparent" Background="Transparent" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="row" Property="Background" Value="{DynamicResource PosSubtle}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="row" Property="Background" Value="{DynamicResource PosChip}"/>
+                            <Setter TargetName="row" Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="Table" TargetType="ListBox">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="ItemContainerStyle" Value="{StaticResource RowItem}"/>
+    </Style>
+
+    <!-- Chip lý do hủy (ListBoxItem) -->
+    <Style x:Key="ReasonItem" TargetType="ListBoxItem">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="chip" CornerRadius="12" Padding="10,4" Margin="0,0,6,6" BorderThickness="1"
+                            Background="{DynamicResource PosCard}" BorderBrush="{DynamicResource PosInputBorder}">
+                        <TextBlock x:Name="txt" Text="{Binding}" FontSize="11.5" Foreground="{DynamicResource PosText}"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource PosBad}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource PosBad}"/>
+                            <Setter TargetName="chip" Property="BorderThickness" Value="1.5"/>
+                            <Setter TargetName="txt" Property="Foreground" Value="{DynamicResource PosBad}"/>
+                            <Setter TargetName="txt" Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Chip phương thức thanh toán: tiền mặt xanh lá, chuyển khoản xanh dương, thẻ tím -->
+    <DataTemplate x:Key="MethodChip">
+        <Border x:Name="b" Style="{StaticResource Chip}" Background="{DynamicResource PosGoodBg}">
+            <TextBlock x:Name="t" Text="{Binding MethodText}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PosGood}"/>
+        </Border>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding Method}" Value="{x:Static vm:PaymentMethod.Transfer}">
+                <Setter TargetName="b" Property="Background" Value="{DynamicResource PosInfoBg}"/>
+                <Setter TargetName="t" Property="Foreground" Value="{DynamicResource PosInfo}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Method}" Value="{x:Static vm:PaymentMethod.Card}">
+                <Setter TargetName="b" Property="Background" Value="{DynamicResource PosSeatCouple}"/>
+                <Setter TargetName="t" Property="Foreground" Value="{DynamicResource PosSeatCoupleBorder}"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <!-- Chip trạng thái đơn -->
+    <DataTemplate x:Key="StatusChip">
+        <Border x:Name="b" Style="{StaticResource Chip}" Background="{DynamicResource PosGoodBg}">
+            <TextBlock x:Name="t" Text="{Binding StatusText}" FontSize="11.5" Foreground="{DynamicResource PosGood}"/>
+        </Border>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsCancelled}" Value="True">
+                <Setter TargetName="b" Property="Background" Value="{DynamicResource PosBadBg}"/>
+                <Setter TargetName="t" Property="Foreground" Value="{DynamicResource PosBad}"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+</ResourceDictionary>
