@@ -1,13 +1,14 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Input;
-using System.Windows.Threading;
 using CinemaAPP.Helpers;
 
 namespace CinemaAPP.ViewModels
 {
     // Màn BÁN VÉ TẠI QUẦY, dùng DỮ LIỆU GIẢ (chưa cần CSDL):
     // trái = suất chiếu hôm nay, giữa = sơ đồ ghế của suất đang chọn, phải = đơn hiện tại + thu tiền.
+    // Tên nhân viên, Đăng xuất... thuộc khung app (MainWindow); khi thanh toán thật, AccountID lấy từ
+    // AppSession.CurrentUser của màn Đăng nhập.
     // Khi ghép với CSDL: suất lấy từ SHOWTIME, ghế từ SEAT của phòng, ghế đã bán từ
     // ShowtimeService.GetSoldSeatIds, thanh toán gọi BookingService.CreateBooking.
     public class SeatMapDemoViewModel : ObservableObject
@@ -23,15 +24,6 @@ namespace CinemaAPP.ViewModels
             ["0901234567"] = ("Nguyễn Văn An", 120),
             ["0912345678"] = ("Trần Thị Bình", 45),
         };
-
-        // Nhân viên đang đứng quầy (giả, sau này lấy từ màn Đăng nhập)
-        public string StaffName { get; } = "Nhân viên 01";
-        public string StaffInitials { get; } = "NV";
-        public string CounterInfo { get; } = "Quầy số 1 · Staff";
-        public string TodayText { get; } = Capitalize(DateTime.Today.ToString("dddd, dd/MM/yyyy", Vi));
-
-        private string clock = DateTime.Now.ToString("HH:mm:ss");
-        public string Clock { get => clock; set => SetProperty(ref clock, value); }
 
         // Giao diện sáng / tối (View tự đổi bộ màu theo cờ này)
         private bool isDarkTheme;
@@ -169,7 +161,6 @@ namespace CinemaAPP.ViewModels
         public ICommand FindMemberCommand { get; }
         public ICommand SetCashCommand { get; }
         public ICommand PayCommand { get; }
-        public ICommand LogoutCommand { get; }
         public ICommand ToggleThemeCommand { get; }
 
         public SeatMapDemoViewModel()
@@ -224,12 +215,7 @@ namespace CinemaAPP.ViewModels
             PayCommand = new RelayCommand(_ => Pay(),
                 _ => SelectedCount > 0 && (Method != PaymentMethod.Cash || Cash >= Total));
 
-            LogoutCommand = new RelayCommand(_ => ShowMessage("Đăng xuất sẽ nối với màn Đăng nhập khi ghép app.", false));
             ToggleThemeCommand = new RelayCommand(_ => IsDarkTheme = !IsDarkTheme);
-
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
-            timer.Tick += (_, _) => Clock = DateTime.Now.ToString("HH:mm:ss");
-            timer.Start();
         }
 
         private IEnumerable<SeatItem> AllSeats() => Rows.SelectMany(r => r.Seats).Where(s => !s.IsAisle);
@@ -384,8 +370,6 @@ namespace CinemaAPP.ViewModels
         }
 
         private static string Money(decimal value) => value.ToString("N0", Vi) + " đ";
-
-        private static string Capitalize(string text) => text.Length == 0 ? text : char.ToUpper(text[0]) + text[1..];
 
         // 3 ô vuông định vị ở 3 góc giống mã QR thật, phần còn lại ngẫu nhiên cố định
         private static List<bool> BuildQrCells()

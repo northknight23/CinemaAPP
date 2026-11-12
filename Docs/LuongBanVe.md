@@ -1,13 +1,14 @@
 # Phác thảo luồng bán vé tại quầy (phần của C)
 
 Người dùng: **nhân viên quầy** (đã đăng nhập, có `AccountID`), bán trên máy POS tại rạp.
-Toàn bộ việc bán nằm trên **một màn hình chia 3 cột**, không chuyển qua lại giữa nhiều màn:
+Toàn bộ việc bán nằm trên **một màn hình chia 3 cột**, không chuyển qua lại giữa nhiều màn.
+Màn này **không có thanh tiêu đề riêng**: logo, tên nhân viên, Đăng xuất thuộc khung app (`MainWindow` của B),
+màn bán vé chỉ là phần nội dung hiện trong khung đó.
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ UT  Bán vé tại quầy · ngày          đồng hồ   Nhân viên · Quầy   ☾ Tối  Đăng xuất │
-├──────────────────┬───────────────────────────────────┬───────────────────────┤
+┌──────────────────┬───────────────────────────────────┬───────────────────────┐
 │ SUẤT CHIẾU       │ SƠ ĐỒ GHẾ của suất đang chọn       │ ĐƠN HIỆN TẠI          │
+│                  │   (nút ☾ Tối / ☀ Sáng, ghế trống)  │                       │
 │ HÔM NAY          │                                   │ ghế gom theo loại vé  │
 │                  │        ═══ MÀN HÌNH ═══           │                       │
 │ Phim A  [P]      │   A  ▢▢ ▢▢▢▢▢▢▢▢ ▢▢  A            │ Khách thành viên (SĐT)│
@@ -139,7 +140,7 @@ Cần sửa `CreateBooking` của 8.4:
 | Giá 75.000 / 90.000 / 180.000 | Tính từ `SHOWTIME.BasePrice` (xem câu hỏi 1) |
 | 2 số điện thoại thành viên giả | `CustomerService.FindByPhone` |
 | `Pay()` chỉ tô xám ghế, mã đơn tự tăng từ 1001 | `BookingService.CreateBooking`, mã đơn = `BookingID` |
-| Nhân viên "Nhân viên 01 · Quầy số 1" | Tài khoản đăng nhập (màn Đăng nhập của A) |
+| Chưa có nhân viên (khung app lo phần hiển thị) | `AppSession.CurrentUser.AccountID` khi tạo BOOKING (màn Đăng nhập của A) |
 | Mã QR minh họa, không quét được | Giữ minh họa, hoặc tạo QR VietQR thật nếu còn thời gian |
 
 ## 5. Tổ chức code (hiện tại)
@@ -170,7 +171,7 @@ Nhờ B thêm vào `MainWindow` / `MainViewModel`: nút menu **"Bán vé"** và 
 5. Bán đơn khác bằng **Chuyển khoản / QR** và **Thẻ (POS)**.
 6. Chọn ghế thứ 9 → bị chặn.
 7. (Tuần 3) Mở 2 cửa sổ app cùng bán một ghế → một bên thành công, bên kia báo "ghế vừa được bán", **không** có đơn nào bị tạo dở.
-8. Bấm ☾ Tối / ☀ Sáng để đổi giao diện.
+8. Bấm ☾ Tối / ☀ Sáng (đầu cột sơ đồ ghế) để đổi giao diện.
 
 ## 7. Câu hỏi cần cả nhóm chốt
 
@@ -180,6 +181,6 @@ Nhờ B thêm vào `MainWindow` / `MainViewModel`: nút menu **"Bán vé"** và 
 
    Cách (a) rõ ràng hơn khi demo. Nếu chọn (a), màn **Quản lý phòng** của B cũng cần cho chọn hàng VIP / ghế đôi khi tự sinh ghế.
 2. **Phương thức thanh toán:** bảng `BOOKING` chưa có cột lưu. Nhờ A thêm `PaymentMethod NVARCHAR(20)` (`Cash` / `Transfer` / `Card`).
-3. **Thanh trên cùng** (nhân viên, đồng hồ, Đăng xuất) đang nằm trong màn bán vé. Nếu `MainWindow` của B cũng có thanh này thì giữ một chỗ thôi.
+3. ~~Thanh trên cùng đặt ở đâu~~ **Đã chốt (12/11):** màn bán vé bỏ thanh tiêu đề riêng; logo, nhân viên, Đăng xuất do `MainWindow` của B hiển thị.
 4. **Lối đi:** CSDL không lưu lối đi. Giữ quy tắc cố định trong code (trước ghế số 3 và 11), hay bỏ?
 5. **Xem lại đơn đã bán** (kế hoạch liệt kê trong quyền của nhân viên): ai làm? Nếu là C thì để sang tuần 4.
