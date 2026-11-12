@@ -16,75 +16,27 @@ namespace CinemaAPP.Services
         // Đúng tên + đúng mật khẩu → trả về tài khoản. Sai bất kỳ cái nào → null.
         public Account? Login(string username, string password)
         {
-            try
-            {
-                using SqlConnection conn = Db.Open();
-                using var cmd = new SqlCommand(
-                    @"SELECT AccountID, Username, PasswordHash, FullName, AccountRole
-                      FROM ACCOUNT WHERE Username = @Username", conn);
-                cmd.Parameters.Add("@Username", SqlDbType.NVarChar, 50).Value = username;
+            using SqlConnection conn = Db.Open();
+            using var cmd = new SqlCommand(
+                @"SELECT AccountID, Username, PasswordHash, FullName, AccountRole
+                  FROM ACCOUNT WHERE Username = @Username", conn);
+            cmd.Parameters.Add("@Username", SqlDbType.NVarChar, 50).Value = username;
 
-                using SqlDataReader r = cmd.ExecuteReader();
-                if (r.Read())
-                {
-                    string savedHash = r.GetString(2);
-                    string inputHash = PasswordHasher.Hash(password);
-                    if (string.Equals(savedHash, inputHash, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return new Account
-                        {
-                            AccountID = r.GetInt32(0),
-                            Username = r.GetString(1),
-                            FullName = r.GetString(3),
-                            AccountRole = r.IsDBNull(4) ? "" : r.GetString(4)
-                        };
-                    }
-                    return null; // Sai mật khẩu
-                }
-            }
-            catch
-            {
-                // Khi không kết nối được CSDL, fallback sang tài khoản mẫu bên dưới để app vẫn chạy kiểm thử được
-            }
+            using SqlDataReader r = cmd.ExecuteReader();
+            if (!r.Read()) return null;                       // không có tên này
 
-            // Fallback tài khoản mẫu (khớp với kịch bản DuLieuMau_CINEMADB_DEMO.sql)
-            if (string.Equals(username, "admin", StringComparison.OrdinalIgnoreCase) &&
-                (password == "Admin@123" || password == "admin"))
-            {
-                return new Account
-                {
-                    AccountID = 1,
-                    Username = "admin",
-                    FullName = "Quản trị viên",
-                    AccountRole = Roles.Admin
-                };
-            }
+            string savedHash = r.GetString(2);
+            string inputHash = PasswordHasher.Hash(password);
+            if (!string.Equals(savedHash, inputHash, StringComparison.OrdinalIgnoreCase))
+                return null;                                  // sai mật khẩu
 
-            if (string.Equals(username, "nv01", StringComparison.OrdinalIgnoreCase) &&
-                (password == "Staff@123" || password == "123" || password == "nv01"))
+            return new Account
             {
-                return new Account
-                {
-                    AccountID = 2,
-                    Username = "nv01",
-                    FullName = "Nguyễn Văn An",
-                    AccountRole = Roles.Staff
-                };
-            }
-
-            if (string.Equals(username, "nv02", StringComparison.OrdinalIgnoreCase) &&
-                (password == "Staff@123" || password == "123" || password == "nv02"))
-            {
-                return new Account
-                {
-                    AccountID = 3,
-                    Username = "nv02",
-                    FullName = "Trần Thị Bình",
-                    AccountRole = Roles.Staff
-                };
-            }
-
-            return null;
+                AccountID = r.GetInt32(0),
+                Username = r.GetString(1),
+                FullName = r.GetString(3),
+                AccountRole = r.IsDBNull(4) ? "" : r.GetString(4)
+            };
         }
 
         // Dùng cho nhãn "Đã kết nối máy chủ CSDL".
