@@ -3,8 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="860"
              FontFamily="Segoe UI" FontSize="14" Language="vi-VN"
              Foreground="{StaticResource TextBrush}" Background="{StaticResource PageBrush}">
     <UserControl.DataContext>
@@ -16,21 +17,190 @@
                 <ResourceDictionary Source="/CinemaAPP;component/Resources/ManagementStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Ô số nhỏ phía trên -->
-            <Style x:Key="KpiCard" TargetType="Border" BasedOn="{StaticResource MgmtCard}">
-                <Setter Property="CornerRadius" Value="14"/>
-                <Setter Property="Padding" Value="16,14"/>
+            <!-- ===== Thẻ số liệu: nền trắng + bóng đổ nhẹ (bóng nằm ở lớp riêng để chữ không bị mờ) ===== -->
+            <Style x:Key="KpiShadow" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="#0F2A4A" Direction="270" ShadowDepth="1" BlurRadius="10" Opacity="0.10"/>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="KpiIconCircle" TargetType="Border">
+                <Setter Property="Width" Value="46"/>
+                <Setter Property="Height" Value="46"/>
+                <Setter Property="CornerRadius" Value="23"/>
+                <Setter Property="Background" Value="#EFF4FB"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style x:Key="KpiIcon" TargetType="Path">
+                <Setter Property="Width" Value="22"/>
+                <Setter Property="Height" Value="22"/>
+                <Setter Property="Stretch" Value="Uniform"/>
+                <Setter Property="Stroke" Value="{StaticResource PrimaryBrush}"/>
+                <Setter Property="StrokeThickness" Value="1.8"/>
+                <Setter Property="StrokeStartLineCap" Value="Round"/>
+                <Setter Property="StrokeEndLineCap" Value="Round"/>
+                <Setter Property="StrokeLineJoin" Value="Round"/>
             </Style>
             <Style x:Key="KpiValue" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="24"/>
+                <Setter Property="FontSize" Value="40"/>
                 <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Margin" Value="0,4,0,0"/>
+                <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+                <Setter Property="HorizontalAlignment" Value="Right"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
             </Style>
-            <!-- Ô thông tin khách đang sửa -->
+            <Style x:Key="KpiLabel" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="13.5"/>
+                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+                <Setter Property="VerticalAlignment" Value="Bottom"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            </Style>
+            <!-- Biến thiên: Tag = true → tăng (xanh lá, mũi tên lên); false → giảm (xanh dương, mũi tên xuống) -->
+            <Style x:Key="TrendPanel" TargetType="StackPanel">
+                <Setter Property="Orientation" Value="Horizontal"/>
+                <Setter Property="VerticalAlignment" Value="Bottom"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource PrimaryBrush}"/>
+                <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
+                <Setter Property="TextElement.FontSize" Value="13.5"/>
+                <Style.Triggers>
+                    <Trigger Property="Tag">
+                        <Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value>
+                        <Setter Property="TextElement.Foreground" Value="#15803D"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            <Style x:Key="TrendArrow" TargetType="Path">
+                <Setter Property="Data" Value="M12,19 V5 M6,11 L12,5 L18,11"/>
+                <Setter Property="Width" Value="11"/>
+                <Setter Property="Height" Value="12"/>
+                <Setter Property="Margin" Value="4,0,0,1"/>
+                <Setter Property="Stretch" Value="Uniform"/>
+                <Setter Property="StrokeThickness" Value="2.2"/>
+                <Setter Property="StrokeStartLineCap" Value="Round"/>
+                <Setter Property="StrokeEndLineCap" Value="Round"/>
+                <Setter Property="StrokeLineJoin" Value="Round"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Stroke" Value="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
+                <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                <Setter Property="RenderTransform">
+                    <Setter.Value><RotateTransform Angle="180"/></Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=StackPanel}}" Value="True">
+                        <Setter Property="RenderTransform">
+                            <Setter.Value><RotateTransform Angle="0"/></Setter.Value>
+                        </Setter>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- ===== Avatar nhiều màu: màu chọn theo Customer.AvatarTone (0–5) ===== -->
+            <Style x:Key="ToneAvatar" TargetType="Border">
+                <Setter Property="Width" Value="40"/>
+                <Setter Property="Height" Value="40"/>
+                <Setter Property="CornerRadius" Value="20"/>
+                <Setter Property="Background" Value="#EAF2FC"/>
+                <Setter Property="TextElement.Foreground" Value="#164F8F"/>
+                <Setter Property="TextElement.FontWeight" Value="Bold"/>
+                <Setter Property="TextElement.FontSize" Value="13.5"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding AvatarTone}" Value="1">
+                        <Setter Property="Background" Value="#FFF4DF"/>
+                        <Setter Property="TextElement.Foreground" Value="#9A3412"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding AvatarTone}" Value="2">
+                        <Setter Property="Background" Value="#EEF7F0"/>
+                        <Setter Property="TextElement.Foreground" Value="#166534"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding AvatarTone}" Value="3">
+                        <Setter Property="Background" Value="#F1ECFC"/>
+                        <Setter Property="TextElement.Foreground" Value="#5B3FB0"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding AvatarTone}" Value="4">
+                        <Setter Property="Background" Value="#FDECEC"/>
+                        <Setter Property="TextElement.Foreground" Value="#B91C1C"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding AvatarTone}" Value="5">
+                        <Setter Property="Background" Value="#E6F6F8"/>
+                        <Setter Property="TextElement.Foreground" Value="#0E6773"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- ===== Nhãn hạng: Thường / Bạc / Vàng (theo Customer.Tier) ===== -->
+            <Style x:Key="TierBadge" TargetType="Border">
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="10,2,10,3"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource TextMutedBrush}"/>
+                <Setter Property="TextElement.FontWeight" Value="Bold"/>
+                <Setter Property="TextElement.FontSize" Value="12"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Tier}" Value="gold">
+                        <Setter Property="Background" Value="#FFF4DF"/>
+                        <Setter Property="BorderBrush" Value="#F5C46A"/>
+                        <Setter Property="TextElement.Foreground" Value="#8A5A00"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Tier}" Value="silver">
+                        <Setter Property="Background" Value="#EEF1F5"/>
+                        <Setter Property="BorderBrush" Value="#C7D0DC"/>
+                        <Setter Property="TextElement.Foreground" Value="#44546A"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Điểm: có điểm → nhãn vàng; 0 điểm → chữ xám -->
+            <Style x:Key="PointsPill" TargetType="Border">
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="9,3"/>
+                <Setter Property="HorizontalAlignment" Value="Right"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="TextElement.Foreground" Value="#6B7889"/>
+                <Setter Property="TextElement.FontSize" Value="13"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding HasPoints}" Value="True">
+                        <Setter Property="Background" Value="#FFF4DF"/>
+                        <Setter Property="TextElement.Foreground" Value="#7A4A00"/>
+                        <Setter Property="TextElement.FontWeight" Value="Bold"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Icon trong nút: lấy màu chữ của nút -->
+            <Style x:Key="ButtonIcon" TargetType="Path">
+                <Setter Property="Width" Value="15"/>
+                <Setter Property="Height" Value="15"/>
+                <Setter Property="Margin" Value="0,0,8,0"/>
+                <Setter Property="Stretch" Value="Uniform"/>
+                <Setter Property="StrokeThickness" Value="2"/>
+                <Setter Property="StrokeStartLineCap" Value="Round"/>
+                <Setter Property="StrokeEndLineCap" Value="Round"/>
+                <Setter Property="StrokeLineJoin" Value="Round"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+            </Style>
+
+            <!-- Ô số nhỏ trong hồ sơ -->
             <Style x:Key="StatTile" TargetType="Border">
                 <Setter Property="Background" Value="{StaticResource SubtleBrush}"/>
                 <Setter Property="CornerRadius" Value="12"/>
                 <Setter Property="Padding" Value="12,10"/>
+            </Style>
+
+            <!-- Chữ gợi ý nằm đè lên ô nhập khi ô trống -->
+            <Style x:Key="InputHint" TargetType="TextBlock">
+                <Setter Property="Margin" Value="12,0,0,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="#8A97A8"/>
+                <Setter Property="IsHitTestVisible" Value="False"/>
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -39,49 +209,137 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ===== Tiêu đề trang ===== -->
-        <DockPanel Margin="0,0,0,18">
-            <Button DockPanel.Dock="Right" Style="{StaticResource MgmtGhostButton}" Height="40"
-                    Command="{Binding ReloadCommand}" VerticalAlignment="Center" Content="Tải lại"/>
-            <StackPanel>
+        <!-- ===================== TIÊU ĐỀ + TÌM KIẾM ===================== -->
+        <Grid Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Bottom">
                 <TextBlock Style="{StaticResource MgmtBreadcrumb}" Text="Bán hàng › Khách hàng"/>
-                <TextBlock Style="{StaticResource MgmtPageTitle}" Text="Quản lý khách hàng"/>
+                <TextBlock Style="{StaticResource MgmtPageTitle}" Text="Khách hàng thành viên"/>
+                <TextBlock Style="{StaticResource MgmtHint}" Margin="0,2,0,0"
+                           Text="1 điểm cho mỗi 10.000 đ · hạng tính theo tổng chi tiêu"/>
             </StackPanel>
-        </DockPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="16,0,0,0">
+                <TextBox Style="{StaticResource MgmtSearchBox}" Width="420" Height="48" FontSize="15"
+                         Tag="Nhập số điện thoại hoặc tên khách…"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Style="{StaticResource MgmtPrimaryButton}" Height="48" Margin="10,0,0,0" Padding="18,0"
+                        Command="{Binding NewCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Style="{StaticResource ButtonIcon}" Data="M12,5 V19 M5,12 H19"/>
+                        <TextBlock Text="Thêm khách" FontWeight="Bold"/>
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource MgmtGhostButton}" Height="48" Width="48" Padding="0" Margin="8,0,0,0"
+                        Command="{Binding ReloadCommand}" ToolTip="Tải lại">
+                    <Path Style="{StaticResource ButtonIcon}" Margin="0" Width="17" Height="17"
+                          Data="M20,11 A8,8 0 1 0 17.7,16.6 M20,4 V9 H15"/>
+                </Button>
+            </StackPanel>
+        </Grid>
 
-        <!-- ===== 3 ô số ===== -->
-        <UniformGrid Grid.Row="1" Rows="1" Margin="0,0,0,20">
-            <Border Style="{StaticResource KpiCard}" Margin="0,0,7,0">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource MgmtHint}" Text="Tổng khách hàng"/>
-                    <TextBlock Style="{StaticResource KpiValue}" Text="{Binding TotalText}"/>
-                </StackPanel>
-            </Border>
-            <Border Style="{StaticResource KpiCard}" Margin="7,0">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource MgmtHint}" Text="Đã từng mua vé"/>
-                    <TextBlock Style="{StaticResource KpiValue}" Text="{Binding BuyersText}"/>
-                </StackPanel>
-            </Border>
-            <Border Style="{StaticResource KpiCard}" Margin="7,0,0,0">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource MgmtHint}" Text="Tổng điểm đang tích lũy"/>
-                    <TextBlock Style="{StaticResource KpiValue}" Text="{Binding PointsText}"/>
-                </StackPanel>
-            </Border>
+        <!-- ===================== 4 THẺ SỐ LIỆU ===================== -->
+        <UniformGrid Grid.Row="1" Rows="1" Columns="4" Margin="-7,0,-7,18">
+            <!-- Tổng thành viên -->
+            <Grid Margin="7,0">
+                <Border Style="{StaticResource KpiShadow}"/>
+                <Grid Margin="22,20">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <Border Style="{StaticResource KpiIconCircle}">
+                        <Path Style="{StaticResource KpiIcon}"
+                              Data="M9,4.5 A3.5,3.5 0 1 1 8.99,4.5 Z M2.5,20 C2.5,16.4 5.4,14 9,14 C12.6,14 15.5,16.4 15.5,20 M16,4.5 A3.5,3.5 0 0 1 16,11.5 M18,14.3 C20,15 21.5,16.9 21.5,20"/>
+                    </Border>
+                    <TextBlock Style="{StaticResource KpiValue}" Text="{Binding MembersValue}"/>
+                    <DockPanel Grid.Row="1" Margin="0,16,0,0">
+                        <StackPanel DockPanel.Dock="Right" Style="{StaticResource TrendPanel}" Tag="{Binding MembersTrendUp}">
+                            <TextBlock Text="{Binding MembersTrendText}"/>
+                            <Path Style="{StaticResource TrendArrow}"/>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource KpiLabel}" Text="Tổng thành viên"/>
+                    </DockPanel>
+                </Grid>
+            </Grid>
+            <!-- Khách quay lại -->
+            <Grid Margin="7,0">
+                <Border Style="{StaticResource KpiShadow}"/>
+                <Grid Margin="22,20">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <Border Style="{StaticResource KpiIconCircle}">
+                        <Path Style="{StaticResource KpiIcon}"
+                              Data="M4,10 A8,8 0 0 1 18,6 L20,8 M20,4 V8 H16 M20,14 A8,8 0 0 1 6,18 L4,16 M4,20 V16 H8"/>
+                    </Border>
+                    <TextBlock Style="{StaticResource KpiValue}" Text="{Binding ReturningValue}"/>
+                    <DockPanel Grid.Row="1" Margin="0,16,0,0">
+                        <StackPanel DockPanel.Dock="Right" Style="{StaticResource TrendPanel}" Tag="{Binding ReturningTrendUp}">
+                            <TextBlock Text="{Binding ReturningTrendText}"/>
+                            <Path Style="{StaticResource TrendArrow}"/>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource KpiLabel}" Text="Khách quay lại"/>
+                    </DockPanel>
+                </Grid>
+            </Grid>
+            <!-- Doanh thu thành viên (số to + đơn vị nhỏ) -->
+            <Grid Margin="7,0">
+                <Border Style="{StaticResource KpiShadow}"/>
+                <Grid Margin="22,20">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <Border Style="{StaticResource KpiIconCircle}">
+                        <Path Style="{StaticResource KpiIcon}"
+                              Data="M4.5,6 H19.5 A2,2 0 0 1 21.5,8 V16 A2,2 0 0 1 19.5,18 H4.5 A2,2 0 0 1 2.5,16 V8 A2,2 0 0 1 4.5,6 Z M12,9.5 A2.5,2.5 0 1 1 11.99,9.5 Z M6,9.5 V14.5 M18,9.5 V14.5"/>
+                    </Border>
+                    <TextBlock Style="{StaticResource KpiValue}">
+                        <Run Text="{Binding RevenueValue, Mode=OneWay}"/><Run Text=" tr" FontSize="17" FontWeight="Normal" Foreground="{StaticResource TextMutedBrush}"/>
+                    </TextBlock>
+                    <DockPanel Grid.Row="1" Margin="0,16,0,0">
+                        <StackPanel DockPanel.Dock="Right" Style="{StaticResource TrendPanel}" Tag="{Binding RevenueTrendUp}">
+                            <TextBlock Text="{Binding RevenueTrendText}"/>
+                            <Path Style="{StaticResource TrendArrow}"/>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource KpiLabel}" Text="Doanh thu thành viên"/>
+                    </DockPanel>
+                </Grid>
+            </Grid>
+            <!-- Thành viên hạng Vàng -->
+            <Grid Margin="7,0">
+                <Border Style="{StaticResource KpiShadow}"/>
+                <Grid Margin="22,20">
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <Border Style="{StaticResource KpiIconCircle}">
+                        <Path Style="{StaticResource KpiIcon}"
+                              Data="M12,8 A6,6 0 1 1 11.99,8 Z M8.5,9.2 L6,3 H10 L12,7 L14,3 H18 L15.5,9.2"/>
+                    </Border>
+                    <TextBlock Style="{StaticResource KpiValue}" Text="{Binding GoldValue}"/>
+                    <DockPanel Grid.Row="1" Margin="0,16,0,0">
+                        <StackPanel DockPanel.Dock="Right" Style="{StaticResource TrendPanel}" Tag="{Binding GoldTrendUp}">
+                            <TextBlock Text="{Binding GoldTrendText}"/>
+                            <Path Style="{StaticResource TrendArrow}"/>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource KpiLabel}" Text="Thành viên hạng Vàng"/>
+                    </DockPanel>
+                </Grid>
+            </Grid>
         </UniformGrid>
 
-        <Grid Grid.Row="2">
+        <!-- ===================== THÔNG BÁO ===================== -->
+        <Border Grid.Row="2" Style="{StaticResource MgmtBanner}" Margin="0,0,0,14"
+                Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13.5" FontWeight="SemiBold"/>
+        </Border>
+
+        <!-- ===================== DANH SÁCH + HỒ SƠ ===================== -->
+        <Grid Grid.Row="3" x:Name="bodyGrid">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" MinWidth="500"/>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="2*" MinWidth="340"/>
+                <ColumnDefinition Width="*" MinWidth="520"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- ===================== DANH SÁCH ===================== -->
+            <!-- Danh sách -->
             <Border Style="{StaticResource MgmtCard}" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -91,83 +349,93 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Margin="18,16,18,14">
-                        <DockPanel>
-                            <Button DockPanel.Dock="Right" Margin="12,0,0,0" Style="{StaticResource MgmtPrimaryButton}"
-                                    Command="{Binding NewCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="+" FontSize="18" Margin="0,-3,8,0"/>
-                                    <TextBlock Text="Thêm khách hàng"/>
-                                </StackPanel>
-                            </Button>
-                            <TextBox Style="{StaticResource MgmtSearchBox}" Tag="Tìm theo tên hoặc số điện thoại…"
-                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                        </DockPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                            <TextBlock Style="{StaticResource MgmtHint}" Text="Sắp xếp:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="sort" IsChecked="{Binding SortRecent}" Content="Mua gần nhất"/>
-                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="sort" IsChecked="{Binding SortPoints}" Content="Điểm cao nhất"/>
-                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="sort" IsChecked="{Binding SortName}" Content="Tên A–Z"/>
-                        </StackPanel>
-                    </StackPanel>
+                    <!-- Lọc theo hạng + sắp xếp -->
+                    <DockPanel Margin="16,14">
+                        <Border DockPanel.Dock="Right" Background="#F1F5FA" CornerRadius="10" Padding="3" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource MgmtSegment}" Height="32" Padding="12,0" GroupName="sort"
+                                             IsChecked="{Binding SortRecent}" Content="Gần đây"/>
+                                <RadioButton Style="{StaticResource MgmtSegment}" Height="32" Padding="12,0" GroupName="sort"
+                                             IsChecked="{Binding SortPoints}" Content="Điểm"/>
+                                <RadioButton Style="{StaticResource MgmtSegment}" Height="32" Padding="12,0" GroupName="sort"
+                                             IsChecked="{Binding SortName}" Content="Tên A–Z"/>
+                            </StackPanel>
+                        </Border>
+                        <WrapPanel VerticalAlignment="Center">
+                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="tier" IsChecked="{Binding TierAll}" Content="{Binding TierAllText}"/>
+                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="tier" IsChecked="{Binding TierGold}" Content="{Binding TierGoldText}"/>
+                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="tier" IsChecked="{Binding TierSilver}" Content="{Binding TierSilverText}"/>
+                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="tier" IsChecked="{Binding TierBasic}" Content="{Binding TierBasicText}"/>
+                        </WrapPanel>
+                    </DockPanel>
 
-                    <!-- Tiêu đề cột: độ rộng phải GIỐNG ItemTemplate -->
-                    <Border Grid.Row="1" Background="{StaticResource SubtleBrush}" Padding="18,9"
+                    <!-- Tiêu đề cột: độ rộng phải GIỐNG ItemTemplate.
+                         Lề phải 18 + 17 (bề rộng thanh cuộn luôn hiện của danh sách) để cột thẳng hàng. -->
+                    <Border Grid.Row="1" Background="{StaticResource SubtleBrush}" Padding="18,9,35,9"
                             BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="52"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="125"/>
-                                <ColumnDefinition Width="70"/>
-                                <ColumnDefinition Width="70"/>
+                                <ColumnDefinition Width="96"/>
                                 <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="112"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Style="{StaticResource MgmtColumnHeader}" Text="KHÁCH HÀNG"/>
-                            <TextBlock Grid.Column="1" Style="{StaticResource MgmtColumnHeader}" Text="SỐ ĐIỆN THOẠI"/>
-                            <TextBlock Grid.Column="2" Style="{StaticResource MgmtColumnHeader}" Text="ĐIỂM" TextAlignment="Right"/>
-                            <TextBlock Grid.Column="3" Style="{StaticResource MgmtColumnHeader}" Text="SỐ ĐƠN" TextAlignment="Right"/>
+                            <TextBlock Grid.Column="1" Style="{StaticResource MgmtColumnHeader}" Text="KHÁCH HÀNG"/>
+                            <TextBlock Grid.Column="2" Style="{StaticResource MgmtColumnHeader}" Text="HẠNG"/>
+                            <TextBlock Grid.Column="3" Style="{StaticResource MgmtColumnHeader}" Text="ĐIỂM" TextAlignment="Right"/>
                             <TextBlock Grid.Column="4" Style="{StaticResource MgmtColumnHeader}" Text="MUA GẦN NHẤT" TextAlignment="Right"/>
                         </Grid>
                     </Border>
 
                     <ListBox Grid.Row="2" Style="{StaticResource MgmtList}" ItemContainerStyle="{StaticResource MgmtRow}"
+                             ScrollViewer.VerticalScrollBarVisibility="Visible"
                              ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="52"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="125"/>
-                                        <ColumnDefinition Width="70"/>
-                                        <ColumnDefinition Width="70"/>
+                                        <ColumnDefinition Width="96"/>
                                         <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="112"/>
                                     </Grid.ColumnDefinitions>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border Style="{StaticResource MgmtAvatar}">
-                                            <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" Margin="10,0,8,0"
-                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                    <Border Style="{StaticResource ToneAvatar}" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
+                                        <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding PhoneText}" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}"/>
                                     </StackPanel>
-                                    <TextBlock Grid.Column="1" Text="{Binding PhoneText}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding Points, StringFormat=N0}" TextAlignment="Right"
-                                               VerticalAlignment="Center" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}"/>
-                                    <TextBlock Grid.Column="3" Text="{Binding OrderCount}" TextAlignment="Right"
-                                               VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}"/>
-                                    <TextBlock Grid.Column="4" Text="{Binding LastPurchaseText}" TextAlignment="Right"
-                                               VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}"/>
+                                    <Border Grid.Column="2" Style="{StaticResource TierBadge}">
+                                        <TextBlock Text="{Binding TierText}"/>
+                                    </Border>
+                                    <Border Grid.Column="3" Style="{StaticResource PointsPill}">
+                                        <TextBlock Text="{Binding PointsText}"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="4" Text="{Binding LastPurchaseRelative}" TextAlignment="Right"
+                                               VerticalAlignment="Center" FontSize="13" Foreground="{StaticResource TextMutedBrush}"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <StackPanel Grid.Row="2" VerticalAlignment="Top" Margin="18,40" HorizontalAlignment="Center"
+                    <!-- Không tìm thấy -->
+                    <StackPanel Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="18,44"
                                 Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="Không tìm thấy khách hàng" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                        <TextBlock Style="{StaticResource MgmtHint}" HorizontalAlignment="Center" Margin="0,4,0,0"
-                                   Text="Kiểm tra lại số điện thoại, hoặc bấm “Thêm khách hàng” để tạo mới."/>
+                        <TextBlock Text="{Binding EmptyTitle}" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource MgmtHint}" HorizontalAlignment="Center" Margin="0,6,0,14"
+                                   Text="Kiểm tra lại số điện thoại, hoặc đăng ký thành viên mới ngay."/>
+                        <Button Style="{StaticResource MgmtPrimaryButton}" HorizontalAlignment="Center"
+                                Command="{Binding NewCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{StaticResource ButtonIcon}" Data="M12,5 V19 M5,12 H19"/>
+                                <TextBlock Text="{Binding EmptyCta}"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
-                    <TextBlock Grid.Row="2" Text="Đang tải…" Margin="18,40" HorizontalAlignment="Center" VerticalAlignment="Top"
+                    <TextBlock Grid.Row="2" Text="Đang tải…" Margin="18,44" HorizontalAlignment="Center" VerticalAlignment="Top"
                                Foreground="{StaticResource TextMutedBrush}"
                                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
 
@@ -175,102 +443,189 @@
                 </Grid>
             </Border>
 
-            <!-- ===================== FORM ===================== -->
-            <Border Grid.Column="2" Style="{StaticResource MgmtCard}" VerticalAlignment="Top">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="22,20">
-                        <TextBlock Style="{StaticResource MgmtCardTitle}" Text="{Binding FormTitle}"/>
-                        <TextBlock Style="{StaticResource MgmtHint}" Text="{Binding FormSubtitle}" Margin="0,2,0,0"/>
+            <!-- Khung bên phải: chỉ hiện khi đã chọn khách hoặc đang thêm khách -->
+            <Border Grid.Column="1" Style="{StaticResource MgmtCard}" Width="420" Margin="20,0,0,0" VerticalAlignment="Top"
+                    Visibility="{Binding IsPanelVisible, Converter={StaticResource BoolToVis}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="{Binding ActualHeight, ElementName=bodyGrid}">
+                    <Grid Margin="22,20">
 
-                        <Border Style="{StaticResource MgmtBanner}" Margin="0,16,0,0"
-                                Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13.5"/>
-                        </Border>
-
-                        <!-- 4 ô thông tin (chỉ khi đang sửa) -->
-                        <UniformGrid Columns="2" Margin="0,16,0,0"
-                                     Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
-                            <Border Style="{StaticResource StatTile}" Background="{StaticResource WarningBgBrush}" Margin="0,0,5,5">
-                                <StackPanel>
-                                    <TextBlock Text="Điểm tích lũy" FontSize="12" Foreground="#7A4A00"/>
-                                    <TextBlock Text="{Binding CurrentPointsText}" FontSize="20" FontWeight="Bold" Foreground="#7A4A00"/>
+                        <!-- ===== XEM HỒ SƠ ===== -->
+                        <StackPanel Visibility="{Binding IsViewMode, Converter={StaticResource BoolToVis}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border DataContext="{Binding Current}" Style="{StaticResource ToneAvatar}"
+                                        Width="64" Height="64" CornerRadius="32" TextElement.FontSize="21">
+                                    <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="14,0,8,0" VerticalAlignment="Center">
+                                    <WrapPanel>
+                                        <TextBlock Text="{Binding Current.FullName}" FontSize="20" FontWeight="Bold"
+                                                   Margin="0,0,8,2" TextWrapping="Wrap"/>
+                                        <Border DataContext="{Binding Current}" Style="{StaticResource TierBadge}" Margin="0,0,0,2">
+                                            <TextBlock Text="{Binding TierText, StringFormat='Hạng {0}'}"/>
+                                        </Border>
+                                    </WrapPanel>
+                                    <TextBlock Text="{Binding Current.PhoneText}" Foreground="{StaticResource TextMutedBrush}"/>
                                 </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource StatTile}" Margin="5,0,0,5">
-                                <StackPanel>
-                                    <TextBlock Text="Tổng chi tiêu" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                    <TextBlock Text="{Binding CurrentSpentText}" FontSize="20" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource StatTile}" Margin="0,5,5,0">
-                                <StackPanel>
-                                    <TextBlock Text="Số đơn đã mua" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                    <TextBlock Text="{Binding CurrentOrdersText}" FontSize="20" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                            <Border Style="{StaticResource StatTile}" Margin="5,5,0,0">
-                                <StackPanel>
-                                    <TextBlock Text="Mua gần nhất" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                    <TextBlock Text="{Binding CurrentLastText}" FontSize="20" FontWeight="Bold"/>
-                                </StackPanel>
-                            </Border>
-                        </UniformGrid>
+                                <Button Grid.Column="2" Style="{StaticResource MgmtGhostButton}" Width="38" Height="38" Padding="0"
+                                        VerticalAlignment="Top" BorderThickness="0" Background="{StaticResource SubtleBrush}"
+                                        Command="{Binding ClosePanelCommand}" ToolTip="Đóng hồ sơ">
+                                    <Path Style="{StaticResource ButtonIcon}" Margin="0" Width="13" Height="13" Data="M6,6 L18,18 M18,6 L6,18"/>
+                                </Button>
+                            </Grid>
 
-                        <!-- Họ tên -->
-                        <TextBlock Style="{StaticResource MgmtLabel}" Text="Họ tên" Margin="0,16,0,6"/>
-                        <TextBox Style="{StaticResource MgmtTextBox}" MaxLength="100" Tag="{Binding HasNameError}"
-                                 Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Style="{StaticResource MgmtError}" Text="{Binding NameError}"
-                                   Visibility="{Binding HasNameError, Converter={StaticResource BoolToVis}}"/>
+                            <!-- 3 ô số -->
+                            <UniformGrid Columns="3" Margin="0,18,0,0">
+                                <Border Style="{StaticResource StatTile}" Background="{StaticResource WarningBgBrush}" Margin="0,0,5,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Điểm tích lũy" FontSize="12" Foreground="#7A4A00"/>
+                                        <TextBlock Text="{Binding CurrentPointsText}" FontSize="19" FontWeight="Bold" Foreground="#7A4A00"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource StatTile}" Margin="5,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Tổng chi tiêu" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                        <TextBlock Text="{Binding CurrentSpentText}" FontSize="19" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Style="{StaticResource StatTile}" Margin="5,0,0,0">
+                                    <StackPanel>
+                                        <TextBlock Text="Số đơn" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                        <TextBlock Text="{Binding CurrentOrdersText}" FontSize="19" FontWeight="Bold"/>
+                                    </StackPanel>
+                                </Border>
+                            </UniformGrid>
 
-                        <!-- Số điện thoại -->
-                        <TextBlock Style="{StaticResource MgmtLabel}" Text="Số điện thoại" Margin="0,14,0,6"/>
-                        <TextBox Style="{StaticResource MgmtTextBox}" MaxLength="15" Tag="{Binding HasPhoneError}"
-                                 Text="{Binding FormPhone, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Style="{StaticResource MgmtError}" Text="{Binding PhoneError}"
-                                   Visibility="{Binding HasPhoneError, Converter={StaticResource BoolToVis}}"/>
-                        <TextBlock Style="{StaticResource MgmtHint}" Margin="0,5,0,0"
-                                   Text="Dùng để tra khách khi bán vé tại quầy. Mỗi số chỉ thuộc một khách."/>
-
-                        <Border Margin="0,14,0,0" Padding="12,10" CornerRadius="10" Background="{StaticResource SubtleBrush}"
-                                Visibility="{Binding IsCreating, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Style="{StaticResource MgmtHint}"
-                                       Text="Khách mới bắt đầu với 0 điểm. Hệ thống cộng 1 điểm cho mỗi 10.000 đ khi thanh toán."/>
-                        </Border>
-
-                        <!-- Hỏi lại trước khi xóa -->
-                        <Border Margin="0,16,0,0" Padding="12" CornerRadius="12" Background="{StaticResource ErrorBgBrush}"
-                                Visibility="{Binding IsConfirmingDelete, Converter={StaticResource BoolToVis}}">
-                            <DockPanel>
-                                <Button DockPanel.Dock="Right" Style="{StaticResource MgmtDangerSolidButton}" Margin="8,0,0,0"
-                                        Command="{Binding ConfirmDeleteCommand}" Content="Xóa"/>
-                                <Button DockPanel.Dock="Right" Style="{StaticResource MgmtGhostButton}" Height="40" Margin="8,0,0,0"
-                                        Command="{Binding CancelDeleteCommand}" Content="Hủy"/>
-                                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{StaticResource ErrorBrush}"
-                                           FontWeight="Medium">
-                                    <Run Text="Xóa khách hàng"/> <Run Text="{Binding Current.FullName, Mode=OneWay}" FontWeight="Bold"/><Run Text="? Không hoàn tác được."/>
-                                </TextBlock>
+                            <!-- Tiến độ lên hạng -->
+                            <DockPanel Margin="0,18,0,8">
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding ProgressNote}" FontSize="13" Foreground="{StaticResource TextMutedBrush}"/>
+                                <TextBlock Text="{Binding ProgressTitle}" FontSize="13" FontWeight="SemiBold"/>
                             </DockPanel>
-                        </Border>
+                            <ProgressBar Value="{Binding ProgressValue, Mode=OneWay}">
+                                <ProgressBar.Style>
+                                    <Style TargetType="ProgressBar" BasedOn="{StaticResource MgmtBar}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Current.IsGold}" Value="True">
+                                                <Setter Property="Foreground" Value="{StaticResource GoldBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ProgressBar.Style>
+                            </ProgressBar>
 
-                        <DockPanel Margin="0,18,0,0" LastChildFill="False">
-                            <Button Style="{StaticResource MgmtPrimaryButton}" Command="{Binding SaveCommand}"
-                                    Content="{Binding SaveText}" Padding="20,0"/>
-                            <Button Style="{StaticResource MgmtGhostButton}" Command="{Binding ResetCommand}"
-                                    Content="Hoàn tác" Margin="10,0,0,0"/>
-                            <Button DockPanel.Dock="Right" Style="{StaticResource MgmtDangerButton}" Command="{Binding DeleteCommand}"
-                                    Content="Xóa" Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}"/>
-                        </DockPanel>
+                            <!-- Mua gần đây -->
+                            <TextBlock Text="Mua gần đây" FontWeight="Bold" Margin="0,20,0,6"/>
+                            <ItemsControl ItemsSource="{Binding RecentPurchases}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="#EDF2F8" BorderThickness="0,1,0,0" Padding="0,9">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="52"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding DateText}" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}"
+                                                           VerticalAlignment="Center"/>
+                                                <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                                                    <TextBlock Text="{Binding MovieTitle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding MetaText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="2" Text="{Binding AmountText}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Border Style="{StaticResource StatTile}" Margin="0,4,0,0"
+                                    Visibility="{Binding NoHistory, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Style="{StaticResource MgmtHint}" FontSize="13"
+                                           Text="Khách chưa mua vé lần nào. Điểm sẽ được cộng ở lần mua đầu tiên."/>
+                            </Border>
 
-                        <Border Margin="0,18,0,0" Padding="0,14,0,0" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,1,0,0">
-                            <StackPanel>
-                                <TextBlock Text="Quy tắc" FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,4"/>
-                                <TextBlock Style="{StaticResource MgmtHint}" Text="• Số điện thoại: 10 số, bắt đầu bằng 0, không trùng (UNIQUE)."/>
-                                <TextBlock Style="{StaticResource MgmtHint}" Text="• Điểm do màn bán vé cộng khi thanh toán, không sửa tay."/>
-                                <TextBlock Style="{StaticResource MgmtHint}" Text="• Không xóa được khách đã có đơn (khóa ngoại BOOKING → CUSTOMER)."/>
+                            <!-- Hỏi lại trước khi xóa -->
+                            <Border Margin="0,16,0,0" Padding="12" CornerRadius="12" Background="{StaticResource ErrorBgBrush}"
+                                    Visibility="{Binding IsConfirmingDelete, Converter={StaticResource BoolToVis}}">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource MgmtDangerSolidButton}" Margin="8,0,0,0"
+                                            Command="{Binding ConfirmDeleteCommand}" Content="Xóa"/>
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource MgmtGhostButton}" Height="40" Margin="8,0,0,0"
+                                            Command="{Binding CancelDeleteCommand}" Content="Hủy"/>
+                                    <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{StaticResource ErrorBrush}"
+                                               FontWeight="Medium">
+                                        <Run Text="Xóa khách"/> <Run Text="{Binding Current.FullName, Mode=OneWay}" FontWeight="Bold"/><Run Text="? Không hoàn tác được."/>
+                                    </TextBlock>
+                                </DockPanel>
+                            </Border>
+
+                            <!-- Sửa / Xóa -->
+                            <DockPanel Margin="0,18,0,0" LastChildFill="False">
+                                <Button Style="{StaticResource MgmtGhostButton}" Command="{Binding EditCommand}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Style="{StaticResource ButtonIcon}" Data="M4,20 H8 L19,9 L15,5 L4,16 Z M13.5,6.5 L17.5,10.5"/>
+                                        <TextBlock Text="Sửa thông tin"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button DockPanel.Dock="Right" Style="{StaticResource MgmtDangerButton}" Command="{Binding DeleteCommand}"
+                                        Visibility="{Binding CanDelete, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Style="{StaticResource ButtonIcon}" Data="M4,7 H20 M9,7 V4 H15 V7 M6,7 L7,20 H17 L18,7"/>
+                                        <TextBlock Text="Xóa"/>
+                                    </StackPanel>
+                                </Button>
+                            </DockPanel>
+                            <TextBlock Style="{StaticResource MgmtHint}" Margin="0,8,0,0" Text="{Binding DeleteLockNote}"
+                                       Visibility="{Binding ShowLockNote, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
+
+                        <!-- ===== FORM: ĐĂNG KÝ / SỬA ===== -->
+                        <StackPanel Visibility="{Binding IsFormMode, Converter={StaticResource BoolToVis}}">
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Style="{StaticResource MgmtGhostButton}" Width="38" Height="38" Padding="0"
+                                        VerticalAlignment="Top" BorderThickness="0" Background="{StaticResource SubtleBrush}"
+                                        Command="{Binding CancelFormCommand}" ToolTip="Đóng">
+                                    <Path Style="{StaticResource ButtonIcon}" Margin="0" Width="13" Height="13" Data="M6,6 L18,18 M18,6 L6,18"/>
+                                </Button>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource MgmtCardTitle}" FontSize="19" Text="{Binding FormTitle}"/>
+                                    <TextBlock Style="{StaticResource MgmtHint}" Margin="0,4,8,0" Text="{Binding FormSubtitle}"/>
+                                </StackPanel>
+                            </DockPanel>
+
+                            <TextBlock Style="{StaticResource MgmtLabel}" Text="Họ tên" Margin="0,20,0,6"/>
+                            <Grid>
+                                <TextBox Style="{StaticResource MgmtTextBox}" Height="46" FontSize="15" MaxLength="100"
+                                         Tag="{Binding HasNameError}"
+                                         Text="{Binding FormName, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock Style="{StaticResource InputHint}" Text="VD: Nguyễn Thị Mai"
+                                           Visibility="{Binding IsFormNameEmpty, Converter={StaticResource BoolToVis}}"/>
+                            </Grid>
+                            <TextBlock Style="{StaticResource MgmtError}" Text="{Binding NameError}"
+                                       Visibility="{Binding HasNameError, Converter={StaticResource BoolToVis}}"/>
+
+                            <TextBlock Style="{StaticResource MgmtLabel}" Text="Số điện thoại" Margin="0,16,0,6"/>
+                            <Grid>
+                                <TextBox Style="{StaticResource MgmtTextBox}" Height="46" FontSize="15" MaxLength="15"
+                                         Tag="{Binding HasPhoneError}"
+                                         Text="{Binding FormPhone, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock Style="{StaticResource InputHint}" Text="VD: 0901 234 567"
+                                           Visibility="{Binding IsFormPhoneEmpty, Converter={StaticResource BoolToVis}}"/>
+                            </Grid>
+                            <TextBlock Style="{StaticResource MgmtError}" Text="{Binding PhoneError}"
+                                       Visibility="{Binding HasPhoneError, Converter={StaticResource BoolToVis}}"/>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,22,0,0">
+                                <Button Style="{StaticResource MgmtPrimaryButton}" Command="{Binding SaveCommand}"
+                                        Content="{Binding SaveText}" Padding="22,0"/>
+                                <Button Style="{StaticResource MgmtGhostButton}" Command="{Binding CancelFormCommand}"
+                                        Content="Hủy" Margin="10,0,0,0" Padding="20,0"/>
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </Border>
         </Grid>
