@@ -15,9 +15,7 @@
     </UserControl.DataContext>
     <UserControl.Resources>
         <ResourceDictionary>
-        <!-- Bộ màu nằm ở Views/Themes (PosLight / PosDark, cùng tên key, giá trị lấy từ Resources/Styles.xaml).
-             Mặc định nạp bộ sáng; code-behind thay MergedDictionaries[0] khi ViewModel.IsDarkTheme đổi.
-             Mọi màu trong màn này dùng DynamicResource nên đổi bộ màu là cập nhật ngay. -->
+        <!-- Bộ màu của màn nằm ở Views/Themes/PosLight.xaml (giá trị lấy từ Resources/Styles.xaml). -->
         <ResourceDictionary.MergedDictionaries>
             <ResourceDictionary Source="/CinemaAPP;component/Views/Themes/PosLight.xaml"/>
         </ResourceDictionary.MergedDictionaries>
@@ -491,11 +489,6 @@
                                 <Run Text="{Binding TotalSeats, Mode=OneWay}"/>
                             </TextBlock>
                         </StackPanel>
-                        <!-- Nút đổi giao diện sáng / tối -->
-                        <Button DockPanel.Dock="Right" Content="{Binding ThemeButtonText}"
-                                Command="{Binding ToggleThemeCommand}" Style="{StaticResource OutlineButton}"
-                                Padding="10,5" Margin="0,0,16,0" VerticalAlignment="Center"
-                                ToolTip="Đổi giao diện sáng / tối"/>
                         <StackPanel>
                             <TextBlock Text="{Binding CurrentShowtime.MovieTitle}" Foreground="{DynamicResource PosText}"
                                        FontSize="18" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
@@ -885,7 +878,7 @@
                                     </Style>
                                 </Border.Style>
                                 <DockPanel>
-                                    <!-- Nền QR luôn trắng để máy quét đọc được ở cả giao diện tối -->
+                                    <!-- Nền QR luôn trắng để máy quét đọc được -->
                                     <Border DockPanel.Dock="Left" Background="White" Padding="5" CornerRadius="4">
                                         <ItemsControl ItemsSource="{Binding QrCells}" Width="84" Height="84">
                                             <ItemsControl.ItemsPanel>

@@ -1,5 +1,5 @@
-<!-- GIAO DIỆN SÁNG của màn Bán vé tại quầy. Mọi màu lấy đúng từ Resources/Styles.xaml
-     (ghi tên key gốc ở cuối dòng). Phải có ĐỦ các key giống PosDark.xaml vì View dùng DynamicResource. -->
+<!-- BỘ MÀU của màn Bán vé tại quầy. Mọi màu lấy đúng từ Resources/Styles.xaml
+     (ghi tên key gốc ở cuối dòng). -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Nền, khung, chữ -->
