@@ -103,15 +103,25 @@ namespace CinemaAPP.Services
 
         // ================= Quản lý tài khoản =================
 
-        // Danh sách tài khoản + số đơn mỗi người đã lập (để biết có xóa được không).
+        // Danh sách tài khoản + thống kê bán vé của từng người.
+        // OrderCount đếm MỌI đơn (kể cả đơn hủy) vì đơn nào cũng làm khóa ngoại chặn xóa;
+        // các cột còn lại chỉ tính đơn đã thanh toán.
         public List<Account> GetAll()
         {
             using SqlConnection conn = Db.Open();
             using var cmd = new SqlCommand(
                 @"SELECT a.AccountID, a.Username, a.FullName, a.AccountRole,
-                         (SELECT COUNT(*) FROM BOOKING b WHERE b.AccountID = a.AccountID) AS OrderCount
+                         COUNT(b.BookingID) AS OrderCount,
+                         SUM(CASE WHEN b.BookingStatus = @Paid THEN 1 ELSE 0 END) AS PaidOrders,
+                         ISNULL(SUM(CASE WHEN b.BookingStatus = @Paid THEN b.TotalAmount END), 0) AS Revenue,
+                         SUM(CASE WHEN b.BookingStatus = @Paid AND b.CreatedAt >= @Today THEN 1 ELSE 0 END) AS TodayOrders,
+                         MAX(CASE WHEN b.BookingStatus = @Paid THEN b.CreatedAt END) AS LastSale
                   FROM ACCOUNT a
+                  LEFT JOIN BOOKING b ON b.AccountID = a.AccountID
+                  GROUP BY a.AccountID, a.Username, a.FullName, a.AccountRole
                   ORDER BY a.AccountID", conn);
+            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid;
+            cmd.Parameters.Add("@Today", SqlDbType.DateTime2).Value = DateTime.Today;
 
             var list = new List<Account>();
             using SqlDataReader r = cmd.ExecuteReader();
@@ -123,7 +133,77 @@ namespace CinemaAPP.Services
                     Username = r.GetString(1),
                     FullName = r.GetString(2),
                     AccountRole = r.IsDBNull(3) ? "" : r.GetString(3),
-                    OrderCount = r.GetInt32(4)
+                    OrderCount = r.GetInt32(4),
+                    PaidOrders = r.GetInt32(5),
+                    Revenue = r.GetDecimal(6),
+                    TodayOrders = r.GetInt32(7),
+                    LastSale = r.IsDBNull(8) ? null : r.GetDateTime(8)
+                });
+            }
+            return list;
+        }
+
+        // Số đơn đã thanh toán: tháng này (từ ngày 1 tới giờ) và CÙNG SỐ NGÀY của tháng trước.
+        public (int ThisMonth, int LastMonth) GetMonthOrders()
+        {
+            DateTime now = DateTime.Now;
+            DateTime thisStart = new DateTime(now.Year, now.Month, 1);
+            DateTime lastStart = thisStart.AddMonths(-1);
+            DateTime lastEnd = lastStart + (now - thisStart);
+            if (lastEnd > thisStart) lastEnd = thisStart;
+
+            using SqlConnection conn = Db.Open();
+            using var cmd = new SqlCommand(
+                @"SELECT SUM(CASE WHEN CreatedAt >= @ThisStart AND CreatedAt < @Now THEN 1 ELSE 0 END),
+                         SUM(CASE WHEN CreatedAt >= @LastStart AND CreatedAt < @LastEnd THEN 1 ELSE 0 END)
+                  FROM BOOKING
+                  WHERE BookingStatus = @Paid AND CreatedAt >= @LastStart", conn);
+            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid;
+            cmd.Parameters.Add("@ThisStart", SqlDbType.DateTime2).Value = thisStart;
+            cmd.Parameters.Add("@Now", SqlDbType.DateTime2).Value = now;
+            cmd.Parameters.Add("@LastStart", SqlDbType.DateTime2).Value = lastStart;
+            cmd.Parameters.Add("@LastEnd", SqlDbType.DateTime2).Value = lastEnd;
+
+            using SqlDataReader r = cmd.ExecuteReader();
+            r.Read();
+            return (r.IsDBNull(0) ? 0 : r.GetInt32(0), r.IsDBNull(1) ? 0 : r.GetInt32(1));
+        }
+
+        // Các đơn bán gần nhất của một nhân viên (chỉ đơn đã thanh toán), kèm phim, suất và khách.
+        public List<AccountSale> GetRecentSales(int accountId, int top)
+        {
+            using SqlConnection conn = Db.Open();
+            using var cmd = new SqlCommand(
+                @"SELECT TOP (@Top) b.BookingID, b.CreatedAt, b.TotalAmount,
+                         COUNT(t.TicketID) AS Tickets,
+                         MIN(m.Title) AS Title,
+                         MIN(s.StartTime) AS ShowStart,
+                         MIN(c.FullName) AS Customer
+                  FROM BOOKING b
+                  LEFT JOIN TICKET t   ON t.BookingID = b.BookingID
+                  LEFT JOIN SHOWTIME s ON s.ShowtimeID = t.ShowtimeID
+                  LEFT JOIN MOVIE m    ON m.MovieID = s.MovieID
+                  LEFT JOIN CUSTOMER c ON c.CustomerID = b.CustomerID
+                  WHERE b.AccountID = @AccountID AND b.BookingStatus = @Paid
+                  GROUP BY b.BookingID, b.CreatedAt, b.TotalAmount
+                  ORDER BY b.CreatedAt DESC", conn);
+            cmd.Parameters.Add("@Top", SqlDbType.Int).Value = top;
+            cmd.Parameters.Add("@AccountID", SqlDbType.Int).Value = accountId;
+            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid;
+
+            var list = new List<AccountSale>();
+            using SqlDataReader r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                list.Add(new AccountSale
+                {
+                    BookingID = r.GetInt32(0),
+                    CreatedAt = r.IsDBNull(1) ? DateTime.MinValue : r.GetDateTime(1),
+                    Amount = r.GetDecimal(2),
+                    Tickets = r.GetInt32(3),
+                    MovieTitle = r.IsDBNull(4) ? "(không rõ phim)" : r.GetString(4),
+                    ShowStart = r.IsDBNull(5) ? null : r.GetDateTime(5),
+                    CustomerName = r.IsDBNull(6) ? null : r.GetString(6)
                 });
             }
             return list;
