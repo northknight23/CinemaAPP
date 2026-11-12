@@ -546,4 +546,153 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- =====================================================================
+         Dùng chung cho các màn quản lý kiểu mới (Tài khoản, …):
+         thẻ số liệu, avatar nhiều màu, icon trong nút, ô số nhỏ, chữ gợi ý.
+         ===================================================================== -->
+
+    <!-- Thẻ số liệu: nền trắng + bóng đổ nhẹ. Đặt Border này làm LỚP NỀN riêng
+         (nội dung để ở lớp trên) để chữ không bị mờ do DropShadowEffect. -->
+    <Style x:Key="MgmtKpiShadow" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="#0F2A4A" Direction="270" ShadowDepth="1" BlurRadius="10" Opacity="0.10"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="MgmtKpiIconCircle" TargetType="Border">
+        <Setter Property="Width" Value="46"/>
+        <Setter Property="Height" Value="46"/>
+        <Setter Property="CornerRadius" Value="23"/>
+        <Setter Property="Background" Value="#EFF4FB"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="MgmtKpiIcon" TargetType="Path">
+        <Setter Property="Width" Value="22"/>
+        <Setter Property="Height" Value="22"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="Stroke" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="StrokeThickness" Value="1.8"/>
+        <Setter Property="StrokeStartLineCap" Value="Round"/>
+        <Setter Property="StrokeEndLineCap" Value="Round"/>
+        <Setter Property="StrokeLineJoin" Value="Round"/>
+    </Style>
+    <Style x:Key="MgmtKpiValue" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="40"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="MgmtKpiLabel" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
+    <!-- Biến thiên %: Tag = true → tăng (xanh lá); false → giảm (xanh dương) -->
+    <Style x:Key="MgmtTrendPanel" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="TextElement.Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
+        <Setter Property="TextElement.FontSize" Value="13.5"/>
+        <Style.Triggers>
+            <Trigger Property="Tag">
+                <Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value>
+                <Setter Property="TextElement.Foreground" Value="#15803D"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <!-- Mũi tên trong MgmtTrendPanel: tự quay lên/xuống theo Tag của panel -->
+    <Style x:Key="MgmtTrendArrow" TargetType="Path">
+        <Setter Property="Data" Value="M12,19 V5 M6,11 L12,5 L18,11"/>
+        <Setter Property="Width" Value="11"/>
+        <Setter Property="Height" Value="12"/>
+        <Setter Property="Margin" Value="4,0,0,1"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="StrokeThickness" Value="2.2"/>
+        <Setter Property="StrokeStartLineCap" Value="Round"/>
+        <Setter Property="StrokeEndLineCap" Value="Round"/>
+        <Setter Property="StrokeLineJoin" Value="Round"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Stroke" Value="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Setter Property="RenderTransform">
+            <Setter.Value><RotateTransform Angle="180"/></Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=StackPanel}}" Value="True">
+                <Setter Property="RenderTransform">
+                    <Setter.Value><RotateTransform Angle="0"/></Setter.Value>
+                </Setter>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Avatar nhiều màu: DataContext cần có thuộc tính AvatarTone (0–5) -->
+    <Style x:Key="MgmtToneAvatar" TargetType="Border">
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="CornerRadius" Value="20"/>
+        <Setter Property="Background" Value="#EAF2FC"/>
+        <Setter Property="TextElement.Foreground" Value="#164F8F"/>
+        <Setter Property="TextElement.FontWeight" Value="Bold"/>
+        <Setter Property="TextElement.FontSize" Value="13.5"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="1">
+                <Setter Property="Background" Value="#FFF4DF"/>
+                <Setter Property="TextElement.Foreground" Value="#9A3412"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="2">
+                <Setter Property="Background" Value="#EEF7F0"/>
+                <Setter Property="TextElement.Foreground" Value="#166534"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="3">
+                <Setter Property="Background" Value="#F1ECFC"/>
+                <Setter Property="TextElement.Foreground" Value="#5B3FB0"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="4">
+                <Setter Property="Background" Value="#FDECEC"/>
+                <Setter Property="TextElement.Foreground" Value="#B91C1C"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="5">
+                <Setter Property="Background" Value="#E6F6F8"/>
+                <Setter Property="TextElement.Foreground" Value="#0E6773"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Icon nét mảnh đặt trong nút: tự lấy màu chữ của nút -->
+    <Style x:Key="MgmtButtonIcon" TargetType="Path">
+        <Setter Property="Width" Value="15"/>
+        <Setter Property="Height" Value="15"/>
+        <Setter Property="Margin" Value="0,0,8,0"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="StrokeThickness" Value="2"/>
+        <Setter Property="StrokeStartLineCap" Value="Round"/>
+        <Setter Property="StrokeEndLineCap" Value="Round"/>
+        <Setter Property="StrokeLineJoin" Value="Round"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+    </Style>
+
+    <!-- Ô số nhỏ trong khung hồ sơ -->
+    <Style x:Key="MgmtStatTile" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SubtleBrush}"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="12,10"/>
+    </Style>
+
+    <!-- Chữ gợi ý nằm đè lên ô nhập khi ô trống -->
+    <Style x:Key="MgmtInputHint" TargetType="TextBlock">
+        <Setter Property="Margin" Value="12,0,0,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="#8A97A8"/>
+        <Setter Property="IsHitTestVisible" Value="False"/>
+    </Style>
 </ResourceDictionary>

@@ -3,41 +3,137 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
-             FontFamily="Segoe UI" FontSize="14"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="860"
+             FontFamily="Segoe UI" FontSize="14" Language="vi-VN"
              Foreground="{StaticResource TextBrush}" Background="{StaticResource PageBrush}">
+    <!-- DataContext (AccountManagementViewModel) gán trong code-behind vì cần nối PasswordBox -->
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/CinemaAPP;component/Resources/ManagementStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Nhãn vai trò: Quản trị = nhãn navy đặc; Nhân viên = nhãn xanh nhạt. DataContext là Account. -->
+            <Style x:Key="RoleBadge" TargetType="Border">
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="10,2,10,3"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Background" Value="{StaticResource InfoBgBrush}"/>
+                <Setter Property="BorderBrush" Value="#C9DCF2"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource InfoBrush}"/>
+                <Setter Property="TextElement.FontWeight" Value="Bold"/>
+                <Setter Property="TextElement.FontSize" Value="12"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsAdmin}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource NavyBrush}"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource NavyBrush}"/>
+                        <Setter Property="TextElement.Foreground" Value="White"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Margin="28,22,28,24">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ===== Tiêu đề trang ===== -->
-        <DockPanel Margin="0,0,0,18">
-            <Button DockPanel.Dock="Right" Style="{StaticResource MgmtGhostButton}" Height="40"
-                    Command="{Binding ReloadCommand}" VerticalAlignment="Center" Content="Tải lại"/>
-            <StackPanel>
-                <TextBlock Style="{StaticResource MgmtBreadcrumb}" Text="Quản lý › Tài khoản"/>
-                <TextBlock Style="{StaticResource MgmtPageTitle}" Text="Quản lý tài khoản"/>
-            </StackPanel>
-        </DockPanel>
-
-        <Grid Grid.Row="1">
+        <!-- ===================== TIÊU ĐỀ + TÌM KIẾM ===================== -->
+        <Grid Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" MinWidth="460"/>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="2*" MinWidth="360"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Bottom">
+                <TextBlock Style="{StaticResource MgmtBreadcrumb}" Text="Quản lý › Tài khoản"/>
+                <TextBlock Style="{StaticResource MgmtPageTitle}" Text="Tài khoản nhân viên"/>
+                <TextBlock Style="{StaticResource MgmtHint}" Margin="0,2,0,0"
+                           Text="Chỉ Quản trị viên mở được màn này · mật khẩu lưu dạng mã hóa"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="16,0,0,0">
+                <TextBox Style="{StaticResource MgmtSearchBox}" Width="420" Height="48" FontSize="15"
+                         Tag="Tìm theo tên đăng nhập hoặc họ tên…"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+                <Button Style="{StaticResource MgmtPrimaryButton}" Height="48" Margin="10,0,0,0" Padding="18,0"
+                        Command="{Binding NewCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Style="{StaticResource MgmtButtonIcon}" Data="M12,5 V19 M5,12 H19"/>
+                        <TextBlock Text="Thêm tài khoản" FontWeight="Bold"/>
+                    </StackPanel>
+                </Button>
+                <Button Style="{StaticResource MgmtGhostButton}" Height="48" Width="48" Padding="0" Margin="8,0,0,0"
+                        Command="{Binding ReloadCommand}" ToolTip="Tải lại">
+                    <Path Style="{StaticResource MgmtButtonIcon}" Margin="0" Width="17" Height="17"
+                          Data="M20,11 A8,8 0 1 0 17.7,16.6 M20,4 V9 H15"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- ===================== 2 THẺ SỐ LIỆU ===================== -->
+        <UniformGrid Grid.Row="1" Rows="1" Columns="2" Margin="-7,0,-7,18">
+            <!-- Tổng tài khoản (không có % vì bảng ACCOUNT không lưu ngày tạo) -->
+            <Grid Margin="7,0">
+                <Border Style="{StaticResource MgmtKpiShadow}"/>
+                <Grid Margin="22,20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource MgmtKpiIconCircle}">
+                        <Path Style="{StaticResource MgmtKpiIcon}"
+                              Data="M9,4.5 A3.5,3.5 0 1 1 8.99,4.5 Z M2.5,20 C2.5,16.4 5.4,14 9,14 C12.6,14 15.5,16.4 15.5,20 M16,4.5 A3.5,3.5 0 0 1 16,11.5 M18,14.3 C20,15 21.5,16.9 21.5,20"/>
+                    </Border>
+                    <TextBlock Style="{StaticResource MgmtKpiValue}" Text="{Binding TotalValue}"/>
+                    <TextBlock Grid.Row="1" Margin="0,16,0,0" Style="{StaticResource MgmtKpiLabel}" Text="Tổng tài khoản"/>
+                </Grid>
+            </Grid>
+            <!-- Đơn đã lập tháng này (so với cùng kỳ tháng trước) -->
+            <Grid Margin="7,0">
+                <Border Style="{StaticResource MgmtKpiShadow}"/>
+                <Grid Margin="22,20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource MgmtKpiIconCircle}">
+                        <Path Style="{StaticResource MgmtKpiIcon}"
+                              Data="M6,3 H18 V21 L15,19 L12,21 L9,19 L6,21 Z M9,8 H15 M9,12 H15"/>
+                    </Border>
+                    <TextBlock Style="{StaticResource MgmtKpiValue}">
+                        <Run Text="{Binding MonthOrdersValue, Mode=OneWay}"/><Run Text=" đơn" FontSize="17" FontWeight="Normal" Foreground="{StaticResource TextMutedBrush}"/>
+                    </TextBlock>
+                    <DockPanel Grid.Row="1" Margin="0,16,0,0">
+                        <StackPanel DockPanel.Dock="Right" Style="{StaticResource MgmtTrendPanel}" Tag="{Binding MonthOrdersTrendUp}"
+                                    ToolTip="So với cùng kỳ tháng trước">
+                            <TextBlock Text="{Binding MonthOrdersTrendText}"/>
+                            <Path Style="{StaticResource MgmtTrendArrow}"/>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource MgmtKpiLabel}" Text="Đơn đã lập tháng này"/>
+                    </DockPanel>
+                </Grid>
+            </Grid>
+        </UniformGrid>
+
+        <!-- ===================== THÔNG BÁO ===================== -->
+        <Border Grid.Row="2" Style="{StaticResource MgmtBanner}" Margin="0,0,0,14"
+                Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13.5" FontWeight="SemiBold"/>
+        </Border>
+
+        <!-- ===================== DANH SÁCH + KHUNG BÊN PHẢI ===================== -->
+        <Grid Grid.Row="3" x:Name="bodyGrid">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" MinWidth="520"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- ===================== DANH SÁCH ===================== -->
+            <!-- Danh sách -->
             <Border Style="{StaticResource MgmtCard}" ClipToBounds="True">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -47,96 +143,100 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Thanh công cụ -->
-                    <StackPanel Margin="18,16,18,14">
-                        <DockPanel>
-                            <Button DockPanel.Dock="Right" Margin="12,0,0,0" Style="{StaticResource MgmtPrimaryButton}"
-                                    Command="{Binding NewCommand}">
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="+" FontSize="18" Margin="0,-3,8,0"/>
-                                    <TextBlock Text="Thêm tài khoản"/>
-                                </StackPanel>
-                            </Button>
-                            <TextBox Style="{StaticResource MgmtSearchBox}" Tag="Tìm theo tên đăng nhập hoặc họ tên…"
-                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                        </DockPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="roleFilter"
-                                         IsChecked="{Binding FilterAll}" Content="{Binding FilterAllText}"/>
-                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="roleFilter"
-                                         IsChecked="{Binding FilterAdmin}" Content="{Binding FilterAdminText}"/>
-                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="roleFilter"
-                                         IsChecked="{Binding FilterStaff}" Content="{Binding FilterStaffText}"/>
-                        </StackPanel>
-                    </StackPanel>
+                    <!-- Lọc theo vai trò + sắp xếp -->
+                    <DockPanel Margin="16,14">
+                        <Border DockPanel.Dock="Right" Background="#F1F5FA" CornerRadius="10" Padding="3" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Style="{StaticResource MgmtSegment}" Height="32" Padding="12,0" GroupName="accSort"
+                                             IsChecked="{Binding SortRecent}" Content="Gần đây"/>
+                                <RadioButton Style="{StaticResource MgmtSegment}" Height="32" Padding="12,0" GroupName="accSort"
+                                             IsChecked="{Binding SortOrders}" Content="Số đơn"/>
+                                <RadioButton Style="{StaticResource MgmtSegment}" Height="32" Padding="12,0" GroupName="accSort"
+                                             IsChecked="{Binding SortName}" Content="Tên A–Z"/>
+                            </StackPanel>
+                        </Border>
+                        <WrapPanel VerticalAlignment="Center">
+                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="accRole" IsChecked="{Binding FilterAll}" Content="{Binding FilterAllText}"/>
+                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="accRole" IsChecked="{Binding FilterAdmin}" Content="{Binding FilterAdminText}"/>
+                            <RadioButton Style="{StaticResource MgmtChip}" GroupName="accRole" IsChecked="{Binding FilterStaff}" Content="{Binding FilterStaffText}"/>
+                        </WrapPanel>
+                    </DockPanel>
 
-                    <!-- Tiêu đề cột: độ rộng cột phải GIỐNG hệt ItemTemplate bên dưới -->
-                    <Border Grid.Row="1" Background="{StaticResource SubtleBrush}" Padding="18,9"
+                    <!-- Tiêu đề cột: độ rộng phải GIỐNG ItemTemplate (lề phải +17 = thanh cuộn) -->
+                    <Border Grid.Row="1" Background="{StaticResource SubtleBrush}" Padding="18,9,35,9"
                             BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1.3*"/>
-                                <ColumnDefinition Width="1.5*"/>
+                                <ColumnDefinition Width="52"/>
+                                <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="110"/>
                                 <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="116"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Style="{StaticResource MgmtColumnHeader}" Text="TÊN ĐĂNG NHẬP"/>
-                            <TextBlock Grid.Column="1" Style="{StaticResource MgmtColumnHeader}" Text="HỌ TÊN"/>
+                            <TextBlock Grid.Column="1" Style="{StaticResource MgmtColumnHeader}" Text="NHÂN VIÊN"/>
                             <TextBlock Grid.Column="2" Style="{StaticResource MgmtColumnHeader}" Text="VAI TRÒ"/>
                             <TextBlock Grid.Column="3" Style="{StaticResource MgmtColumnHeader}" Text="ĐƠN ĐÃ LẬP" TextAlignment="Right"/>
+                            <TextBlock Grid.Column="4" Style="{StaticResource MgmtColumnHeader}" Text="BÁN GẦN NHẤT" TextAlignment="Right"/>
                         </Grid>
                     </Border>
 
                     <ListBox Grid.Row="2" Style="{StaticResource MgmtList}" ItemContainerStyle="{StaticResource MgmtRow}"
+                             ScrollViewer.VerticalScrollBarVisibility="Visible"
                              ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="1.3*"/>
-                                        <ColumnDefinition Width="1.5*"/>
+                                        <ColumnDefinition Width="52"/>
+                                        <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="110"/>
                                         <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="116"/>
                                     </Grid.ColumnDefinitions>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Border x:Name="avatar" Style="{StaticResource MgmtAvatar}">
-                                            <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <TextBlock Text="{Binding Username}" FontWeight="SemiBold" Margin="10,0,0,0"
-                                                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                                    </StackPanel>
-                                    <TextBlock Grid.Column="1" Text="{Binding FullName}" VerticalAlignment="Center"
-                                               TextTrimming="CharacterEllipsis" Margin="0,0,8,0"/>
-                                    <Border x:Name="badge" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                            CornerRadius="11" Padding="10,3" Background="{StaticResource InfoBgBrush}">
-                                        <TextBlock x:Name="badgeText" Text="{Binding RoleText}" FontSize="12" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource InfoBrush}"/>
+                                    <Border Style="{StaticResource MgmtToneAvatar}" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     </Border>
-                                    <TextBlock Grid.Column="3" Text="{Binding OrderCountText}" TextAlignment="Right"
-                                               VerticalAlignment="Center" Foreground="{StaticResource TextMutedBrush}"/>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                            <Border Margin="6,0,0,0" Padding="7,0,7,1" CornerRadius="9" Background="{StaticResource SuccessBgBrush}"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{Binding IsSelf, Converter={StaticResource BoolToVis}}">
+                                                <TextBlock Text="Bạn" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding AtUsername}" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="2" Style="{StaticResource RoleBadge}">
+                                        <TextBlock Text="{Binding RoleText}"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="3" Text="{Binding OrdersColumnText}" TextAlignment="Right" VerticalAlignment="Center"
+                                               FontWeight="Bold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#8A97A8"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasOrders}" Value="True">
+                                                        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Grid.Column="4" Text="{Binding LastSaleText}" TextAlignment="Right"
+                                               VerticalAlignment="Center" FontSize="13" Foreground="{StaticResource TextMutedBrush}"/>
                                 </Grid>
-                                <DataTemplate.Triggers>
-                                    <!-- Quản trị: huy hiệu cam, avatar nền navy chữ vàng -->
-                                    <DataTrigger Binding="{Binding IsAdmin}" Value="True">
-                                        <Setter TargetName="badge" Property="Background" Value="{StaticResource WarningBgBrush}"/>
-                                        <Setter TargetName="badgeText" Property="Foreground" Value="{StaticResource WarningBrush}"/>
-                                        <Setter TargetName="avatar" Property="Background" Value="{StaticResource NavyBrush}"/>
-                                        <Setter TargetName="avatar" Property="TextElement.Foreground" Value="{StaticResource GoldBrush}"/>
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
 
-                    <!-- Trạng thái rỗng / đang tải (đè lên vùng danh sách) -->
-                    <StackPanel Grid.Row="2" VerticalAlignment="Top" Margin="18,40" HorizontalAlignment="Center"
+                    <StackPanel Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="18,44"
                                 Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="Không tìm thấy tài khoản nào" FontWeight="SemiBold" HorizontalAlignment="Center"/>
-                        <TextBlock Style="{StaticResource MgmtHint}" Text="Thử từ khóa khác hoặc chọn lại bộ lọc vai trò."
-                                   HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        <TextBlock Text="Không tìm thấy tài khoản nào" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource MgmtHint}" HorizontalAlignment="Center" Margin="0,6,0,0"
+                                   Text="Thử từ khóa khác hoặc chọn lại bộ lọc vai trò."/>
                     </StackPanel>
-                    <TextBlock Grid.Row="2" Text="Đang tải…" Margin="18,40" HorizontalAlignment="Center" VerticalAlignment="Top"
+                    <TextBlock Grid.Row="2" Text="Đang tải…" Margin="18,44" HorizontalAlignment="Center" VerticalAlignment="Top"
                                Foreground="{StaticResource TextMutedBrush}"
                                Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
 
@@ -144,123 +244,238 @@
                 </Grid>
             </Border>
 
-            <!-- ===================== FORM ===================== -->
-            <Border Grid.Column="2" Style="{StaticResource MgmtCard}" VerticalAlignment="Top">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="22,20">
-                        <DockPanel>
-                            <Border DockPanel.Dock="Right" VerticalAlignment="Top" CornerRadius="11" Padding="10,4"
-                                    Background="{StaticResource InfoBgBrush}"
-                                    Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="Đang sửa" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource InfoBrush}"/>
+            <!-- Khung bên phải: chỉ hiện khi đã chọn tài khoản hoặc đang thêm mới -->
+            <Border Grid.Column="1" Style="{StaticResource MgmtCard}" Width="430" Margin="20,0,0,0" VerticalAlignment="Top"
+                    Visibility="{Binding IsPanelVisible, Converter={StaticResource BoolToVis}}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="{Binding ActualHeight, ElementName=bodyGrid}">
+                    <Grid Margin="22,20">
+
+                        <!-- ===== HỒ SƠ ===== -->
+                        <StackPanel Visibility="{Binding IsViewMode, Converter={StaticResource BoolToVis}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border DataContext="{Binding Current}" Style="{StaticResource MgmtToneAvatar}"
+                                        Width="64" Height="64" CornerRadius="32" TextElement.FontSize="21">
+                                    <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="14,0,8,0" VerticalAlignment="Center">
+                                    <WrapPanel>
+                                        <TextBlock Text="{Binding Current.FullName}" FontSize="20" FontWeight="Bold"
+                                                   Margin="0,0,8,2" TextWrapping="Wrap"/>
+                                        <Border DataContext="{Binding Current}" Style="{StaticResource RoleBadge}" Margin="0,0,0,2">
+                                            <TextBlock Text="{Binding RoleText}"/>
+                                        </Border>
+                                    </WrapPanel>
+                                    <TextBlock Text="{Binding ProfileSubText}" Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                                <Button Grid.Column="2" Style="{StaticResource MgmtGhostButton}" Width="38" Height="38" Padding="0"
+                                        VerticalAlignment="Top" BorderThickness="0" Background="{StaticResource SubtleBrush}"
+                                        Command="{Binding ClosePanelCommand}" ToolTip="Đóng">
+                                    <Path Style="{StaticResource MgmtButtonIcon}" Margin="0" Width="13" Height="13" Data="M6,6 L18,18 M18,6 L6,18"/>
+                                </Button>
+                            </Grid>
+
+                            <!-- Quản trị: không bán vé -->
+                            <Border Style="{StaticResource MgmtStatTile}" Padding="14,12" Margin="0,18,0,0"
+                                    Visibility="{Binding IsAdminProfile, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <TextBlock Text="Tài khoản Quản trị không bán vé" FontWeight="Bold"/>
+                                    <TextBlock Style="{StaticResource MgmtHint}" FontSize="13" Margin="0,4,0,0"
+                                               Text="Dùng để quản lý phim, phòng chiếu, suất chiếu, tài khoản và xem thống kê doanh thu. Việc bán vé tại quầy do tài khoản Nhân viên thực hiện."/>
+                                </StackPanel>
                             </Border>
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource MgmtCardTitle}" Text="{Binding FormTitle}"/>
-                                <TextBlock Style="{StaticResource MgmtHint}" Text="{Binding FormSubtitle}" Margin="0,2,0,0"/>
+
+                            <!-- Nhân viên: số liệu bán vé -->
+                            <StackPanel Visibility="{Binding IsStaffProfile, Converter={StaticResource BoolToVis}}">
+                                <UniformGrid Columns="3" Margin="0,18,0,0">
+                                    <Border Style="{StaticResource MgmtStatTile}" Margin="0,0,5,0">
+                                        <StackPanel>
+                                            <TextBlock Text="Đơn đã lập" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                            <TextBlock Text="{Binding CurrentOrdersText}" FontSize="19" FontWeight="Bold"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource MgmtStatTile}" Margin="5,0">
+                                        <StackPanel>
+                                            <TextBlock Text="Doanh thu bán" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                            <TextBlock Text="{Binding CurrentRevenueText}" FontSize="19" FontWeight="Bold"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource MgmtStatTile}" Background="{StaticResource InfoBgBrush}" Margin="5,0,0,0">
+                                        <StackPanel>
+                                            <TextBlock Text="Đơn hôm nay" FontSize="12" Foreground="{StaticResource InfoBrush}"/>
+                                            <TextBlock Text="{Binding CurrentTodayText}" FontSize="19" FontWeight="Bold" Foreground="{StaticResource InfoBrush}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+
+                                <TextBlock Text="Bán gần đây" FontWeight="Bold" Margin="0,20,0,6"/>
+                                <ItemsControl ItemsSource="{Binding RecentSales}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="#EDF2F8" BorderThickness="0,1,0,0" Padding="0,9">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="52"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding TimeText}" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}"
+                                                               VerticalAlignment="Center"/>
+                                                    <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                                                        <TextBlock Text="{Binding MovieTitle}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                        <TextBlock Text="{Binding MetaText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"
+                                                                   TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="2" Text="{Binding AmountText}" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Border Style="{StaticResource MgmtStatTile}" Margin="0,4,0,0"
+                                        Visibility="{Binding NoSales, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock Style="{StaticResource MgmtHint}" FontSize="13" Text="Tài khoản này chưa lập đơn bán vé nào."/>
+                                </Border>
                             </StackPanel>
-                        </DockPanel>
 
-                        <!-- Thông báo -->
-                        <Border Style="{StaticResource MgmtBanner}" Margin="0,16,0,0"
-                                Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="13.5"/>
-                        </Border>
+                            <!-- Hỏi lại trước khi xóa -->
+                            <Border Margin="0,16,0,0" Padding="12" CornerRadius="12" Background="{StaticResource ErrorBgBrush}"
+                                    Visibility="{Binding IsConfirmingDelete, Converter={StaticResource BoolToVis}}">
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource MgmtDangerSolidButton}" Margin="8,0,0,0"
+                                            Command="{Binding ConfirmDeleteCommand}" Content="Xóa"/>
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource MgmtGhostButton}" Height="40" Margin="8,0,0,0"
+                                            Command="{Binding CancelDeleteCommand}" Content="Hủy"/>
+                                    <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{StaticResource ErrorBrush}"
+                                               FontWeight="Medium">
+                                        <Run Text="Xóa tài khoản"/> <Run Text="{Binding Current.AtUsername, Mode=OneWay}" FontWeight="Bold"/><Run Text="? Không hoàn tác được."/>
+                                    </TextBlock>
+                                </DockPanel>
+                            </Border>
 
-                        <!-- Tên đăng nhập -->
-                        <TextBlock Style="{StaticResource MgmtLabel}" Text="Tên đăng nhập" Margin="0,16,0,6"/>
-                        <TextBox Style="{StaticResource MgmtTextBox}" IsEnabled="{Binding IsCreating}"
-                                 Tag="{Binding HasUsernameError}"
-                                 Text="{Binding FormUsername, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Style="{StaticResource MgmtError}" Text="{Binding UsernameError}"
-                                   Visibility="{Binding HasUsernameError, Converter={StaticResource BoolToVis}}"/>
-                        <TextBlock Style="{StaticResource MgmtHint}" Margin="0,5,0,0"
-                                   Text="Tên đăng nhập không đổi được sau khi tạo."
-                                   Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}"/>
+                            <!-- Sửa / Đặt lại mật khẩu / Xóa -->
+                            <WrapPanel Margin="0,18,0,0">
+                                <Button Style="{StaticResource MgmtGhostButton}" Margin="0,0,8,8" Command="{Binding EditCommand}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Style="{StaticResource MgmtButtonIcon}" Data="M4,20 H8 L19,9 L15,5 L4,16 Z M13.5,6.5 L17.5,10.5"/>
+                                        <TextBlock Text="Sửa thông tin"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource MgmtGhostButton}" Margin="0,0,8,8" Command="{Binding ResetPasswordCommand}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Style="{StaticResource MgmtButtonIcon}" Data="M8,11 A4,4 0 1 1 7.99,11 Z M11,12 L20,3 M17,6 L20,9 M14.5,8.5 L16.5,10.5"/>
+                                        <TextBlock Text="Đặt lại mật khẩu"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource MgmtDangerButton}" Margin="0,0,0,8" Command="{Binding DeleteCommand}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Style="{StaticResource MgmtButtonIcon}" Data="M4,7 H20 M9,7 V4 H15 V7 M6,7 L7,20 H17 L18,7"/>
+                                        <TextBlock Text="Xóa"/>
+                                    </StackPanel>
+                                </Button>
+                            </WrapPanel>
+                            <TextBlock Style="{StaticResource MgmtHint}" Margin="0,2,0,0" Text="{Binding DeleteLockNote}"
+                                       Visibility="{Binding ShowLockNote, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
 
-                        <!-- Họ tên -->
-                        <TextBlock Style="{StaticResource MgmtLabel}" Text="Họ tên" Margin="0,14,0,6"/>
-                        <TextBox Style="{StaticResource MgmtTextBox}" MaxLength="50"
-                                 Tag="{Binding HasFullNameError}"
-                                 Text="{Binding FormFullName, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBlock Style="{StaticResource MgmtError}" Text="{Binding FullNameError}"
-                                   Visibility="{Binding HasFullNameError, Converter={StaticResource BoolToVis}}"/>
-
-                        <!-- Vai trò -->
-                        <TextBlock Style="{StaticResource MgmtLabel}" Text="Vai trò" Margin="0,14,0,6"/>
-                        <Border Background="{StaticResource SubtleBrush}" CornerRadius="12" Padding="4" HorizontalAlignment="Left"
-                                IsEnabled="{Binding CanChangeRole}">
-                            <StackPanel Orientation="Horizontal">
-                                <RadioButton Style="{StaticResource MgmtSegment}" GroupName="formRole"
-                                             IsChecked="{Binding FormIsStaff}" Content="Nhân viên"/>
-                                <RadioButton Style="{StaticResource MgmtSegment}" GroupName="formRole"
-                                             IsChecked="{Binding FormIsAdmin}" Content="Quản trị"/>
-                            </StackPanel>
-                        </Border>
-                        <TextBlock Style="{StaticResource MgmtHint}" Margin="0,6,0,0"
-                                   Text="Nhân viên: bán vé, tra khách hàng. Quản trị: toàn quyền, xem thống kê."/>
-                        <TextBlock Style="{StaticResource MgmtHint}" Margin="0,4,0,0" Foreground="{StaticResource WarningBrush}"
-                                   Text="Không thể tự hạ quyền tài khoản đang đăng nhập."
-                                   Visibility="{Binding IsSelf, Converter={StaticResource BoolToVis}}"/>
-
-                        <!-- Mật khẩu -->
-                        <Grid Margin="0,14,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="12"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource MgmtLabel}" Text="{Binding PasswordLabel}"/>
-                                <PasswordBox x:Name="pwdNew" Style="{StaticResource MgmtPasswordBox}"
-                                             Tag="{Binding HasPasswordError}" PasswordChanged="PwdNew_PasswordChanged"/>
-                                <TextBlock Style="{StaticResource MgmtError}" Text="{Binding PasswordError}"
-                                           Visibility="{Binding HasPasswordError, Converter={StaticResource BoolToVis}}"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Style="{StaticResource MgmtLabel}" Text="Nhập lại mật khẩu"/>
-                                <PasswordBox x:Name="pwdConfirm" Style="{StaticResource MgmtPasswordBox}"
-                                             Tag="{Binding HasConfirmError}" PasswordChanged="PwdConfirm_PasswordChanged"/>
-                                <TextBlock Style="{StaticResource MgmtError}" Text="{Binding ConfirmError}"
-                                           Visibility="{Binding HasConfirmError, Converter={StaticResource BoolToVis}}"/>
-                            </StackPanel>
-                        </Grid>
-                        <TextBlock Style="{StaticResource MgmtHint}" Margin="0,6,0,0" Text="{Binding PasswordHint}"/>
-
-                        <!-- Hỏi lại trước khi xóa -->
-                        <Border Margin="0,16,0,0" Padding="12" CornerRadius="12" Background="{StaticResource ErrorBgBrush}"
-                                Visibility="{Binding IsConfirmingDelete, Converter={StaticResource BoolToVis}}">
+                        <!-- ===== FORM: THÊM / SỬA ===== -->
+                        <StackPanel Visibility="{Binding IsFormMode, Converter={StaticResource BoolToVis}}">
                             <DockPanel>
-                                <Button DockPanel.Dock="Right" Style="{StaticResource MgmtDangerSolidButton}" Margin="8,0,0,0"
-                                        Command="{Binding ConfirmDeleteCommand}" Content="Xóa"/>
-                                <Button DockPanel.Dock="Right" Style="{StaticResource MgmtGhostButton}" Height="40" Margin="8,0,0,0"
-                                        Command="{Binding CancelDeleteCommand}" Content="Hủy"/>
-                                <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{StaticResource ErrorBrush}"
-                                           FontWeight="Medium">
-                                    <Run Text="Xóa tài khoản"/> <Run Text="{Binding FormUsername, Mode=OneWay}" FontWeight="Bold"/><Run Text="? Không hoàn tác được."/>
-                                </TextBlock>
+                                <Button DockPanel.Dock="Right" Style="{StaticResource MgmtGhostButton}" Width="38" Height="38" Padding="0"
+                                        VerticalAlignment="Top" BorderThickness="0" Background="{StaticResource SubtleBrush}"
+                                        Command="{Binding CancelFormCommand}" ToolTip="Đóng">
+                                    <Path Style="{StaticResource MgmtButtonIcon}" Margin="0" Width="13" Height="13" Data="M6,6 L18,18 M18,6 L6,18"/>
+                                </Button>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource MgmtCardTitle}" FontSize="19" Text="{Binding FormTitle}"/>
+                                    <TextBlock Style="{StaticResource MgmtHint}" Margin="0,4,8,0" Text="{Binding FormSubtitle}"/>
+                                </StackPanel>
                             </DockPanel>
-                        </Border>
 
-                        <!-- Nút -->
-                        <DockPanel Margin="0,18,0,0" LastChildFill="False">
-                            <Button Style="{StaticResource MgmtPrimaryButton}" Command="{Binding SaveCommand}"
-                                    Content="{Binding SaveText}" Padding="20,0"/>
-                            <Button Style="{StaticResource MgmtGhostButton}" Command="{Binding ResetCommand}"
-                                    Content="Hoàn tác" Margin="10,0,0,0"/>
-                            <Button DockPanel.Dock="Right" Style="{StaticResource MgmtDangerButton}" Command="{Binding DeleteCommand}"
-                                    Content="Xóa" Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}"/>
-                        </DockPanel>
+                            <!-- Tên đăng nhập (khóa khi sửa) -->
+                            <TextBlock Style="{StaticResource MgmtLabel}" Text="Tên đăng nhập" Margin="0,20,0,6"/>
+                            <Grid>
+                                <TextBox Style="{StaticResource MgmtTextBox}" Height="46" FontSize="15" MaxLength="30"
+                                         IsEnabled="{Binding IsCreating}" Tag="{Binding HasUsernameError}"
+                                         Text="{Binding FormUsername, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock Style="{StaticResource MgmtInputHint}" Text="VD: nv05"
+                                           Visibility="{Binding IsFormUsernameEmpty, Converter={StaticResource BoolToVis}}"/>
+                            </Grid>
+                            <TextBlock Style="{StaticResource MgmtError}" Text="{Binding UsernameError}"
+                                       Visibility="{Binding HasUsernameError, Converter={StaticResource BoolToVis}}"/>
+                            <TextBlock Style="{StaticResource MgmtHint}" Margin="0,5,0,0" Text="Tên đăng nhập không đổi được sau khi tạo."
+                                       Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}"/>
 
-                        <!-- Quy tắc -->
-                        <Border Margin="0,18,0,0" Padding="0,14,0,0" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,1,0,0">
-                            <StackPanel>
-                                <TextBlock Text="Quy tắc" FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,4"/>
-                                <TextBlock Style="{StaticResource MgmtHint}" Text="• Tên đăng nhập 3–30 ký tự (chữ không dấu, số, _), không trùng."/>
-                                <TextBlock Style="{StaticResource MgmtHint}" Text="• Không xóa được tài khoản đã lập đơn bán vé (khóa ngoại BOOKING → ACCOUNT)."/>
-                                <TextBlock Style="{StaticResource MgmtHint}" Text="• Không xóa hoặc hạ quyền tài khoản đang đăng nhập."/>
+                            <!-- Họ tên -->
+                            <TextBlock Style="{StaticResource MgmtLabel}" Text="Họ tên" Margin="0,16,0,6"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="72*"/>
+                                    <ColumnDefinition Width="295*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Style="{StaticResource MgmtTextBox}" Height="46" FontSize="15" MaxLength="50"
+                                         Tag="{Binding HasFullNameError}"
+                                         Text="{Binding FormFullName, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2"/>
+                                <TextBlock Style="{StaticResource MgmtInputHint}" Text="VD: Phạm Hoàng Nam"
+                                           Visibility="{Binding IsFormNameEmpty, Converter={StaticResource BoolToVis}}" Grid.ColumnSpan="2" Margin="12,0,0,0"/>
+                            </Grid>
+                            <TextBlock Style="{StaticResource MgmtError}" Text="{Binding FullNameError}"
+                                       Visibility="{Binding HasFullNameError, Converter={StaticResource BoolToVis}}"/>
+
+                            <!-- Vai trò -->
+                            <TextBlock Style="{StaticResource MgmtLabel}" Text="Vai trò" Margin="0,16,0,6"/>
+                            <Border Background="#F1F5FA" CornerRadius="10" Padding="3" HorizontalAlignment="Left"
+                                    IsEnabled="{Binding CanChangeRole}">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton Style="{StaticResource MgmtSegment}" Padding="16,0" GroupName="accFormRole"
+                                                 IsChecked="{Binding FormIsStaff}" Content="Nhân viên"/>
+                                    <RadioButton Style="{StaticResource MgmtSegment}" Padding="16,0" GroupName="accFormRole"
+                                                 IsChecked="{Binding FormIsAdmin}" Content="Quản trị"/>
+                                </StackPanel>
+                            </Border>
+                            <TextBlock Style="{StaticResource MgmtHint}" Margin="0,6,0,0" Text="{Binding RoleHint}"/>
+
+                            <!-- Mật khẩu -->
+                            <Border BorderBrush="#EDF2F8" BorderThickness="0,1,0,0" Margin="0,18,0,0" Padding="0,14,0,0">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource MgmtLabel}" Text="{Binding PasswordTitle}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="10"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="Mật khẩu" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
+                                            <PasswordBox x:Name="pwdNew" Style="{StaticResource MgmtPasswordBox}" Height="46"
+                                                         Tag="{Binding HasPasswordError}" PasswordChanged="PwdNew_PasswordChanged"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="Nhập lại" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,0,6"/>
+                                            <PasswordBox x:Name="pwdConfirm" Style="{StaticResource MgmtPasswordBox}" Height="46"
+                                                         Tag="{Binding HasConfirmError}" PasswordChanged="PwdConfirm_PasswordChanged"/>
+                                        </StackPanel>
+                                    </Grid>
+                                    <TextBlock Style="{StaticResource MgmtError}" Text="{Binding PasswordError}"
+                                               Visibility="{Binding HasPasswordError, Converter={StaticResource BoolToVis}}"/>
+                                    <TextBlock Style="{StaticResource MgmtError}" Text="{Binding ConfirmError}"
+                                               Visibility="{Binding HasConfirmError, Converter={StaticResource BoolToVis}}"/>
+                                    <TextBlock Style="{StaticResource MgmtHint}" Margin="0,6,0,0" Text="Ít nhất 6 ký tự."/>
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,22,0,0">
+                                <Button Style="{StaticResource MgmtPrimaryButton}" Command="{Binding SaveCommand}"
+                                        Content="{Binding SaveText}" Padding="22,0"/>
+                                <Button Style="{StaticResource MgmtGhostButton}" Command="{Binding CancelFormCommand}"
+                                        Content="Hủy" Margin="10,0,0,0" Padding="20,0"/>
                             </StackPanel>
-                        </Border>
-                    </StackPanel>
+                        </StackPanel>
+                    </Grid>
                 </ScrollViewer>
             </Border>
         </Grid>
