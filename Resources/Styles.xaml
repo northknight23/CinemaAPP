@@ -7,6 +7,7 @@
     <SolidColorBrush x:Key="PrimaryHoverBrush" Color="#185BA3"/>
     <SolidColorBrush x:Key="PrimaryPressBrush" Color="#134B87"/>
     <SolidColorBrush x:Key="GoldBrush"         Color="#F5A524"/>
+    <SolidColorBrush x:Key="AccentBrush"       Color="#1F6FC5"/>
 
     <!-- ===== Nền, viền, chữ ===== -->
     <SolidColorBrush x:Key="PageBrush"         Color="#F3F6FA"/>

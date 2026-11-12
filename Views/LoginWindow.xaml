@@ -12,15 +12,6 @@
     </Window.InputBindings>
 
     <Window.Resources>
-        <!-- Màu lấy từ bản thiết kế -->
-        <SolidColorBrush x:Key="NavyBrush" Color="#0F2A4A"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#1F6FC5"/>
-        <SolidColorBrush x:Key="AccentDarkBrush" Color="#185BA3"/>
-        <SolidColorBrush x:Key="GoldBrush" Color="#F5A524"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#4A5B70"/>
-        <SolidColorBrush x:Key="IconBrush" Color="#5F6B7A"/>
-        <SolidColorBrush x:Key="LightTextBrush" Color="#A9C3E0"/>
-
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
 
         <!-- Khung bao quanh mỗi ô nhập: viền sáng xanh khi đang gõ -->
@@ -98,7 +89,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="{StaticResource AccentDarkBrush}"/>
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource PrimaryHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="bd" Property="Background" Value="#134B87"/>
@@ -113,7 +104,7 @@
         <Style x:Key="TextButton" TargetType="Button">
             <Setter Property="Height" Value="44"/>
             <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
             <Setter Property="FontSize" Value="15"/>
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -147,7 +138,7 @@
             </Style.Triggers>
         </Style>
         <Style x:Key="StatusText" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{StaticResource MutedBrush}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsDbConnected}" Value="True">
                     <Setter Property="Foreground" Value="#166534"/>
@@ -190,53 +181,17 @@
                     <!-- đồng hồ -->
                 </Grid.RowDefinitions>
 
-                <!-- Logo: vẽ bằng XAML theo bản thiết kế -->
-                <StackPanel Orientation="Horizontal">
-                    <Viewbox Width="72" Height="72">
-                        <Canvas Width="72" Height="72">
-                            <Rectangle Width="72" Height="72" RadiusX="18" RadiusY="18" Fill="{StaticResource AccentBrush}"/>
-                            <Canvas>
-                                <Canvas.RenderTransform>
-                                    <TransformGroup>
-                                        <ScaleTransform ScaleX="0.1867" ScaleY="0.1867"/>
-                                        <TranslateTransform X="8" Y="21"/>
-                                    </TransformGroup>
-                                </Canvas.RenderTransform>
-                                <!-- chữ U -->
-                                <Path Data="M42,30 V92 A36,36 0 0 0 114,92 V30" Stroke="White" StrokeThickness="28"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                                <!-- nút play trong chữ U -->
-                                <Path Data="M66,64 L66,94 L91,79 Z" Fill="{StaticResource GoldBrush}"
-                                      Stroke="{StaticResource GoldBrush}" StrokeThickness="6" StrokeLineJoin="Round"/>
-                                <!-- chữ I là dải phim -->
-                                <Rectangle Canvas.Left="142" Canvas.Top="16" Width="36" Height="128" RadiusX="12" RadiusY="12" Fill="{StaticResource NavyBrush}"/>
-                                <Rectangle Canvas.Left="148" Canvas.Top="30" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
-                                <Rectangle Canvas.Left="148" Canvas.Top="60" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
-                                <Rectangle Canvas.Left="148" Canvas.Top="90" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
-                                <Rectangle Canvas.Left="148" Canvas.Top="120" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
-                                <Rectangle Canvas.Left="165" Canvas.Top="30" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
-                                <Rectangle Canvas.Left="165" Canvas.Top="60" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
-                                <Rectangle Canvas.Left="165" Canvas.Top="90" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
-                                <Rectangle Canvas.Left="165" Canvas.Top="120" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
-                                <!-- chữ T -->
-                                <Path Data="M200,30 H284 M242,30 V130" Stroke="White" StrokeThickness="28"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                            </Canvas>
-                        </Canvas>
-                    </Viewbox>
-                    <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="UIT" FontSize="34" FontWeight="ExtraBold" Foreground="White"/>
-                        <TextBlock Text="C I N E M A" FontSize="12" FontWeight="SemiBold" Foreground="#9CC3EA"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <!-- Tiêu đề + mô tả -->
+                <!-- logo-->
+                <Grid>
+                    <ContentControl Template ="{StaticResource LogoUITFull}" HorizontalAlignment="Left"/>
+                </Grid>
+                    <!-- Tiêu đề + mô tả -->
                 <Viewbox Grid.Row="1" Stretch="Uniform" StretchDirection="UpOnly" MaxWidth="680"
                          HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,24">
                     <StackPanel Width="380">
                         <TextBlock Text="Hệ thống quản lý rạp chiếu phim" FontSize="40" FontWeight="Bold"
                                    Foreground="White" TextWrapping="Wrap" LineHeight="48"/>
-                        <TextBlock Margin="0,16,0,0" FontSize="16" Foreground="{StaticResource LightTextBrush}"
+                        <TextBlock Margin="0,16,0,0" FontSize="16" Foreground="{StaticResource OnNavyMutedBrush}"
                                    TextWrapping="Wrap" LineHeight="26"
                                    Text="Bán vé, quản lý suất chiếu và phòng chiếu — dành cho nhân viên quầy vé và quản trị viên."/>
                     </StackPanel>
@@ -342,7 +297,7 @@
                     <StackPanel DockPanel.Dock="Left">
                         <TextBlock Text="{Binding TimeText}" FontSize="44" FontWeight="Light" Foreground="White"/>
                         <TextBlock Text="{Binding DateText}" Margin="0,6,0,0" FontSize="14" FontWeight="Medium"
-                                   Foreground="{StaticResource LightTextBrush}"/>
+                                   Foreground="{StaticResource OnNavyMutedBrush}"/>
                     </StackPanel>
                     <TextBlock DockPanel.Dock="Right" VerticalAlignment="Bottom" FontSize="12" Foreground="#8FB0D4"
                                Text="Phiên bản 1.0 · Đồ án Lập Trình Trực Quan"/>
@@ -356,7 +311,7 @@
 
                 <TextBlock Text="Đăng nhập" FontSize="30" FontWeight="Bold" Foreground="{StaticResource NavyBrush}"/>
                 <TextBlock Text="Nhập tài khoản được cấp để tiếp tục." Margin="0,8,0,24" FontSize="15"
-                           Foreground="{StaticResource MutedBrush}"/>
+                           Foreground="{StaticResource TextMutedBrush}"/>
 
                 <!-- Thông báo lỗi: chỉ hiện khi HasMessage = true -->
                 <Border Background="#FDECEC" CornerRadius="12" Padding="14,12" Margin="0,0,0,20"
