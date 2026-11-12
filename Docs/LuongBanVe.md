@@ -8,7 +8,7 @@ màn bán vé chỉ là phần nội dung hiện trong khung đó.
 ```
 ┌──────────────────┬───────────────────────────────────┬───────────────────────┐
 │ SUẤT CHIẾU       │ SƠ ĐỒ GHẾ của suất đang chọn       │ ĐƠN HIỆN TẠI          │
-│                  │   (nút ☾ Tối / ☀ Sáng, ghế trống)  │                       │
+│                  │   (tên phim, phòng, ghế trống)     │                       │
 │ HÔM NAY          │                                   │ ghế gom theo loại vé  │
 │                  │        ═══ MÀN HÌNH ═══           │                       │
 │ Phim A  [P]      │   A  ▢▢ ▢▢▢▢▢▢▢▢ ▢▢  A            │ Khách thành viên (SĐT)│
@@ -146,9 +146,8 @@ Cần sửa `CreateBooking` của 8.4:
 ## 5. Tổ chức code (hiện tại)
 
 ```
-Views/SeatMapDemoView.xaml(.cs)      Màn bán vé tại quầy (3 cột). Code-behind chỉ đổi bộ màu sáng / tối
-Views/Themes/PosLight.xaml           Bộ màu sáng  ┐ cùng tên key, giá trị lấy từ Resources/Styles.xaml
-Views/Themes/PosDark.xaml            Bộ màu tối   ┘
+Views/SeatMapDemoView.xaml(.cs)      Màn bán vé tại quầy (3 cột), tự tạo SeatMapDemoViewModel
+Views/Themes/PosLight.xaml           Bộ màu của màn, giá trị lấy từ Resources/Styles.xaml
 ViewModels/SeatMapDemoViewModel.cs   Toàn bộ trạng thái + lệnh của màn (suất, ghế, đơn, khách, thanh toán)
 ViewModels/MovieShowtimes.cs         Một phim + các suất của phim trong ngày
 ViewModels/ShowtimeOption.cs         Một suất chiếu (giờ, phòng, ghế còn trống, ghế đã bán)
@@ -160,7 +159,7 @@ Sẽ thêm ở tuần 3: `Services/BookingService.cs` (`GetTodayShowtimes`, `Get
 `Services/CustomerService.cs` (`FindByPhone`), dùng chung `Services/ShowtimeService.cs` (`HasOverlap`, `GetSoldSeatIds`) với màn Quản lý suất chiếu.
 Khi ghép CSDL có thể đổi tên `SeatMapDemoViewModel` / `SeatMapDemoView` thành `SellTicketViewModel` / `SellTicketView`.
 
-Nhờ B thêm vào `MainWindow` / `MainViewModel`: nút menu **"Bán vé"** và `DataTemplate SeatMapDemoViewModel → SeatMapDemoView`.
+B đã nối menu **"Bán vé"** trong `MainViewModel` bằng `new SeatMapDemoView()`; màn tự tạo ViewModel nên không cần gán thêm.
 
 ## 6. Kịch bản demo
 
@@ -171,8 +170,6 @@ Nhờ B thêm vào `MainWindow` / `MainViewModel`: nút menu **"Bán vé"** và 
 5. Bán đơn khác bằng **Chuyển khoản / QR** và **Thẻ (POS)**.
 6. Chọn ghế thứ 9 → bị chặn.
 7. (Tuần 3) Mở 2 cửa sổ app cùng bán một ghế → một bên thành công, bên kia báo "ghế vừa được bán", **không** có đơn nào bị tạo dở.
-8. Bấm ☾ Tối / ☀ Sáng (đầu cột sơ đồ ghế) để đổi giao diện.
-
 ## 7. Câu hỏi cần cả nhóm chốt
 
 1. **Loại ghế và giá:** bảng `SEAT` chưa có cột loại ghế. Chọn một trong hai:

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Input;
 using CinemaAPP.Helpers;
+using CinemaAPP.Services;
 
 namespace CinemaAPP.ViewModels
 {
@@ -24,19 +25,6 @@ namespace CinemaAPP.ViewModels
             ["0901234567"] = ("Nguyễn Văn An", 120),
             ["0912345678"] = ("Trần Thị Bình", 45),
         };
-
-        // Giao diện sáng / tối (View tự đổi bộ màu theo cờ này)
-        private bool isDarkTheme;
-        public bool IsDarkTheme
-        {
-            get => isDarkTheme;
-            set
-            {
-                if (SetProperty(ref isDarkTheme, value))
-                    OnPropertyChanged(nameof(ThemeButtonText));
-            }
-        }
-        public string ThemeButtonText => IsDarkTheme ? "☀  Sáng" : "☾  Tối";
 
         public decimal StandardPrice { get; } = 75000;
         public decimal VipPrice { get; } = 90000;
@@ -123,7 +111,7 @@ namespace CinemaAPP.ViewModels
 
         // Mã QR minh họa 21×21 ô (không quét được, chỉ để demo bố cục) và nội dung chuyển khoản
         public List<bool> QrCells { get; } = BuildQrCells();
-        public string TransferNote => $"UT{nextBookingId}";
+        public string TransferNote => $"UT{SalesDemoStore.NextBookingId}";
 
         // ----- Thu tiền -----
         private string cashText = "";
@@ -153,15 +141,12 @@ namespace CinemaAPP.ViewModels
         private bool isMessageError;
         public bool IsMessageError { get => isMessageError; set => SetProperty(ref isMessageError, value); }
 
-        private int nextBookingId = 1001;
-
         public ICommand SelectShowtimeCommand { get; }
         public ICommand ToggleSeatCommand { get; }
         public ICommand ClearCommand { get; }
         public ICommand FindMemberCommand { get; }
         public ICommand SetCashCommand { get; }
         public ICommand PayCommand { get; }
-        public ICommand ToggleThemeCommand { get; }
 
         public SeatMapDemoViewModel()
         {
@@ -214,8 +199,6 @@ namespace CinemaAPP.ViewModels
             // Tiền mặt phải đưa đủ; chuyển khoản / thẻ thì nhân viên bấm sau khi đã nhận tiền
             PayCommand = new RelayCommand(_ => Pay(),
                 _ => SelectedCount > 0 && (Method != PaymentMethod.Cash || Cash >= Total));
-
-            ToggleThemeCommand = new RelayCommand(_ => IsDarkTheme = !IsDarkTheme);
         }
 
         private IEnumerable<SeatItem> AllSeats() => Rows.SelectMany(r => r.Seats).Where(s => !s.IsAisle);
@@ -289,7 +272,8 @@ namespace CinemaAPP.ViewModels
             }
         }
 
-        // Giả lập BookingService.CreateBooking: đánh dấu ghế đã bán cho suất hiện tại.
+        // Giả lập BookingService.CreateBooking: đánh dấu ghế đã bán cho suất hiện tại
+        // và ghi đơn vào SalesDemoStore để màn Giao dịch thấy được.
         private void Pay()
         {
             string labels = string.Join(", ", SelectedSeats.Select(s => s.Label));
@@ -301,6 +285,19 @@ namespace CinemaAPP.ViewModels
                 _ => "Thẻ (POS)",
             };
             string points = IsMemberFound ? $" Cộng {PointsText} cho thành viên." : "";
+            Members.TryGetValue(MemberPhone.Trim(), out var member);
+            SaleRecord sale = SalesDemoStore.Add(new SaleRecord
+            {
+                CreatedAt = DateTime.Now, MovieTitle = CurrentShowtime.MovieTitle, ShowStart = CurrentShowtime.StartTime,
+                RoomName = CurrentShowtime.RoomName, ShowFormat = CurrentShowtime.ShowFormat,
+                Seats = SelectedSeats.OrderBy(s => s.Type).Select(s => new SoldSeat(s.Label, s.Type)).ToList(),
+                StaffName = AppSession.CurrentUser?.FullName ?? "Quản trị viên",
+                StaffUsername = AppSession.CurrentUser?.Username ?? "admin",
+                CustomerName = IsMemberFound ? member.Name : null,
+                CustomerPhone = IsMemberFound ? MemberPhone.Trim() : null,
+                Method = Method, CashGiven = Method == PaymentMethod.Cash ? Cash : 0, Total = Total,
+            });
+
             foreach (SeatItem seat in SelectedSeats)
             {
                 CurrentShowtime.SoldSeatIds.Add(seat.SeatID);
@@ -308,11 +305,10 @@ namespace CinemaAPP.ViewModels
                 seat.IsSold = true;
             }
             CurrentShowtime.FreeSeats -= SelectedSeats.Count;
-            int bookingId = nextBookingId++;
             OnPropertyChanged(nameof(TransferNote));
 
             ResetOrder();
-            ShowMessage($"Đã thanh toán đơn #{bookingId}: ghế {labels} – {paid} ({how}).{points}", false);
+            ShowMessage($"Đã thanh toán đơn {sale.Code}: ghế {labels} – {paid} ({how}).{points}", false);
         }
 
         // Xóa đơn đang làm: bỏ chọn ghế, tiền khách đưa, khách thành viên, về lại tiền mặt.
