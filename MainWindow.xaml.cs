@@ -20,5 +20,8 @@ namespace CinemaAPP
         {
             InitializeComponent();
         }
+
+        
+        
     }
 }
