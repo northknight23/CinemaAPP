@@ -382,71 +382,12 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="IsHitTestVisible" Value="False"/>
         </Style>
-
-        <!-- Nút trên thanh tiêu đề (Giao diện, Đăng xuất) -->
-        <Style x:Key="HeaderButton" TargetType="Button">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Body" BorderBrush="{StaticResource OnNavyMutedBrush}" BorderThickness="1"
-                                CornerRadius="8" Padding="12,6" Background="Transparent">
-                            <ContentPresenter/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Body" Property="Background" Value="{StaticResource PrimaryPressBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
+    <!-- Không có thanh tiêu đề riêng: logo, nhân viên, Đăng xuất thuộc khung app (MainWindow của B) -->
     <Grid Background="{DynamicResource PosPage}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <!-- ===== Thanh trên: tên màn, ngày, đồng hồ, nhân viên ===== -->
-        <Border Background="{DynamicResource PosHeader}" BorderBrush="{DynamicResource PosCardBorder}"
-                BorderThickness="0,0,0,1" Padding="16,10">
-            <DockPanel>
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="{Binding Clock}" Foreground="White" FontSize="20" FontWeight="SemiBold"
-                               VerticalAlignment="Center" Margin="0,0,20,0"/>
-                    <Border Width="32" Height="32" CornerRadius="16" Background="{StaticResource NavyDarkBrush}"
-                            BorderBrush="{StaticResource OnNavyMutedBrush}" BorderThickness="1">
-                        <TextBlock Text="{Binding StaffInitials}" Foreground="White" FontSize="11" FontWeight="SemiBold"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <StackPanel Margin="8,0,16,0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding StaffName}" Foreground="White" FontSize="13" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding CounterInfo}" Foreground="{StaticResource OnNavyMutedBrush}" FontSize="11"/>
-                    </StackPanel>
-                    <Button Content="{Binding ThemeButtonText}" Command="{Binding ToggleThemeCommand}"
-                            Style="{StaticResource HeaderButton}" Margin="0,0,8,0" ToolTip="Đổi giao diện sáng / tối"/>
-                    <Button Content="Đăng xuất" Command="{Binding LogoutCommand}" Style="{StaticResource HeaderButton}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="34" Height="34" CornerRadius="8" Background="{StaticResource PrimaryBrush}">
-                        <TextBlock Text="UT" Foreground="White" FontWeight="Bold" FontSize="14"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Text="Bán vé tại quầy" Foreground="White" FontSize="15" FontWeight="SemiBold"/>
-                        <TextBlock Text="{Binding TodayText}" Foreground="{StaticResource OnNavyMutedBrush}" FontSize="11"/>
-                    </StackPanel>
-                </StackPanel>
-            </DockPanel>
-        </Border>
-
-        <Grid Grid.Row="1" Margin="12">
+        <Grid Margin="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="280"/>
                 <ColumnDefinition Width="*"/>
@@ -540,6 +481,11 @@
                                 <Run Text="{Binding TotalSeats, Mode=OneWay}"/>
                             </TextBlock>
                         </StackPanel>
+                        <!-- Nút đổi giao diện sáng / tối -->
+                        <Button DockPanel.Dock="Right" Content="{Binding ThemeButtonText}"
+                                Command="{Binding ToggleThemeCommand}" Style="{StaticResource OutlineButton}"
+                                Padding="10,5" Margin="0,0,16,0" VerticalAlignment="Center"
+                                ToolTip="Đổi giao diện sáng / tối"/>
                         <StackPanel>
                             <TextBlock Text="{Binding CurrentShowtime.MovieTitle}" Foreground="{DynamicResource PosText}"
                                        FontSize="18" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>

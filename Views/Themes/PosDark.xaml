@@ -5,7 +5,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Nền, khung, chữ -->
     <SolidColorBrush x:Key="PosPage" Color="#0A2240"/>          <!-- NavyDarkBrush -->
-    <SolidColorBrush x:Key="PosHeader" Color="#0A2240"/>        <!-- NavyDarkBrush -->
     <SolidColorBrush x:Key="PosCard" Color="#0F2A4A"/>          <!-- NavyBrush -->
     <SolidColorBrush x:Key="PosCardBorder" Color="#33A9C3E0"/>  <!-- OnNavyMutedBrush 20% -->
     <SolidColorBrush x:Key="PosSubtle" Color="#14A9C3E0"/>      <!-- OnNavyMutedBrush 8% -->

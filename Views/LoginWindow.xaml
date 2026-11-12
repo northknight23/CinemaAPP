@@ -12,6 +12,15 @@
     </Window.InputBindings>
 
     <Window.Resources>
+        <!-- Màu lấy từ bản thiết kế -->
+        <SolidColorBrush x:Key="NavyBrush" Color="#0F2A4A"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#1F6FC5"/>
+        <SolidColorBrush x:Key="AccentDarkBrush" Color="#185BA3"/>
+        <SolidColorBrush x:Key="GoldBrush" Color="#F5A524"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#4A5B70"/>
+        <SolidColorBrush x:Key="IconBrush" Color="#5F6B7A"/>
+        <SolidColorBrush x:Key="LightTextBrush" Color="#A9C3E0"/>
+
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
 
         <!-- Khung bao quanh mỗi ô nhập: viền sáng xanh khi đang gõ -->
