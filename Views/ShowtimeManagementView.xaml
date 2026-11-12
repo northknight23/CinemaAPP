@@ -24,10 +24,11 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ListBoxItem">
-                            <Border x:Name="bg" CornerRadius="8" Padding="12,5" Margin="2,0" MinWidth="96" Background="Transparent">
+                            <Border x:Name="bg" CornerRadius="8" Padding="10,5" Margin="2,0" Background="Transparent">
                                 <StackPanel>
-                                    <TextBlock x:Name="top" Text="{Binding Top}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource PosText}"/>
-                                    <TextBlock x:Name="bottom" FontSize="11" Foreground="{DynamicResource PosTextMuted}">
+                                    <TextBlock x:Name="top" Text="{Binding Top}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource PosText}"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock x:Name="bottom" FontSize="11" Foreground="{DynamicResource PosTextMuted}" TextTrimming="CharacterEllipsis">
                                         <Run Text="{Binding Bottom, Mode=OneWay}"/> · <Run Text="{Binding CountText, Mode=OneWay}"/>
                                     </TextBlock>
                                 </StackPanel>
@@ -142,6 +143,7 @@
             <!-- Ô số: nhãn, số lớn + chip, dòng phụ, biểu tượng bên phải -->
             <Style x:Key="KpiLabel" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
                 <Setter Property="FontSize" Value="13"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
             </Style>
             <Style x:Key="KpiBig" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="26"/>
@@ -157,6 +159,7 @@
             <Style x:Key="KpiSub" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Margin" Value="0,6,0,0"/>
+                <Setter Property="TextWrapping" Value="Wrap"/>
             </Style>
             <Style x:Key="KpiIcon" TargetType="Border">
                 <Setter Property="Width" Value="46"/>
@@ -227,63 +230,65 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- ===== Dải 7 ngày + nút ===== -->
-            <DockPanel>
-                <Border DockPanel.Dock="Left" Style="{StaticResource Card}" Padding="4">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Style="{StaticResource IconButton}" Command="{Binding PrevWeekCommand}" ToolTip="7 ngày trước">
-                            <Path Data="M15 18l-6-6 6-6" Stroke="{DynamicResource PosText}" StrokeThickness="2" Width="10" Height="12" Stretch="Uniform"/>
-                        </Button>
-                        <ListBox ItemsSource="{Binding Days}" SelectedItem="{Binding SelectedDay}"
-                                 BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource DayItem}"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                            <ListBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal"/>
-                                </ItemsPanelTemplate>
-                            </ListBox.ItemsPanel>
-                        </ListBox>
-                        <Button Style="{StaticResource IconButton}" Command="{Binding NextWeekCommand}" ToolTip="7 ngày sau">
-                            <Path Data="M9 18l6-6-6-6" Stroke="{DynamicResource PosText}" StrokeThickness="2" Width="10" Height="12" Stretch="Uniform"/>
-                        </Button>
-                    </StackPanel>
-                </Border>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Style="{StaticResource OutlineButton}" Padding="0" Width="96" Command="{Binding TodayCommand}" Content="Hôm nay"/>
-                    <Button Style="{StaticResource OutlineButton}" Width="104" Margin="8,0,0,0" Command="{Binding ReloadCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 4v5h-5" Stroke="{DynamicResource PosText}" StrokeThickness="2"
-                                  Width="13" Height="13" Stretch="Uniform" Margin="0,0,7,0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                            <TextBlock Text="Tải lại"/>
-                        </StackPanel>
+            <!-- ===== Dải 7 ngày: chiếm cả hàng, 7 ô chia đều nên tự co khi thu nhỏ cửa sổ ===== -->
+            <Border Style="{StaticResource Card}" Padding="4" ToolTip="{Binding WeekText}">
+                <DockPanel>
+                    <Button DockPanel.Dock="Left" Style="{StaticResource IconButton}" Command="{Binding PrevWeekCommand}" ToolTip="7 ngày trước">
+                        <Path Data="M15 18l-6-6 6-6" Stroke="{DynamicResource PosText}" StrokeThickness="2" Width="10" Height="12" Stretch="Uniform"/>
                     </Button>
-                    <Button Style="{StaticResource SolidButton}" Background="{DynamicResource PosAccent}" Width="178" Margin="8,0,0,0"
-                            Command="{Binding NewCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <Path Data="M12 5v14 M5 12h14" Stroke="White" StrokeThickness="2.2" Width="12" Height="12" Stretch="Uniform"
-                                  Margin="0,0,8,0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                            <TextBlock Text="Thêm suất chiếu"/>
-                        </StackPanel>
+                    <Button DockPanel.Dock="Right" Style="{StaticResource OutlineButton}" Width="88" Height="36" Margin="4,0,2,0"
+                            Command="{Binding TodayCommand}" Content="Hôm nay"/>
+                    <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Command="{Binding NextWeekCommand}" ToolTip="7 ngày sau">
+                        <Path Data="M9 18l6-6-6-6" Stroke="{DynamicResource PosText}" StrokeThickness="2" Width="10" Height="12" Stretch="Uniform"/>
                     </Button>
-                </StackPanel>
-            </DockPanel>
+                    <ListBox ItemsSource="{Binding Days}" SelectedItem="{Binding SelectedDay}"
+                             BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource DayItem}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1"/>
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
+                </DockPanel>
+            </Border>
 
             <!-- ===== Bộ lọc ===== -->
-            <DockPanel Grid.Row="1" Margin="0,10,0,0">
-                <TextBox DockPanel.Dock="Left" Style="{StaticResource InputBox}" Width="280" Height="40" Tag="⌕  Tìm mã suất, tên phim"
+            <!-- ===== Bộ lọc (co giãn theo chiều ngang) + nút ===== -->
+            <Grid Grid.Row="1" Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.4*" MinWidth="140"/>
+                    <ColumnDefinition Width="1.3*" MinWidth="125"/>
+                    <ColumnDefinition Width="*" MinWidth="115"/>
+                    <ColumnDefinition Width="*" MinWidth="148"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Style="{StaticResource InputBox}" Height="40" Tag="⌕  Tìm mã suất, tên phim"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
-                <ComboBox DockPanel.Dock="Left" Style="{StaticResource FilterCombo}" Width="230" Height="40" Margin="10,0,0,0"
+                <ComboBox Grid.Column="1" Style="{StaticResource FilterCombo}" Height="40" Margin="10,0,0,0"
                           ItemsSource="{Binding MovieFilterOptions}" SelectedItem="{Binding SelectedMovieFilter}"/>
-                <ComboBox DockPanel.Dock="Left" Style="{StaticResource FilterCombo}" Width="170" Height="40" Margin="10,0,0,0"
+                <ComboBox Grid.Column="2" Style="{StaticResource FilterCombo}" Height="40" Margin="10,0,0,0"
                           ItemsSource="{Binding RoomFilterOptions}" SelectedItem="{Binding SelectedRoomFilter}"/>
-                <ComboBox DockPanel.Dock="Left" Style="{StaticResource FilterCombo}" Width="190" Height="40" Margin="10,0,0,0"
+                <ComboBox Grid.Column="3" Style="{StaticResource FilterCombo}" Height="40" Margin="10,0,0,0"
                           ItemsSource="{Binding StatusFilterOptions}" SelectedItem="{Binding SelectedStatusFilter}"/>
-                <Button DockPanel.Dock="Left" Style="{StaticResource OutlineButton}" Height="40" Width="140" Margin="10,0,0,0"
+                <Button Grid.Column="4" Style="{StaticResource OutlineButton}" Height="40" Width="118" Margin="10,0,0,0"
                         Command="{Binding ResetFiltersCommand}" Content="Đặt lại bộ lọc" FontSize="12.5"/>
-                <TextBlock Text="{Binding WeekText, StringFormat='Đang xem {0}'}" Style="{StaticResource Muted}"
-                           HorizontalAlignment="Right" VerticalAlignment="Center"/>
-            </DockPanel>
+                <Button Grid.Column="5" Style="{StaticResource OutlineButton}" Height="40" Width="40" Margin="10,0,0,0"
+                        Command="{Binding ReloadCommand}" ToolTip="Tải lại lịch chiếu">
+                    <Path Data="M21 12a9 9 0 1 1-2.64-6.36 M21 4v5h-5" Stroke="{DynamicResource PosText}" StrokeThickness="2"
+                          Width="14" Height="14" Stretch="Uniform" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                </Button>
+                <Button Grid.Column="6" Style="{StaticResource SolidButton}" Background="{DynamicResource PosAccent}" Width="166" Margin="10,0,0,0"
+                        Command="{Binding NewCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="M12 5v14 M5 12h14" Stroke="White" StrokeThickness="2.2" Width="12" Height="12" Stretch="Uniform"
+                              Margin="0,0,8,0" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        <TextBlock Text="Thêm suất chiếu"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
 
             <!-- ===== 4 ô số của ngày đang chọn ===== -->
             <UniformGrid Grid.Row="2" Rows="1" Margin="0,10,0,10">
@@ -295,12 +300,12 @@
                         </Border>
                         <StackPanel>
                             <TextBlock Text="Suất chiếu trong ngày" Style="{StaticResource KpiLabel}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <WrapPanel Margin="0,4,0,0">
                                 <TextBlock Text="{Binding ShowCountText}" Style="{StaticResource KpiBig}"/>
                                 <Border Style="{StaticResource KpiChip}" Background="{DynamicResource PosGoodBg}">
                                     <TextBlock Text="{Binding ShowCountSub}" Foreground="{DynamicResource PosGood}"/>
                                 </Border>
-                            </StackPanel>
+                            </WrapPanel>
                             <TextBlock Text="Tự động cộng 15 phút dọn phòng mỗi suất" Style="{StaticResource KpiSub}"/>
                         </StackPanel>
                     </DockPanel>
@@ -313,12 +318,12 @@
                         </Border>
                         <StackPanel>
                             <TextBlock Text="Đang mở bán vé" Style="{StaticResource KpiLabel}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <WrapPanel Margin="0,4,0,0">
                                 <TextBlock Text="{Binding OnSaleText}" Style="{StaticResource KpiBig}" Foreground="{DynamicResource PosAccent}"/>
                                 <Border Style="{StaticResource KpiChip}" Background="{DynamicResource PosInfoBg}">
                                     <TextBlock Text="{Binding OnSaleSub}" Foreground="{DynamicResource PosInfo}"/>
                                 </Border>
-                            </StackPanel>
+                            </WrapPanel>
                             <TextBlock Text="Suất hôm nay, mai, kia được bán tại quầy" Style="{StaticResource KpiSub}"/>
                         </StackPanel>
                     </DockPanel>
@@ -331,12 +336,12 @@
                         </Border>
                         <StackPanel>
                             <TextBlock Text="Ghế đã bán trong ngày" Style="{StaticResource KpiLabel}"/>
-                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <WrapPanel Margin="0,4,0,0">
                                 <TextBlock Text="{Binding SeatsSoldText}" Style="{StaticResource KpiBig}"/>
                                 <Border Style="{StaticResource KpiChip}" Background="{DynamicResource PosWarnBg}">
                                     <TextBlock Text="{Binding SeatsSoldSub}" Foreground="{DynamicResource PosWarn}"/>
                                 </Border>
-                            </StackPanel>
+                            </WrapPanel>
                             <TextBlock Text="Tỷ lệ lấp đầy các suất trong ngày" Style="{StaticResource KpiSub}"/>
                         </StackPanel>
                     </DockPanel>
@@ -349,7 +354,10 @@
                         </Border>
                         <StackPanel>
                             <TextBlock Text="Doanh thu vé" Style="{StaticResource KpiLabel}"/>
-                            <TextBlock Text="{Binding RevenueText}" Style="{StaticResource KpiBig}" Foreground="{DynamicResource PosGood}" Margin="0,4,0,0"/>
+                            <!-- Số tiền dài: ô hẹp thì tự thu nhỏ chữ thay vì bị cắt -->
+                            <Viewbox StretchDirection="DownOnly" HorizontalAlignment="Left" Margin="0,4,0,0">
+                                <TextBlock Text="{Binding RevenueText}" Style="{StaticResource KpiBig}" Foreground="{DynamicResource PosGood}"/>
+                            </Viewbox>
                             <TextBlock Text="Tính từ vé đã bán, bỏ đơn đã hủy" Style="{StaticResource KpiSub}"/>
                         </StackPanel>
                     </DockPanel>
@@ -362,30 +370,33 @@
             </Border>
 
             <!-- ===== Bảng suất chiếu ===== -->
+            <!-- Cửa sổ hẹp hơn MinWidth thì bảng cuộn ngang thay vì các cột đè lên nhau -->
             <Border Grid.Row="4" Style="{StaticResource Card}" Padding="0">
-                <DockPanel>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                <DockPanel MinWidth="900" Width="{Binding ViewportWidth, RelativeSource={RelativeSource AncestorType=ScrollViewer}}">
                     <DockPanel DockPanel.Dock="Top" Margin="22,14,22,12">
                         <TextBlock Text="{Binding TableTitle}" Style="{StaticResource Title}"/>
                         <TextBlock Style="{StaticResource Muted}" FontSize="12.5" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Margin="16,0,0,0" TextTrimming="CharacterEllipsis"
                                    Text="Giờ chiếu: bắt đầu → hết phim. Phòng trống sau khi dọn 15 phút."/>
                     </DockPanel>
                     <Border DockPanel.Dock="Top" Padding="22,11" Background="{DynamicResource PosSubtle}"
                             BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="0,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="86"/><ColumnDefinition Width="*"/><ColumnDefinition Width="150"/>
-                                <ColumnDefinition Width="170"/><ColumnDefinition Width="190"/><ColumnDefinition Width="110"/>
-                                <ColumnDefinition Width="120"/><ColumnDefinition Width="136"/><ColumnDefinition Width="84"/>
+                                <ColumnDefinition Width="72"/><ColumnDefinition Width="2*" MinWidth="170"/><ColumnDefinition Width="0.8*" MinWidth="108"/>
+                                <ColumnDefinition Width="0.9*" MinWidth="128"/><ColumnDefinition Width="*" MinWidth="132"/><ColumnDefinition Width="0.7*" MinWidth="104"/>
+                                <ColumnDefinition Width="0.8*" MinWidth="112"/><ColumnDefinition Width="70"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Text="MÃ SUẤT" Style="{StaticResource Head}"/>
                             <TextBlock Grid.Column="1" Text="THÔNG TIN PHIM" Style="{StaticResource Head}"/>
-                            <TextBlock Grid.Column="2" Text="PHÒNG · ĐỊNH DẠNG" Style="{StaticResource Head}"/>
-                            <TextBlock Grid.Column="3" Text="KHUNG GIỜ CHIẾU" Style="{StaticResource Head}"/>
-                            <TextBlock Grid.Column="4" Text="TÌNH TRẠNG GHẾ" Style="{StaticResource Head}"/>
-                            <TextBlock Grid.Column="5" Text="GIÁ CƠ BẢN" Style="{StaticResource Head}" HorizontalAlignment="Right" Margin="0,0,14,0"/>
-                            <TextBlock Grid.Column="6" Text="DOANH THU" Style="{StaticResource Head}" HorizontalAlignment="Right" Margin="0,0,14,0"/>
-                            <TextBlock Grid.Column="7" Text="TRẠNG THÁI" Style="{StaticResource Head}"/>
-                            <TextBlock Grid.Column="8" Text="THAO TÁC" Style="{StaticResource Head}" HorizontalAlignment="Right"/>
+                            <TextBlock Grid.Column="2" Text="PHÒNG" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="3" Text="GIỜ CHIẾU" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="4" Text="GHẾ ĐÃ BÁN" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="5" Text="GIÁ VÉ" Style="{StaticResource Head}" HorizontalAlignment="Right" Margin="0,0,14,0"
+                                       ToolTip="Giá vé cơ bản, dòng dưới là doanh thu của suất"/>
+                            <TextBlock Grid.Column="6" Text="TRẠNG THÁI" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="7" Text="THAO TÁC" Style="{StaticResource Head}" HorizontalAlignment="Right"/>
                         </Grid>
                     </Border>
                     <Grid>
@@ -399,9 +410,9 @@
                                 <DataTemplate>
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="86"/><ColumnDefinition Width="*"/><ColumnDefinition Width="150"/>
-                                            <ColumnDefinition Width="170"/><ColumnDefinition Width="190"/><ColumnDefinition Width="110"/>
-                                            <ColumnDefinition Width="120"/><ColumnDefinition Width="136"/><ColumnDefinition Width="84"/>
+                                            <ColumnDefinition Width="72"/><ColumnDefinition Width="2*" MinWidth="170"/><ColumnDefinition Width="0.8*" MinWidth="108"/>
+                                            <ColumnDefinition Width="0.9*" MinWidth="128"/><ColumnDefinition Width="*" MinWidth="132"/><ColumnDefinition Width="0.7*" MinWidth="104"/>
+                                            <ColumnDefinition Width="0.8*" MinWidth="112"/><ColumnDefinition Width="70"/>
                                         </Grid.ColumnDefinitions>
 
                                         <Border Style="{StaticResource Chip}" Background="{DynamicResource PosSubtle}" CornerRadius="7" Padding="10,4"
@@ -427,8 +438,8 @@
 
                                         <StackPanel Grid.Column="2" VerticalAlignment="Center">
                                             <TextBlock Text="{Binding RoomName}" Style="{StaticResource Cell}" FontSize="13.5" FontWeight="SemiBold"/>
-                                            <Border Style="{StaticResource Chip}" Background="{DynamicResource PosChip}" CornerRadius="5" Padding="8,2" Margin="0,4,0,0">
-                                                <TextBlock Text="{Binding FormatText}" FontSize="11.5" FontWeight="SemiBold" Foreground="{DynamicResource PosInfo}"/>
+                                            <Border Style="{StaticResource Chip}" Background="{DynamicResource PosChip}" CornerRadius="5" Padding="6,2" Margin="0,4,0,0">
+                                                <TextBlock Text="{Binding FormatText}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource PosInfo}"/>
                                             </Border>
                                         </StackPanel>
 
@@ -460,18 +471,19 @@
                                             </Border>
                                         </StackPanel>
 
-                                        <TextBlock Grid.Column="5" Text="{Binding PriceText}" Style="{StaticResource Cell}" FontSize="14" FontWeight="Bold"
-                                                   HorizontalAlignment="Right" Margin="0,0,16,0"/>
-                                        <TextBlock Grid.Column="6" Text="{Binding RevenueText}" Style="{StaticResource Cell}" FontSize="13"
-                                                   HorizontalAlignment="Right" Margin="0,0,16,0"/>
+                                        <StackPanel Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,14,0">
+                                            <TextBlock Text="{Binding PriceText}" Style="{StaticResource Cell}" FontSize="14" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding RevenueText}" Style="{StaticResource Muted}" FontSize="11.5" HorizontalAlignment="Right"
+                                                       Margin="0,4,0,0" ToolTip="Doanh thu vé của suất"/>
+                                        </StackPanel>
 
-                                        <Border Grid.Column="7" Style="{StaticResource ShowStatusChip}" Padding="10,4" CornerRadius="12">
+                                        <Border Grid.Column="6" Style="{StaticResource ShowStatusChip}" Padding="10,4" CornerRadius="12">
                                             <TextBlock FontSize="12" FontWeight="SemiBold">
                                                 <Run Text="●" FontSize="9"/> <Run Text="{Binding StatusText, Mode=OneWay}"/>
                                             </TextBlock>
                                         </Border>
 
-                                        <StackPanel Grid.Column="8" Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <StackPanel Grid.Column="7" Orientation="Horizontal" HorizontalAlignment="Right">
                                             <Button Style="{StaticResource IconButton}" ToolTip="Sửa / xem suất" CommandParameter="{Binding}"
                                                     Command="{Binding DataContext.EditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}">
                                                 <Path Data="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
@@ -492,6 +504,7 @@
                                    Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}"/>
                     </Grid>
                 </DockPanel>
+                </ScrollViewer>
             </Border>
         </Grid>
 
