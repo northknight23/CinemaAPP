@@ -1,8 +1,15 @@
 ﻿<UserControl x:Class="CinemaAPP.Views.SeatMapDemoView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="768"
+             d:DataContext="{d:DesignInstance Type=vm:SeatMapDemoViewModel, IsDesignTimeCreatable=True}"
              Language="vi-VN">
     <!-- Language="vi-VN": số tiền hiện dạng 75.000 thay vì 75,000 -->
+    <!-- d:DataContext chỉ dùng cho khung thiết kế của Visual Studio (để thấy ghế mẫu khi mở file);
+         lúc chạy app thì DataContext do nơi chứa màn này gán. -->
     <UserControl.Resources>
         <ResourceDictionary>
         <!-- Bộ màu nằm ở Views/Themes (PosLight / PosDark, cùng tên key, giá trị lấy từ Resources/Styles.xaml).
