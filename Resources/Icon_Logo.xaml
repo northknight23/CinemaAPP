@@ -1,0 +1,51 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ControlTemplate x:Key="LogoUITFull" TargetType="ContentControl">
+        <StackPanel Orientation="Horizontal">
+            <Viewbox Width="72" Height="72">
+                <Canvas Width="72" Height="72">
+                    <Rectangle Width="72" Height="72" RadiusX="18" RadiusY="18" Fill="{StaticResource AccentBrush}"/>
+                    <Canvas>
+                        <Canvas.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="0.1867" ScaleY="0.1867"/>
+                                <TranslateTransform X="8" Y="21"/>
+                            </TransformGroup>
+                        </Canvas.RenderTransform>
+                        <!-- chữ U -->
+                        <Path Data="M42,30 V92 A36,36 0 0 0 114,92 V30" Stroke="White" StrokeThickness="28"
+                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        <!-- nút play trong chữ U -->
+                        <Path Data="M66,64 L66,94 L91,79 Z" Fill="{StaticResource GoldBrush}"
+                      Stroke="{StaticResource GoldBrush}" StrokeThickness="6" StrokeLineJoin="Round"/>
+                        <!-- chữ I là dải phim -->
+                        <Rectangle Canvas.Left="142" Canvas.Top="16" Width="36" Height="128" RadiusX="12" RadiusY="12" Fill="{StaticResource NavyBrush}"/>
+                        <Rectangle Canvas.Left="148" Canvas.Top="30" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                        <Rectangle Canvas.Left="148" Canvas.Top="60" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                        <Rectangle Canvas.Left="148" Canvas.Top="90" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                        <Rectangle Canvas.Left="148" Canvas.Top="120" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                        <Rectangle Canvas.Left="165" Canvas.Top="30" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                        <Rectangle Canvas.Left="165" Canvas.Top="60" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                        <Rectangle Canvas.Left="165" Canvas.Top="90" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                        <Rectangle Canvas.Left="165" Canvas.Top="120" Width="7" Height="10" RadiusX="3" RadiusY="3" Fill="White"/>
+                        <!-- chữ T -->
+                        <Path Data="M200,30 H284 M242,30 V130" Stroke="White" StrokeThickness="28"
+                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    </Canvas>
+                </Canvas>
+            </Viewbox>
+            <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="UIT" FontSize="34" FontWeight="ExtraBold" Foreground="White"/>
+                <TextBlock Text="C I N E M A" FontSize="12" FontWeight="SemiBold" Foreground="#9CC3EA"/>
+            </StackPanel>
+        </StackPanel>
+    </ControlTemplate>
+    
+    <!--Logo-->
+    <ControlTemplate x:Key="LogoUIT" TargetType="ContentControl">
+        <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
+            <TextBlock Text="UIT" FontSize="34" FontWeight="ExtraBold" Foreground="White"/>
+            <TextBlock Text="C I N E M A" FontSize="12" FontWeight="SemiBold" Foreground="#9CC3EA"/>
+        </StackPanel>
+    </ControlTemplate>
+</ResourceDictionary>
