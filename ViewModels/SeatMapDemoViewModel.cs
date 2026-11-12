@@ -25,19 +25,6 @@ namespace CinemaAPP.ViewModels
             ["0912345678"] = ("Trần Thị Bình", 45),
         };
 
-        // Giao diện sáng / tối (View tự đổi bộ màu theo cờ này)
-        private bool isDarkTheme;
-        public bool IsDarkTheme
-        {
-            get => isDarkTheme;
-            set
-            {
-                if (SetProperty(ref isDarkTheme, value))
-                    OnPropertyChanged(nameof(ThemeButtonText));
-            }
-        }
-        public string ThemeButtonText => IsDarkTheme ? "☀  Sáng" : "☾  Tối";
-
         public decimal StandardPrice { get; } = 75000;
         public decimal VipPrice { get; } = 90000;
         public decimal CouplePrice { get; } = 180000;
@@ -161,7 +148,6 @@ namespace CinemaAPP.ViewModels
         public ICommand FindMemberCommand { get; }
         public ICommand SetCashCommand { get; }
         public ICommand PayCommand { get; }
-        public ICommand ToggleThemeCommand { get; }
 
         public SeatMapDemoViewModel()
         {
@@ -214,8 +200,6 @@ namespace CinemaAPP.ViewModels
             // Tiền mặt phải đưa đủ; chuyển khoản / thẻ thì nhân viên bấm sau khi đã nhận tiền
             PayCommand = new RelayCommand(_ => Pay(),
                 _ => SelectedCount > 0 && (Method != PaymentMethod.Cash || Cash >= Total));
-
-            ToggleThemeCommand = new RelayCommand(_ => IsDarkTheme = !IsDarkTheme);
         }
 
         private IEnumerable<SeatItem> AllSeats() => Rows.SelectMany(r => r.Seats).Where(s => !s.IsAisle);
