@@ -196,7 +196,7 @@ namespace CinemaAPP.ViewModels
             {
                 DateTime d = weekStart.AddDays(i);
                 int n = week.Count(s => s.StartTime.Date == d);
-                return new DayOption(d, DayName(d), d.ToString("dd/MM"), n == 0 ? "Chưa có suất" : $"{n} suất");
+                return new DayOption(d, DayName(d), d.ToString("dd/MM"), $"{n} suất");
             }).ToList();
             OnPropertyChanged(nameof(Days));
             OnPropertyChanged(nameof(WeekText));
