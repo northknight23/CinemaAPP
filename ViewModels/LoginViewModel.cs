@@ -54,7 +54,7 @@ namespace CinemaAPP.ViewModels
         {
             null => "Đang kiểm tra kết nối CSDL…",
             true => "Đã kết nối máy chủ CSDL",
-            false => "Chế độ ngoại tuyến (Tài khoản mẫu: admin / nv01)"
+            false => "Không kết nối được máy chủ CSDL"
         };
 
         // ---------- Lệnh ----------
