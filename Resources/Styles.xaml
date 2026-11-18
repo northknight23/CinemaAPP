@@ -41,4 +41,14 @@
     <SolidColorBrush x:Key="SeatCoupleBrush"       Color="#F1ECFC"/>
     <SolidColorBrush x:Key="SeatCoupleBorderBrush" Color="#8466D1"/>
     <SolidColorBrush x:Key="SeatSoldBrush"         Color="#DDE3EA"/>
+
+    <!-- Quầng sáng màn hình hắt xuống: đậm ở mép màn, nhạt dần về phía ghế -->
+    <LinearGradientBrush x:Key="PosScreenGlow" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#401F6FC5" Offset="0"/>                <!-- PrimaryBrush 25% -->
+        <GradientStop Color="#001F6FC5" Offset="1"/>                <!-- PrimaryBrush 0% -->
+    </LinearGradientBrush>
+    <!-- Giấy in vé: tông hồng và họa tiết chìm theo mẫu vé. -->
+    <SolidColorBrush x:Key="TicketPaperBrush" Color="#F4DEDC"/>
+    <SolidColorBrush x:Key="TicketWatermarkBrush" Color="#FFF5F1"/>
+    <SolidColorBrush x:Key="TicketRuleBrush" Color="#A37575"/>
 </ResourceDictionary>
