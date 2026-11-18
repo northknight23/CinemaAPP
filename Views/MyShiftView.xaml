@@ -15,21 +15,21 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/CinemaAPP;component/Views/Themes/SalesControls.xaml"/>
+                <ResourceDictionary Source="/CinemaAPP;component/Resources/SalesControls.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Chip trạng thái ca: Đang mở xanh lá, Chờ xác nhận xanh dương, Đã bàn giao xám -->
             <Style x:Key="ShiftChip" TargetType="Border" BasedOn="{StaticResource Chip}">
-                <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
-                <Setter Property="TextElement.Foreground" Value="{DynamicResource PosGood}"/>
+                <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding ShiftStatusKind}" Value="Pending">
-                        <Setter Property="Background" Value="{DynamicResource PosInfoBg}"/>
-                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosInfo}"/>
+                        <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource InfoBrush}"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding ShiftStatusKind}" Value="Done">
-                        <Setter Property="Background" Value="{DynamicResource PosSubtle}"/>
-                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosTextMuted}"/>
+                        <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource TextMutedBrush}"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
@@ -37,7 +37,7 @@
             <Style x:Key="SectionTitle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="13"/>
                 <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -52,7 +52,7 @@
 
         <!-- ===== Tab + thông tin ca + bộ lọc ===== -->
         <DockPanel>
-            <Border DockPanel.Dock="Left" Background="{DynamicResource PosCard}" BorderBrush="{DynamicResource PosCardBorder}"
+            <Border DockPanel.Dock="Left" Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource CardBorderBrush}"
                     BorderThickness="1" CornerRadius="10" Padding="4" Height="42">
                 <StackPanel Orientation="Horizontal">
                     <RadioButton Content="Hóa đơn trong ca" Style="{StaticResource TabButton}" IsChecked="{Binding IsListTab}"/>
@@ -96,14 +96,14 @@
             <Border Style="{StaticResource Card}" Margin="4,0" Padding="16,10">
                 <StackPanel>
                     <TextBlock Text="Doanh thu ca" Style="{StaticResource Muted}"/>
-                    <TextBlock Text="{Binding RevenueText}" Style="{StaticResource KpiValue}" Foreground="{DynamicResource PosGood}"/>
+                    <TextBlock Text="{Binding RevenueText}" Style="{StaticResource KpiValue}" Foreground="{DynamicResource SuccessBrush}"/>
                 </StackPanel>
             </Border>
             <Border Style="{StaticResource Card}" Margin="4,0,0,0" Padding="16,10">
                 <StackPanel>
                     <TextBlock Text="Đơn đã hủy" Style="{StaticResource Muted}"/>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding CancelledText}" Style="{StaticResource KpiValue}" Foreground="{DynamicResource PosBad}"/>
+                        <TextBlock Text="{Binding CancelledText}" Style="{StaticResource KpiValue}" Foreground="{DynamicResource ErrorBrush}"/>
                         <TextBlock Text="{Binding RefundText}" Style="{StaticResource Muted}" VerticalAlignment="Bottom" Margin="8,0,0,4"/>
                     </StackPanel>
                 </StackPanel>
@@ -114,13 +114,13 @@
         <Border Grid.Row="2" CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
             <Border.Style>
                 <Style TargetType="Border">
-                    <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
+                    <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding Message}" Value="">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsMessageError}" Value="True">
-                            <Setter Property="Background" Value="{DynamicResource PosWarnBg}"/>
+                            <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -128,10 +128,10 @@
             <TextBlock Text="{Binding Message}" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
-                        <Setter Property="Foreground" Value="{DynamicResource PosGood}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsMessageError}" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource PosWarn}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -149,8 +149,8 @@
 
             <Border Style="{StaticResource Card}" Padding="0">
                 <DockPanel>
-                    <Border DockPanel.Dock="Top" Padding="19,10" Background="{DynamicResource PosSubtle}" CornerRadius="12,12,0,0"
-                            BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="0,0,0,1">
+                    <Border DockPanel.Dock="Top" Padding="19,10" Background="{DynamicResource SubtleBrush}" CornerRadius="12,12,0,0"
+                            BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="0,0,0,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="56"/><ColumnDefinition Width="44"/><ColumnDefinition Width="*"/>
@@ -197,7 +197,7 @@
                                                 <Style TargetType="TextBlock" BasedOn="{StaticResource Cell}">
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsCancelled}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource PosTextMuted}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
                                                             <Setter Property="TextDecorations" Value="Strikethrough"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -242,13 +242,13 @@
                         </DockPanel>
 
                         <!-- Đơn đã hủy: ai hủy, lúc nào, vì sao -->
-                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource PosBadBg}" CornerRadius="10" Padding="12"
+                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource ErrorBgBrush}" CornerRadius="10" Padding="12"
                                 Visibility="{Binding IsCancelled, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="{Binding CancelInfo}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource PosBad}"/>
+                            <TextBlock Text="{Binding CancelInfo}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ErrorBrush}"/>
                         </Border>
 
                         <!-- Không hủy được (suất đã chiếu / ca đã chốt) -->
-                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource PosSubtle}" CornerRadius="10" Padding="12"
+                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource SubtleBrush}" CornerRadius="10" Padding="12"
                                 DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
                             <Border.Style>
                                 <Style TargetType="Border">
@@ -259,15 +259,15 @@
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
-                            <TextBlock Text="{Binding CancelBlockedText}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource PosTextMuted}"/>
+                            <TextBlock Text="{Binding CancelBlockedText}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource TextMutedBrush}"/>
                         </Border>
 
                         <!-- Hỗ trợ khách hủy vé -->
-                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource PosBadBg}" CornerRadius="10" Padding="12"
+                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource ErrorBgBrush}" CornerRadius="10" Padding="12"
                                 DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                 Visibility="{Binding CanCancel, Converter={StaticResource BoolToVis}}">
                             <StackPanel>
-                                <TextBlock Text="Hỗ trợ khách hủy vé" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource PosBad}"/>
+                                <TextBlock Text="Hỗ trợ khách hủy vé" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource ErrorBrush}"/>
                                 <StackPanel>
                                     <StackPanel.Style>
                                         <Style TargetType="StackPanel">
@@ -302,10 +302,10 @@
                                     </TextBox>
                                 </StackPanel>
                                 <TextBlock Text="{Binding CancelImpactText}" TextWrapping="Wrap" FontSize="11.5"
-                                           Foreground="{DynamicResource PosText}" Margin="0,2,0,10"/>
+                                           Foreground="{DynamicResource TextBrush}" Margin="0,2,0,10"/>
 
                                 <!-- Bước 1: chọn lý do rồi bấm -->
-                                <Button Content="HỦY VÉ &amp; HOÀN TIỀN" Background="{DynamicResource PosBad}"
+                                <Button Content="HỦY VÉ &amp; HOÀN TIỀN" Background="{DynamicResource ErrorBrush}"
                                         Command="{Binding AskCancelCommand}">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource SolidButton}">
@@ -321,7 +321,7 @@
                                 <!-- Bước 2: xác nhận (không hoàn tác được) -->
                                 <StackPanel Visibility="{Binding IsConfirmingCancel, Converter={StaticResource BoolToVis}}">
                                     <TextBlock FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap"
-                                               Foreground="{DynamicResource PosBad}" Margin="0,0,0,8">
+                                               Foreground="{DynamicResource ErrorBrush}" Margin="0,0,0,8">
                                         <Run Text="Hủy vé với lý do"/> <Run Text="{Binding SelectedReason, Mode=OneWay}"/><Run Text="? Thao tác không hoàn tác được."/>
                                     </TextBlock>
                                     <Grid>
@@ -332,7 +332,7 @@
                                         </Grid.ColumnDefinitions>
                                         <Button Content="Không" Style="{StaticResource OutlineButton}" Command="{Binding BackCommand}"/>
                                         <Button Grid.Column="2" Content="Xác nhận hủy" Style="{StaticResource SolidButton}"
-                                                Background="{DynamicResource PosBad}" Command="{Binding ConfirmCancelCommand}"/>
+                                                Background="{DynamicResource ErrorBrush}" Command="{Binding ConfirmCancelCommand}"/>
                                     </Grid>
                                 </StackPanel>
                             </StackPanel>
@@ -363,17 +363,17 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border x:Name="seat" CornerRadius="5" Padding="6,2" Margin="4,0,0,4" BorderThickness="1"
-                                                    Background="{DynamicResource PosSeatStd}" BorderBrush="{DynamicResource PosSeatStdBorder}">
-                                                <TextBlock Text="{Binding Label}" FontSize="11" Foreground="{DynamicResource PosText}"/>
+                                                    Background="{DynamicResource SeatStdBrush}" BorderBrush="{DynamicResource SeatStdBorderBrush}">
+                                                <TextBlock Text="{Binding Label}" FontSize="11" Foreground="{DynamicResource TextBrush}"/>
                                             </Border>
                                             <DataTemplate.Triggers>
                                                 <DataTrigger Binding="{Binding Type}" Value="{x:Static vm:SeatType.Vip}">
-                                                    <Setter TargetName="seat" Property="Background" Value="{DynamicResource PosSeatVip}"/>
-                                                    <Setter TargetName="seat" Property="BorderBrush" Value="{DynamicResource PosSeatVipBorder}"/>
+                                                    <Setter TargetName="seat" Property="Background" Value="{DynamicResource SeatVipBrush}"/>
+                                                    <Setter TargetName="seat" Property="BorderBrush" Value="{DynamicResource SeatVipBorderBrush}"/>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding Type}" Value="{x:Static vm:SeatType.Couple}">
-                                                    <Setter TargetName="seat" Property="Background" Value="{DynamicResource PosSeatCouple}"/>
-                                                    <Setter TargetName="seat" Property="BorderBrush" Value="{DynamicResource PosSeatCoupleBorder}"/>
+                                                    <Setter TargetName="seat" Property="Background" Value="{DynamicResource SeatCoupleBrush}"/>
+                                                    <Setter TargetName="seat" Property="BorderBrush" Value="{DynamicResource SeatCoupleBorderBrush}"/>
                                                 </DataTrigger>
                                             </DataTemplate.Triggers>
                                         </DataTemplate>
@@ -386,7 +386,7 @@
                             </Grid>
                             <Grid Style="{StaticResource DetailRow}">
                                 <TextBlock Text="Điểm tích lũy" Style="{StaticResource Muted}"/>
-                                <TextBlock Text="{Binding PointsText}" Style="{StaticResource Cell}" Foreground="{DynamicResource PosGood}" HorizontalAlignment="Right"/>
+                                <TextBlock Text="{Binding PointsText}" Style="{StaticResource Cell}" Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Right"/>
                             </Grid>
                             <Grid Style="{StaticResource DetailRow}">
                                 <TextBlock Text="Giờ bán" Style="{StaticResource Muted}"/>
@@ -396,10 +396,10 @@
                                 <TextBlock Text="Thanh toán" Style="{StaticResource Muted}"/>
                                 <TextBlock Text="{Binding PaymentDetail}" Style="{StaticResource Cell}" HorizontalAlignment="Right"/>
                             </Grid>
-                            <Border Height="1" Background="{DynamicResource PosCardBorder}" Margin="0,2,0,10"/>
+                            <Border Height="1" Background="{DynamicResource CardBorderBrush}" Margin="0,2,0,10"/>
                             <Grid>
                                 <TextBlock Text="Tổng tiền" Style="{StaticResource Title}" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding AmountText}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PosTotal}" HorizontalAlignment="Right"/>
+                                <TextBlock Text="{Binding AmountText}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/>
                             </Grid>
                         </StackPanel>
                         </ScrollViewer>
@@ -419,8 +419,8 @@
             <Border Style="{StaticResource Card}" Padding="0">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="Vé theo suất chiếu" Style="{StaticResource Title}" Margin="16,14,16,10"/>
-                    <Border DockPanel.Dock="Top" Padding="24,8" Background="{DynamicResource PosSubtle}"
-                            BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="0,1">
+                    <Border DockPanel.Dock="Top" Padding="24,8" Background="{DynamicResource SubtleBrush}"
+                            BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="0,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/><ColumnDefinition Width="170"/><ColumnDefinition Width="50"/><ColumnDefinition Width="110"/>
@@ -439,7 +439,7 @@
                             <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Border Background="{DynamicResource PosSubtle}" CornerRadius="10" Padding="14,12">
+                        <Border Background="{DynamicResource SubtleBrush}" CornerRadius="10" Padding="14,12">
                             <StackPanel>
                                 <TextBlock Text="Theo phương thức thanh toán" Style="{StaticResource SectionTitle}" Margin="0,0,0,8"/>
                                 <ItemsControl ItemsSource="{Binding MethodRows}">
@@ -458,7 +458,7 @@
                                 </ItemsControl>
                             </StackPanel>
                         </Border>
-                        <Border Grid.Column="2" Background="{DynamicResource PosSubtle}" CornerRadius="10" Padding="14,12">
+                        <Border Grid.Column="2" Background="{DynamicResource SubtleBrush}" CornerRadius="10" Padding="14,12">
                             <DockPanel>
                                 <TextBlock DockPanel.Dock="Top" Text="Vé đã hủy trong ca" Style="{StaticResource SectionTitle}" Margin="0,0,0,8"/>
                                 <Grid>
@@ -473,7 +473,7 @@
                                                         <TextBlock Text="{Binding Code}" Style="{StaticResource Cell}" FontWeight="SemiBold"/>
                                                         <TextBlock Grid.Column="1" Text="{Binding CancelReason}" Style="{StaticResource Muted}" TextTrimming="CharacterEllipsis"
                                                                    VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                                        <TextBlock Grid.Column="2" Text="{Binding AmountText}" Style="{StaticResource Cell}" Foreground="{DynamicResource PosBad}"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding AmountText}" Style="{StaticResource Cell}" Foreground="{DynamicResource ErrorBrush}"/>
                                                     </Grid>
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
@@ -497,7 +497,7 @@
                     </Grid>
 
                     <!-- Dòng tổng -->
-                    <Border DockPanel.Dock="Bottom" Padding="24,12" Margin="0,0,0,14" BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="0,1">
+                    <Border DockPanel.Dock="Bottom" Padding="24,12" Margin="0,0,0,14" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="0,1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/><ColumnDefinition Width="170"/><ColumnDefinition Width="50"/><ColumnDefinition Width="110"/>
@@ -505,7 +505,7 @@
                             <TextBlock Text="Tổng" Style="{StaticResource Cell}" FontWeight="Bold"/>
                             <TextBlock Grid.Column="2" Text="{Binding TotalTicketsText}" Style="{StaticResource Cell}" FontWeight="Bold"/>
                             <TextBlock Grid.Column="3" Text="{Binding TotalRevenueText}" Style="{StaticResource Cell}" FontWeight="Bold"
-                                       Foreground="{DynamicResource PosGood}" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                                       Foreground="{DynamicResource SuccessBrush}" HorizontalAlignment="Right" Margin="0,0,10,0"/>
                         </Grid>
                     </Border>
 
@@ -557,10 +557,10 @@
                     </StackPanel>
 
                     <Button DockPanel.Dock="Bottom" Content="NỘP BÁO CÁO CHỐT CA" Style="{StaticResource SolidButton}" Height="44"
-                            Background="{DynamicResource PosPay}" FontSize="14" Command="{Binding SubmitShiftCommand}"/>
+                            Background="{DynamicResource SuccessBrush}" FontSize="14" Command="{Binding SubmitShiftCommand}"/>
 
                     <!-- Đã nộp / đã bàn giao -->
-                    <Border DockPanel.Dock="Bottom" Background="{DynamicResource PosInfoBg}" CornerRadius="8" Padding="12,8" Margin="0,0,0,10">
+                    <Border DockPanel.Dock="Bottom" Background="{DynamicResource InfoBgBrush}" CornerRadius="8" Padding="12,8" Margin="0,0,0,10">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Style.Triggers>
@@ -570,12 +570,12 @@
                                 </Style.Triggers>
                             </Style>
                         </Border.Style>
-                        <TextBlock Text="{Binding CloseStatusText}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource PosInfo}"/>
+                        <TextBlock Text="{Binding CloseStatusText}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource InfoBrush}"/>
                     </Border>
 
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
                     <StackPanel>
-                        <Border Background="{DynamicResource PosSubtle}" CornerRadius="10" Padding="12,10">
+                        <Border Background="{DynamicResource SubtleBrush}" CornerRadius="10" Padding="12,10">
                             <Grid>
                                 <TextBlock Text="Tiền mặt phải có trong két" Style="{StaticResource Muted}" VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding SystemCashText}" Style="{StaticResource Cell}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
@@ -592,20 +592,20 @@
                         <Border CornerRadius="8" Padding="12,8" Margin="0,10,0,0">
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="{DynamicResource PosSubtle}"/>
-                                    <Setter Property="TextElement.Foreground" Value="{DynamicResource PosTextMuted}"/>
+                                    <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+                                    <Setter Property="TextElement.Foreground" Value="{DynamicResource TextMutedBrush}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding DiffKind}" Value="Even">
-                                            <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
-                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource PosGood}"/>
+                                            <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding DiffKind}" Value="Short">
-                                            <Setter Property="Background" Value="{DynamicResource PosBadBg}"/>
-                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource PosBad}"/>
+                                            <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
+                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding DiffKind}" Value="Over">
-                                            <Setter Property="Background" Value="{DynamicResource PosWarnBg}"/>
-                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource PosWarn}"/>
+                                            <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningBrush}"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>

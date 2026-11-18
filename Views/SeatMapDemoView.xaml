@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:CinemaAPP.Views"
              xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
              mc:Ignorable="d" d:DesignWidth="1366" d:DesignHeight="768"
              Language="vi-VN">
@@ -15,26 +16,22 @@
     </UserControl.DataContext>
     <UserControl.Resources>
         <ResourceDictionary>
-        <!-- Bộ màu của màn nằm ở Views/Themes/PosLight.xaml (giá trị lấy từ Resources/Styles.xaml). -->
-        <ResourceDictionary.MergedDictionaries>
-            <ResourceDictionary Source="/CinemaAPP;component/Views/Themes/PosLight.xaml"/>
-        </ResourceDictionary.MergedDictionaries>
 
         <!-- Khung bo góc cho 3 cột -->
         <Style x:Key="Card" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource PosCard}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource PosCardBorder}"/>
+            <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Padding" Value="16"/>
         </Style>
         <Style x:Key="SectionTitle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         <Style x:Key="Muted" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource PosTextMuted}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
         <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource SectionTitle}">
@@ -44,13 +41,13 @@
 
         <!-- Ô thông tin nhỏ (giờ, phòng, định dạng) -->
         <Style x:Key="InfoChip" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource PosChip}"/>
+            <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
             <Setter Property="CornerRadius" Value="6"/>
             <Setter Property="Padding" Value="8,3"/>
             <Setter Property="Margin" Value="0,0,6,0"/>
         </Style>
         <Style x:Key="ChipText" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource PosChipText}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="FontSize" Value="12"/>
         </Style>
 
@@ -60,47 +57,47 @@
             <Setter Property="Padding" Value="5,1"/>
             <Setter Property="Margin" Value="6,0,0,0"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
-            <Setter Property="TextElement.Foreground" Value="{DynamicResource PosGood}"/>
+            <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding AgeRating}" Value="K">
-                    <Setter Property="Background" Value="{DynamicResource PosInfoBg}"/>
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource PosInfo}"/>
+                    <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource InfoBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding AgeRating}" Value="T13">
-                    <Setter Property="Background" Value="{DynamicResource PosWarnBg}"/>
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource PosWarn}"/>
+                    <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding AgeRating}" Value="T16">
-                    <Setter Property="Background" Value="{DynamicResource PosBadBg}"/>
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource PosBad}"/>
+                    <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding AgeRating}" Value="T18">
-                    <Setter Property="Background" Value="{DynamicResource PosBadBg}"/>
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource PosBad}"/>
+                    <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
+                    <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
         <!-- Khung một phim ở cột trái; phim có suất đang chọn thì viền xanh -->
         <Style x:Key="MovieGroup" TargetType="Border">
-            <Setter Property="BorderBrush" Value="{DynamicResource PosCardBorder}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
             <Setter Property="BorderThickness" Value="1.5"/>
             <Setter Property="CornerRadius" Value="10"/>
             <Setter Property="Padding" Value="10,10,2,2"/>
             <Setter Property="Margin" Value="0,0,8,10"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                    <Setter Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
 
         <!-- Thẻ suất chiếu; suất đang chọn tô nền xanh -->
         <Style x:Key="ShowtimeCard" TargetType="Button">
-            <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
-            <Setter Property="Background" Value="{DynamicResource PosSubtle}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource PosCardBorder}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
             <Setter Property="Margin" Value="0,0,8,8"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -113,7 +110,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -121,8 +118,8 @@
             </Setter>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource PosAccent}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -131,13 +128,13 @@
         <Style x:Key="FreeText" TargetType="TextBlock">
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{DynamicResource PosGood}"/>
+            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding FreeSeats}" Value="0">
-                    <Setter Property="Foreground" Value="{DynamicResource PosBad}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -151,9 +148,9 @@
             <Setter Property="FontSize" Value="10"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Foreground" Value="{DynamicResource PosSeatStdText}"/>
-            <Setter Property="Background" Value="{DynamicResource PosSeatStd}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource PosSeatStdBorder}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SeatStdBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SeatStdBorderBrush}"/>
             <Setter Property="ToolTip">
                 <Setter.Value>
                     <TextBlock>
@@ -171,7 +168,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -179,26 +176,26 @@
             </Setter>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Type}" Value="Vip">
-                    <Setter Property="Background" Value="{DynamicResource PosSeatVip}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource PosSeatVipBorder}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource PosSeatVipText}"/>
+                    <Setter Property="Background" Value="{DynamicResource SeatVipBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource SeatVipBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
                 </DataTrigger>
                 <!-- Ghế đôi rộng bằng 2 ghế thường + khoảng cách giữa chúng -->
                 <DataTrigger Binding="{Binding Type}" Value="Couple">
                     <Setter Property="Width" Value="78"/>
-                    <Setter Property="Background" Value="{DynamicResource PosSeatCouple}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource PosSeatCoupleBorder}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource PosSeatCoupleText}"/>
+                    <Setter Property="Background" Value="{DynamicResource SeatCoupleBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource SeatCoupleBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource PosSeatSel}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource PosSeatSelBorder}"/>
+                    <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                     <Setter Property="Foreground" Value="White"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsSold}" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource PosSeatSold}"/>
-                    <Setter Property="BorderBrush" Value="{DynamicResource PosSeatSold}"/>
-                    <Setter Property="Foreground" Value="{DynamicResource PosSeatSoldText}"/>
+                    <Setter Property="Background" Value="{DynamicResource SeatSoldBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource SeatSoldBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource IconBrush}"/>
                     <Setter Property="IsEnabled" Value="False"/>
                 </DataTrigger>
                 <!-- Ô lối đi: Hidden (không phải Collapsed) để vẫn giữ chỗ trống trên hàng -->
@@ -213,7 +210,7 @@
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="TextAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Foreground" Value="{DynamicResource PosTextMuted}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
         </Style>
 
         <!-- Chú thích màu dưới sơ đồ -->
@@ -231,7 +228,7 @@
 
         <!-- Nút chữ (Bỏ chọn) -->
         <Style x:Key="LinkButton" TargetType="Button">
-            <Setter Property="Foreground" Value="{DynamicResource PosAccent}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryBrush}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
@@ -243,16 +240,16 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Foreground" Value="{DynamicResource PosTextMuted}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <!-- Nút viền (Vừa đủ, 100k...) -->
         <Style x:Key="OutlineButton" TargetType="Button">
-            <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
-            <Setter Property="Background" Value="{DynamicResource PosSubtle}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource PosInputBorder}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Padding" Value="10,7"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -266,7 +263,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter TargetName="Body" Property="Opacity" Value="0.5"/>
@@ -279,16 +276,16 @@
         <!-- Nút xanh nhỏ (Tìm) -->
         <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource OutlineButton}">
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="{DynamicResource PosAccent}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+            <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
             <Setter Property="Padding" Value="14,7"/>
         </Style>
 
         <!-- Ô chọn phương thức thanh toán (RadioButton: chỉ 1 ô được chọn) -->
         <Style x:Key="MethodTile" TargetType="RadioButton">
-            <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
-            <Setter Property="Background" Value="{DynamicResource PosSubtle}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource PosInputBorder}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
             <Setter Property="FontSize" Value="11"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Margin" Value="0,0,6,0"/>
@@ -303,12 +300,12 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Body" Property="Background" Value="{DynamicResource PosMethodSel}"/>
-                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PosMethodSelBorder}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource PosMethodSelText}"/>
+                                <Setter TargetName="Body" Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource SuccessBrush}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -327,8 +324,10 @@
 
         <!-- Nút THANH TOÁN -->
         <Style x:Key="PayButton" TargetType="Button">
+            <Setter Property="Content" Value="THANH TOÁN"/>
+            <Setter Property="IsEnabled" Value="False"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="{DynamicResource PosPay}"/>
+            <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Height" Value="48"/>
@@ -347,20 +346,38 @@
                                 <Setter TargetName="Body" Property="Opacity" Value="0.8"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Body" Property="Opacity" Value="0.35"/>
+                                <Setter TargetName="Body" Property="Opacity" Value="0.55"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding SelectedCount}" Value="0">
+                    <Setter Property="Background" Value="{DynamicResource CardBorderBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding CanPay}" Value="True">
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsPaidTicket}" Value="True">
+                    <Setter Property="Content" Value="IN VÉ"/>
+                    <Setter Property="Background" Value="{DynamicResource SuccessBrush}"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding PreviewTicket.Sale.IsCancelled}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <!-- Ô nhập: viền xanh khi đang gõ -->
         <Style x:Key="InputBox" TargetType="TextBox">
-            <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
-            <Setter Property="CaretBrush" Value="{DynamicResource PosText}"/>
-            <Setter Property="Background" Value="{DynamicResource PosInput}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource PosInputBorder}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource InputBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Padding" Value="8,4"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -373,10 +390,10 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PosInputHover}"/>
+                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource InputHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
-                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PosAccent}"/>
+                                <Setter TargetName="Body" Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -394,7 +411,7 @@
     </UserControl.Resources>
 
     <!-- Không có thanh tiêu đề riêng: logo, nhân viên, Đăng xuất thuộc khung app (MainWindow của B) -->
-    <Grid Background="{DynamicResource PosPage}">
+    <Grid Background="{DynamicResource PageBrush}">
         <Grid Margin="12">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="280"/>
@@ -421,7 +438,7 @@
                                                 <!-- Khung poster: ảnh từ MOVIE.PosterPath; chưa có ảnh thì để khung trống.
                                                      ImageBrush làm nền để ảnh bo góc theo khung -->
                                                 <Border DockPanel.Dock="Right" Width="28" Height="38" CornerRadius="4"
-                                                        Background="{DynamicResource PosChip}" Margin="6,0,0,0">
+                                                        Background="{DynamicResource InfoBgBrush}" Margin="6,0,0,0">
                                                     <Border CornerRadius="4">
                                                         <Border.Background>
                                                             <ImageBrush ImageSource="{Binding PosterPath, TargetNullValue={x:Null}}"
@@ -483,14 +500,14 @@
                         <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right">
                             <TextBlock Text="Ghế trống" Style="{StaticResource Muted}" FontSize="11"
                                        HorizontalAlignment="Right"/>
-                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PosText}">
+                            <TextBlock FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextBrush}">
                                 <Run Text="{Binding CurrentShowtime.FreeSeats, Mode=OneWay}"/>
                                 <Run Text="/"/>
                                 <Run Text="{Binding TotalSeats, Mode=OneWay}"/>
                             </TextBlock>
                         </StackPanel>
                         <StackPanel>
-                            <TextBlock Text="{Binding CurrentShowtime.MovieTitle}" Foreground="{DynamicResource PosText}"
+                            <TextBlock Text="{Binding CurrentShowtime.MovieTitle}" Foreground="{DynamicResource TextBrush}"
                                        FontSize="18" FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
                             <WrapPanel Margin="0,6,0,0">
                                 <Border Style="{StaticResource InfoChip}">
@@ -527,13 +544,13 @@
                                 </Path>
                                 <!-- Mép màn hình: nét sáng, có quầng mờ quanh nét -->
                                 <Path Stretch="Fill" Height="12" VerticalAlignment="Top" Margin="20,2,20,0"
-                                      Data="M 0,12 Q 50,0 100,12" Stroke="{DynamicResource PosScreen}"
+                                      Data="M 0,12 Q 50,0 100,12" Stroke="{DynamicResource InputHoverBrush}"
                                       StrokeThickness="3.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
                                     <Path.Effect>
                                         <DropShadowEffect Color="#A9C9EC" BlurRadius="18" ShadowDepth="0" Opacity="0.9"/>
                                     </Path.Effect>
                                 </Path>
-                                <TextBlock Text="M À N   H Ì N H" Foreground="{DynamicResource PosText}" Opacity="0.75"
+                                <TextBlock Text="M À N   H Ì N H" Foreground="{DynamicResource TextBrush}" Opacity="0.75"
                                            FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center"
                                            VerticalAlignment="Top" Margin="0,30,0,0"/>
                             </Grid>
@@ -570,41 +587,41 @@
                     </Viewbox>
 
                     <!-- Chú thích -->
-                    <Border Grid.Row="2" BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="0,1,0,0"
+                    <Border Grid.Row="2" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="0,1,0,0"
                             Padding="0,12,0,0">
                         <WrapPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
-                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource PosSeatStd}"
-                                        BorderBrush="{DynamicResource PosSeatStdBorder}"/>
+                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource SeatStdBrush}"
+                                        BorderBrush="{DynamicResource SeatStdBorderBrush}"/>
                                 <TextBlock Style="{StaticResource Muted}">
                                     <Run Text="Thường"/>
                                     <Run Text="{Binding StandardPrice, Mode=OneWay, StringFormat={}{0:N0} đ}"/>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
-                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource PosSeatVip}"
-                                        BorderBrush="{DynamicResource PosSeatVipBorder}"/>
+                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource SeatVipBrush}"
+                                        BorderBrush="{DynamicResource SeatVipBorderBrush}"/>
                                 <TextBlock Style="{StaticResource Muted}">
                                     <Run Text="VIP"/>
                                     <Run Text="{Binding VipPrice, Mode=OneWay, StringFormat={}{0:N0} đ}"/>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
-                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource PosSeatCouple}"
-                                        BorderBrush="{DynamicResource PosSeatCoupleBorder}"/>
+                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource SeatCoupleBrush}"
+                                        BorderBrush="{DynamicResource SeatCoupleBorderBrush}"/>
                                 <TextBlock Style="{StaticResource Muted}">
                                     <Run Text="Đôi"/>
                                     <Run Text="{Binding CouplePrice, Mode=OneWay, StringFormat={}{0:N0} đ}"/>
                                 </TextBlock>
                             </StackPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
-                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource PosSeatSel}"
-                                        BorderBrush="{DynamicResource PosSeatSelBorder}"/>
+                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource PrimaryBrush}"
+                                        BorderBrush="{DynamicResource PrimaryBrush}"/>
                                 <TextBlock Text="Đang chọn" Style="{StaticResource Muted}"/>
                             </StackPanel>
                             <StackPanel Style="{StaticResource LegendItem}">
-                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource PosSeatSold}"
-                                        BorderBrush="{DynamicResource PosSeatSold}"/>
+                                <Border Style="{StaticResource LegendSwatch}" Background="{DynamicResource SeatSoldBrush}"
+                                        BorderBrush="{DynamicResource SeatSoldBrush}"/>
                                 <TextBlock Text="Đã bán" Style="{StaticResource Muted}"/>
                             </StackPanel>
                         </WrapPanel>
@@ -616,17 +633,17 @@
             <Border Grid.Column="2" Style="{StaticResource Card}">
                 <DockPanel>
                     <!-- Phần đáy cột (từ dưới lên): nút Thanh toán, thông báo, phương thức thanh toán -->
-                    <Button DockPanel.Dock="Bottom" Content="THANH TOÁN" Command="{Binding PayCommand}"
-                            Style="{StaticResource PayButton}"/>
+                    <Button x:Name="CheckoutButton" DockPanel.Dock="Bottom"
+                            Style="{StaticResource PayButton}" Click="Checkout_Click"/>
                     <Border DockPanel.Dock="Bottom" CornerRadius="8" Padding="10,8" Margin="0,0,0,10">
                         <Border.Style>
                             <Style TargetType="Border">
-                                <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
-                                <Setter Property="TextElement.Foreground" Value="{DynamicResource PosGood}"/>
+                                <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                                <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMessageError}" Value="True">
-                                        <Setter Property="Background" Value="{DynamicResource PosBadBg}"/>
-                                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosBad}"/>
+                                        <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
+                                        <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding Message}" Value="">
                                         <Setter Property="Visibility" Value="Collapsed"/>
@@ -637,6 +654,15 @@
                         <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontSize="12"/>
                     </Border>
                     <UniformGrid DockPanel.Dock="Bottom" Columns="3" Margin="0,8,-6,8">
+                        <UniformGrid.Style>
+                            <Style TargetType="UniformGrid">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPaidTicket}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </UniformGrid.Style>
                         <RadioButton GroupName="PayMethod" IsChecked="{Binding IsCash}" Style="{StaticResource MethodTile}">
                             <StackPanel>
                                 <!-- Tờ tiền: viền, đồng xu ở giữa, 2 chấm hai bên -->
@@ -702,244 +728,267 @@
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <DockPanel>
-                                <Button DockPanel.Dock="Right" Content="Bỏ chọn" Command="{Binding ClearCommand}"
-                                        Style="{StaticResource LinkButton}" VerticalAlignment="Center"/>
+                                <Button DockPanel.Dock="Right" Command="{Binding ClearCommand}" VerticalAlignment="Center">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource LinkButton}">
+                                            <Setter Property="Content" Value="Bỏ chọn"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsPaidTicket}" Value="True">
+                                                    <Setter Property="Content" Value="Đơn mới"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
                                 <TextBlock Text="Đơn hiện tại" Style="{StaticResource SectionTitle}"/>
                             </DockPanel>
 
-                            <!-- Ghế trong đơn gom theo loại vé -->
-                            <Border Background="{DynamicResource PosSubtle}" CornerRadius="8" MinHeight="52"
+                            <Border Background="{DynamicResource SubtleBrush}" CornerRadius="8" MinHeight="52"
                                     Padding="12,8" Margin="0,10,0,0">
-                                <Grid>
-                                    <TextBlock Text="Bấm vào ghế trên sơ đồ để thêm vào đơn" TextWrapping="Wrap"
-                                               TextAlignment="Center" VerticalAlignment="Center">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock" BasedOn="{StaticResource Muted}">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding SelectedCount}" Value="0">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                    <ItemsControl ItemsSource="{Binding OrderLines}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <DockPanel Margin="0,3">
-                                                    <TextBlock DockPanel.Dock="Right" Margin="8,0,0,0" FontSize="12"
-                                                               Foreground="{DynamicResource PosTextMuted}">
-                                                        <Run Text="{Binding Count, Mode=OneWay}" FontWeight="SemiBold"
-                                                             Foreground="{DynamicResource PosText}"/><Run Text=" vé · "/><Run
-                                                             Text="{Binding Subtotal, Mode=OneWay, StringFormat={}{0:N0} đ}"/>
-                                                    </TextBlock>
-                                                    <TextBlock Text="{Binding Title}" Foreground="{DynamicResource PosText}" FontSize="12"
-                                                               FontWeight="SemiBold" TextWrapping="Wrap"/>
-                                                </DockPanel>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </Grid>
-                            </Border>
-
-                            <TextBlock Text="Khách thành viên (không bắt buộc)" Style="{StaticResource FieldLabel}"/>
-                            <DockPanel>
-                                <Button DockPanel.Dock="Right" Content="Tìm" Command="{Binding FindMemberCommand}"
-                                        Style="{StaticResource AccentButton}" Margin="8,0,0,0"/>
-                                <Grid>
-                                    <TextBox Text="{Binding MemberPhone, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource InputBox}">
-                                        <TextBox.InputBindings>
-                                            <KeyBinding Key="Enter" Command="{Binding FindMemberCommand}"/>
-                                        </TextBox.InputBindings>
-                                    </TextBox>
-                                    <TextBlock Text="Số điện thoại">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock" BasedOn="{StaticResource Placeholder}">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding MemberPhone}" Value="">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Grid>
-                            </DockPanel>
-                            <TextBlock Text="{Binding MemberText}" FontSize="12" Margin="2,6,0,0">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="{DynamicResource PosBad}"/>
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsMemberFound}" Value="True">
-                                                <Setter Property="Foreground" Value="{DynamicResource PosGood}"/>
+                                            <DataTrigger Binding="{Binding PreviewTicket}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible"/>
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding MemberText}" Value="">
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="Bấm vào ghế trên sơ đồ để thêm vào đơn" TextWrapping="Wrap"
+                                           Style="{StaticResource Muted}" TextAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <Viewbox StretchDirection="DownOnly" Margin="0,10,0,0">
+                                <Viewbox.Style>
+                                    <Style TargetType="Viewbox">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding PreviewTicket}" Value="{x:Null}">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                                </Viewbox.Style>
+                                <local:TicketCard DataContext="{Binding PreviewTicket}"/>
+                            </Viewbox>
 
-                            <!-- Tóm tắt đơn -->
-                            <Border Background="{DynamicResource PosSubtle}" CornerRadius="8" Padding="12,8" Margin="0,10,0,0">
-                                <StackPanel>
-                                    <DockPanel>
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding SelectedCount}"
-                                                   Foreground="{DynamicResource PosText}" FontSize="13"/>
-                                        <TextBlock Text="Số ghế" Style="{StaticResource Muted}" FontSize="13"/>
-                                    </DockPanel>
-                                    <DockPanel Margin="0,4,0,0">
-                                        <TextBlock DockPanel.Dock="Right" Text="{Binding PointsText}"
-                                                   Foreground="{DynamicResource PosText}" FontSize="13"/>
-                                        <TextBlock Text="Điểm tích lũy" Style="{StaticResource Muted}" FontSize="13"/>
-                                    </DockPanel>
-                                    <DockPanel Margin="0,4,0,0">
-                                        <TextBlock DockPanel.Dock="Right" FontSize="22" FontWeight="Bold"
-                                                   Foreground="{DynamicResource PosTotal}"
-                                                   Text="{Binding Total, StringFormat={}{0:N0} đ}"/>
-                                        <TextBlock Text="Tổng tiền" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
-                                    </DockPanel>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Tiền mặt: nhập tiền khách đưa, tính tiền thối -->
                             <StackPanel>
                                 <StackPanel.Style>
                                     <Style TargetType="StackPanel">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsCash}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
+                                            <DataTrigger Binding="{Binding IsPaidTicket}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </StackPanel.Style>
-                                <TextBlock Text="Tiền khách đưa" Style="{StaticResource FieldLabel}"/>
-                                <Grid>
-                                    <TextBox Text="{Binding CashText, UpdateSourceTrigger=PropertyChanged}"
-                                             Style="{StaticResource InputBox}" Padding="8,4,28,4"/>
-                                    <TextBlock Text="0">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock" BasedOn="{StaticResource Placeholder}">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding CashText}" Value="">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                    <TextBlock Text="đ" Style="{StaticResource Placeholder}" HorizontalAlignment="Right"/>
-                                </Grid>
-                                <UniformGrid Columns="4" Margin="0,8,-6,0">
-                                    <Button Content="Vừa đủ" Command="{Binding SetCashCommand}" CommandParameter="exact"
-                                            Style="{StaticResource OutlineButton}" Margin="0,0,6,0"/>
-                                    <Button Content="100k" Command="{Binding SetCashCommand}" CommandParameter="100000"
-                                            Style="{StaticResource OutlineButton}" Margin="0,0,6,0"/>
-                                    <Button Content="200k" Command="{Binding SetCashCommand}" CommandParameter="200000"
-                                            Style="{StaticResource OutlineButton}" Margin="0,0,6,0"/>
-                                    <Button Content="500k" Command="{Binding SetCashCommand}" CommandParameter="500000"
-                                            Style="{StaticResource OutlineButton}" Margin="0,0,6,0"/>
-                                </UniformGrid>
-                                <DockPanel Margin="0,12,0,0">
-                                    <TextBlock DockPanel.Dock="Right" Text="{Binding ChangeText}" FontSize="20" FontWeight="Bold">
+                                <TextBlock Text="Khách thành viên (không bắt buộc)" Style="{StaticResource FieldLabel}"/>
+                                <DockPanel>
+                                    <Button DockPanel.Dock="Right" Content="Tìm" Command="{Binding FindMemberCommand}"
+                                            Style="{StaticResource AccentButton}" Margin="8,0,0,0"/>
+                                    <Grid>
+                                        <TextBox Text="{Binding MemberPhone, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource InputBox}">
+                                            <TextBox.InputBindings>
+                                                <KeyBinding Key="Enter" Command="{Binding FindMemberCommand}"/>
+                                            </TextBox.InputBindings>
+                                        </TextBox>
+                                        <TextBlock Text="Số điện thoại">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource Placeholder}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding MemberPhone}" Value="">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Grid>
+                                </DockPanel>
+                                <TextBlock Text="{Binding MemberText}" FontSize="12" Margin="2,6,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsMemberFound}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding MemberText}" Value="">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <StackPanel Margin="0,8,0,0">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsMemberFound}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <TextBlock Text="Dùng điểm · 1 điểm = 1.000đ" Style="{StaticResource FieldLabel}"/>
+                                    <TextBox Text="{Binding RedeemPointsText, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource InputBox}" ToolTip="Nhập 0 nếu không dùng điểm"/>
+                                    <TextBlock Text="{Binding RedemptionHint}" FontSize="11" TextWrapping="Wrap" Margin="0,4,0,0">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{DynamicResource PosGood}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsCashShort}" Value="True">
-                                                        <Setter Property="Foreground" Value="{DynamicResource PosBad}"/>
-                                                        <Setter Property="FontSize" Value="14"/>
+                                                    <DataTrigger Binding="{Binding IsRedemptionValid}" Value="False">
+                                                        <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-                                    <TextBlock Text="Tiền thối lại" Style="{StaticResource SectionTitle}" FontSize="13"
-                                               VerticalAlignment="Center"/>
-                                </DockPanel>
-                            </StackPanel>
-
-                            <!-- Chuyển khoản: mã QR + nội dung chuyển khoản -->
-                            <Border Background="{DynamicResource PosSubtle}" CornerRadius="8" Padding="12" Margin="0,12,0,0">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsTransfer}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <DockPanel>
-                                    <!-- Nền QR luôn trắng để máy quét đọc được -->
-                                    <Border DockPanel.Dock="Left" Background="White" Padding="5" CornerRadius="4">
-                                        <ItemsControl ItemsSource="{Binding QrCells}" Width="84" Height="84">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <UniformGrid Columns="21" Rows="21"/>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Rectangle>
-                                                        <Rectangle.Style>
-                                                            <Style TargetType="Rectangle">
-                                                                <Setter Property="Fill" Value="Transparent"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding}" Value="True">
-                                                                        <Setter Property="Fill" Value="{StaticResource NavyBrush}"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Rectangle.Style>
-                                                    </Rectangle>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </Border>
-                                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
-                                        <TextBlock Text="Khách quét mã để chuyển khoản" Style="{StaticResource SectionTitle}"
-                                                   FontSize="12" TextWrapping="Wrap"/>
-                                        <TextBlock Style="{StaticResource Muted}" Margin="0,6,0,0">
-                                            <Run Text="Nội dung:"/>
-                                            <Run Text="{Binding TransferNote, Mode=OneWay}" FontWeight="SemiBold"
-                                                 Foreground="{DynamicResource PosText}"/>
-                                        </TextBlock>
-                                        <TextBlock Style="{StaticResource Muted}" Margin="0,2,0,0" TextWrapping="Wrap"
-                                                   Text="Nhận được tiền thì bấm Thanh toán."/>
-                                    </StackPanel>
-                                </DockPanel>
-                            </Border>
-
-                            <!-- Thẻ: hướng dẫn quẹt thẻ trên máy POS -->
-                            <Border Background="{DynamicResource PosSubtle}" CornerRadius="8" Padding="12" Margin="0,12,0,0">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsCard}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <StackPanel>
-                                    <TextBlock Style="{StaticResource SectionTitle}" FontSize="12" TextWrapping="Wrap">
-                                        <Run Text="Nhập"/>
-                                        <Run Text="{Binding Total, Mode=OneWay, StringFormat={}{0:N0} đ}" Foreground="{DynamicResource PosTotal}"/>
-                                        <Run Text="trên máy POS"/>
-                                    </TextBlock>
-                                    <TextBlock Style="{StaticResource Muted}" Margin="0,6,0,0" TextWrapping="Wrap"
-                                               Text="Khách quẹt / chạm thẻ. Máy POS in hóa đơn thành công thì bấm Thanh toán."/>
                                 </StackPanel>
-                            </Border>
+                                <DockPanel Margin="0,8,0,0">
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding PointsText}" FontSize="12"/>
+                                    <TextBlock Text="Điểm tích lũy" Style="{StaticResource Muted}" FontSize="12"/>
+                                </DockPanel>
+
+                                <!-- Tiền mặt: nhập tiền khách đưa, tính tiền thối -->
+                                <StackPanel>
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCash}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <TextBlock Text="Tiền khách đưa" Style="{StaticResource FieldLabel}"/>
+                                    <Grid>
+                                        <TextBox Text="{Binding CashText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource InputBox}" Padding="8,4,28,4"/>
+                                        <TextBlock Text="0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource Placeholder}">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding CashText}" Value="">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Text="đ" Style="{StaticResource Placeholder}" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                    <UniformGrid Columns="4" Margin="0,8,-6,0">
+                                        <Button Content="Vừa đủ" Command="{Binding SetCashCommand}" CommandParameter="exact"
+                                                Style="{StaticResource OutlineButton}" Margin="0,0,6,0"/>
+                                        <Button Content="100k" Command="{Binding SetCashCommand}" CommandParameter="100000"
+                                                Style="{StaticResource OutlineButton}" Margin="0,0,6,0"/>
+                                        <Button Content="200k" Command="{Binding SetCashCommand}" CommandParameter="200000"
+                                                Style="{StaticResource OutlineButton}" Margin="0,0,6,0"/>
+                                        <Button Content="500k" Command="{Binding SetCashCommand}" CommandParameter="500000"
+                                                Style="{StaticResource OutlineButton}" Margin="0,0,6,0"/>
+                                    </UniformGrid>
+                                    <DockPanel Margin="0,12,0,0">
+                                        <TextBlock DockPanel.Dock="Right" Text="{Binding ChangeText}" FontSize="20" FontWeight="Bold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCashShort}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
+                                                            <Setter Property="FontSize" Value="14"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Text="Tiền thối lại" Style="{StaticResource SectionTitle}" FontSize="13"
+                                                   VerticalAlignment="Center"/>
+                                    </DockPanel>
+                                </StackPanel>
+
+                                <!-- Chuyển khoản: mã QR + nội dung chuyển khoản -->
+                                <Border Background="{DynamicResource SubtleBrush}" CornerRadius="8" Padding="12" Margin="0,12,0,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsTransfer}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <DockPanel>
+                                        <!-- Nền QR luôn trắng để máy quét đọc được -->
+                                        <Border DockPanel.Dock="Left" Background="White" Padding="5" CornerRadius="4">
+                                            <ItemsControl ItemsSource="{Binding QrCells}" Width="84" Height="84">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <UniformGrid Columns="21" Rows="21"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Rectangle>
+                                                            <Rectangle.Style>
+                                                                <Style TargetType="Rectangle">
+                                                                    <Setter Property="Fill" Value="Transparent"/>
+                                                                    <Style.Triggers>
+                                                                        <DataTrigger Binding="{Binding}" Value="True">
+                                                                            <Setter Property="Fill" Value="{StaticResource NavyBrush}"/>
+                                                                        </DataTrigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Rectangle.Style>
+                                                        </Rectangle>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Border>
+                                        <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Text="Khách quét mã để chuyển khoản" Style="{StaticResource SectionTitle}"
+                                                       FontSize="12" TextWrapping="Wrap"/>
+                                            <TextBlock Style="{StaticResource Muted}" Margin="0,6,0,0">
+                                                <Run Text="Nội dung:"/>
+                                                <Run Text="{Binding TransferNote, Mode=OneWay}" FontWeight="SemiBold"
+                                                     Foreground="{DynamicResource TextBrush}"/>
+                                            </TextBlock>
+                                            <TextBlock Style="{StaticResource Muted}" Margin="0,2,0,0" TextWrapping="Wrap"
+                                                       Text="Nhận được tiền thì bấm Thanh toán."/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- Thẻ: hướng dẫn quẹt thẻ trên máy POS -->
+                                <Border Background="{DynamicResource SubtleBrush}" CornerRadius="8" Padding="12" Margin="0,12,0,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsCard}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource SectionTitle}" FontSize="12" TextWrapping="Wrap">
+                                            <Run Text="Nhập"/>
+                                            <Run Text="{Binding Total, Mode=OneWay, StringFormat={}{0:N0} đ}" Foreground="{DynamicResource TextBrush}"/>
+                                            <Run Text="trên máy POS"/>
+                                        </TextBlock>
+                                        <TextBlock Style="{StaticResource Muted}" Margin="0,6,0,0" TextWrapping="Wrap"
+                                                   Text="Khách quẹt / chạm thẻ. Máy POS in hóa đơn thành công thì bấm Thanh toán."/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </DockPanel>

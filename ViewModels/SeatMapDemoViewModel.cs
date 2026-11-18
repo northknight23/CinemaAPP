@@ -52,11 +52,30 @@ namespace CinemaAPP.ViewModels
         private decimal total;
         public decimal Total { get => total; set => SetProperty(ref total, value); }
 
-        // Ghế trong đơn gom theo loại vé
-        public ObservableCollection<OrderLine> OrderLines { get; } = new ObservableCollection<OrderLine>();
+        public decimal GrossTotal => SelectedSeats.Sum(s => s.Price);
+        public int MemberBalance => IsMemberFound && Members.TryGetValue(MemberPhone.Trim(), out var member)
+            ? member.Points + SalesDemoStore.Sales
+                .Where(s => s.CustomerPhone == MemberPhone.Trim() && !s.IsCancelled).Sum(s => s.Points - s.PointsUsed)
+            : 0;
+        public int MaxRedeemPoints => Math.Max(0, Math.Min(MemberBalance, (int)decimal.Floor(GrossTotal * 0.20m / 1000m)));
+        private string redeemPointsText = "0";
+        public string RedeemPointsText
+        {
+            get => redeemPointsText;
+            set
+            {
+                if (SetProperty(ref redeemPointsText, value))
+                    UpdateSummary();
+            }
+        }
+        public bool IsRedemptionValid => int.TryParse(RedeemPointsText, out int points) && points >= 0 && points <= MaxRedeemPoints;
+        public int PointsUsed => IsMemberFound && IsRedemptionValid ? int.Parse(RedeemPointsText) : 0;
+        public decimal DiscountAmount => PointsUsed * 1000m;
+        public string RedemptionHint => IsRedemptionValid
+            ? $"Có {MemberBalance} điểm · Tối đa {MaxRedeemPoints} điểm (20% đơn)"
+            : $"Nhập số nguyên từ 0 đến {MaxRedeemPoints} điểm.";
 
-        // 1 điểm cho mỗi 10.000 đ, chỉ cộng khi có khách thành viên
-        public const decimal MoneyPerPoint = 10000;
+        // Chỉ cộng điểm cho khách thành viên; quy tắc theo loại ghế nằm ở TicketRewards.
         private string pointsText = "—";
         public string PointsText { get => pointsText; set => SetProperty(ref pointsText, value); }
 
@@ -85,7 +104,10 @@ namespace CinemaAPP.ViewModels
             set
             {
                 if (SetProperty(ref isMemberFound, value))
-                    UpdatePoints();
+                {
+                    RedeemPointsText = "0";
+                    UpdateSummary();
+                }
             }
         }
 
@@ -102,6 +124,8 @@ namespace CinemaAPP.ViewModels
                     OnPropertyChanged(nameof(IsCash));
                     OnPropertyChanged(nameof(IsTransfer));
                     OnPropertyChanged(nameof(IsCard));
+                    OnPropertyChanged(nameof(CanPay));
+                    RefreshTicket();
                 }
             }
         }
@@ -126,7 +150,15 @@ namespace CinemaAPP.ViewModels
         }
 
         private decimal cash;
-        public decimal Cash { get => cash; set => SetProperty(ref cash, value); }
+        public decimal Cash
+        {
+            get => cash;
+            set
+            {
+                if (SetProperty(ref cash, value))
+                    OnPropertyChanged(nameof(CanPay));
+            }
+        }
 
         private string changeText = "0 đ";
         public string ChangeText { get => changeText; set => SetProperty(ref changeText, value); }
@@ -147,6 +179,19 @@ namespace CinemaAPP.ViewModels
         public ICommand FindMemberCommand { get; }
         public ICommand SetCashCommand { get; }
         public ICommand PayCommand { get; }
+
+        private PrintableTicket? previewTicket;
+        public PrintableTicket? PreviewTicket
+        {
+            get => previewTicket;
+            private set
+            {
+                if (SetProperty(ref previewTicket, value))
+                    OnPropertyChanged(nameof(IsPaidTicket));
+            }
+        }
+        public bool IsPaidTicket => PreviewTicket?.Sale != null;
+        public bool CanPay => SelectedCount > 0 && IsRedemptionValid && (Method != PaymentMethod.Cash || Cash >= Total);
 
         public SeatMapDemoViewModel()
         {
@@ -185,7 +230,7 @@ namespace CinemaAPP.ViewModels
                 UpdateSummary();
             });
 
-            ClearCommand = new RelayCommand(_ => ResetOrder(), _ => SelectedCount > 0 || CashText != "" || MemberPhone != "");
+            ClearCommand = new RelayCommand(_ => ResetOrder(), _ => IsPaidTicket || SelectedCount > 0 || CashText != "" || MemberPhone != "");
 
             FindMemberCommand = new RelayCommand(_ => FindMember());
 
@@ -197,8 +242,7 @@ namespace CinemaAPP.ViewModels
             }, p => p as string != "exact" || Total > 0);
 
             // Tiền mặt phải đưa đủ; chuyển khoản / thẻ thì nhân viên bấm sau khi đã nhận tiền
-            PayCommand = new RelayCommand(_ => Pay(),
-                _ => SelectedCount > 0 && (Method != PaymentMethod.Cash || Cash >= Total));
+            PayCommand = new RelayCommand(_ => Pay(), _ => CanPay);
         }
 
         private IEnumerable<SeatItem> AllSeats() => Rows.SelectMany(r => r.Seats).Where(s => !s.IsAisle);
@@ -263,7 +307,7 @@ namespace CinemaAPP.ViewModels
             else if (Members.TryGetValue(phone, out var member))
             {
                 IsMemberFound = true;
-                MemberText = $"{member.Name} · {member.Points} điểm";
+                MemberText = $"{member.Name} · {MemberBalance} điểm";
             }
             else
             {
@@ -276,6 +320,13 @@ namespace CinemaAPP.ViewModels
         // và ghi đơn vào SalesDemoStore để màn Giao dịch thấy được.
         private void Pay()
         {
+            // Kiểm tra lại số dư trước khi thanh toán, vì cửa sổ khác có thể vừa dùng điểm.
+            UpdateSummary();
+            if (!CanPay)
+            {
+                ShowMessage("Kiểm tra tiền thanh toán và số điểm được phép sử dụng.", true);
+                return;
+            }
             string labels = string.Join(", ", SelectedSeats.Select(s => s.Label));
             string paid = Money(Total);
             string how = Method switch
@@ -296,7 +347,11 @@ namespace CinemaAPP.ViewModels
                 CustomerName = IsMemberFound ? member.Name : null,
                 CustomerPhone = IsMemberFound ? MemberPhone.Trim() : null,
                 Method = Method, CashGiven = Method == PaymentMethod.Cash ? Cash : 0, Total = Total,
+                Points = IsMemberFound ? TicketRewards.Calculate(SelectedSeats.Select(s => (s.Type, s.Price)), DiscountAmount) : 0,
+                PointsUsed = PointsUsed,
             });
+
+            var paidTicket = CreateTicket(sale);
 
             foreach (SeatItem seat in SelectedSeats)
             {
@@ -308,6 +363,7 @@ namespace CinemaAPP.ViewModels
             OnPropertyChanged(nameof(TransferNote));
 
             ResetOrder();
+            PreviewTicket = paidTicket;
             ShowMessage($"Đã thanh toán đơn {sale.Code}: ghế {labels} – {paid} ({how}).{points}", false);
         }
 
@@ -316,6 +372,7 @@ namespace CinemaAPP.ViewModels
         {
             foreach (SeatItem s in SelectedSeats) s.IsSelected = false;
             SelectedSeats.Clear();
+            RedeemPointsText = "0";
             CashText = "";
             MemberPhone = "";
             IsMemberFound = false;
@@ -327,27 +384,36 @@ namespace CinemaAPP.ViewModels
         private void UpdateSummary()
         {
             SelectedCount = SelectedSeats.Count;
-            Total = SelectedSeats.Sum(s => s.Price);
-
-            OrderLines.Clear();
-            foreach (var group in SelectedSeats.GroupBy(s => s.Type).OrderBy(g => g.Key))
-            {
-                string name = group.Key switch { SeatType.Vip => "Vé VIP", SeatType.Couple => "Vé Đôi", _ => "Vé Thường" };
-                OrderLines.Add(new OrderLine
-                {
-                    Title = $"{name} · {string.Join(", ", group.Select(s => s.Label))}",
-                    Count = group.Count(),
-                    Subtotal = group.Sum(s => s.Price)
-                });
-            }
+            Total = GrossTotal - DiscountAmount;
+            OnPropertyChanged(nameof(MemberBalance));
+            OnPropertyChanged(nameof(MaxRedeemPoints));
+            OnPropertyChanged(nameof(RedemptionHint));
+            OnPropertyChanged(nameof(IsRedemptionValid));
 
             UpdatePoints();
             UpdateChange();
+            OnPropertyChanged(nameof(CanPay));
+            PreviewTicket = SelectedCount > 0 ? CreateTicket() : null;
+        }
+
+        private void RefreshTicket()
+        {
+            if (SelectedCount > 0)
+                PreviewTicket = CreateTicket();
+        }
+
+        private PrintableTicket CreateTicket(SaleRecord? sale = null)
+        {
+            string ageRating = Movies.FirstOrDefault(m => m.Showtimes.Contains(CurrentShowtime))?.AgeRating ?? "";
+            string staffName = sale?.StaffName ?? AppSession.CurrentUser?.FullName ?? "Quản trị viên";
+            return new PrintableTicket(CurrentShowtime, ageRating, staffName, Method, IsMemberFound, PointsUsed,
+                SelectedSeats.Select(s => new TicketSeat(s.Label, s.Type, s.Price)).ToArray(), sale);
         }
 
         private void UpdatePoints()
         {
-            PointsText = IsMemberFound ? $"+{(int)(Total / MoneyPerPoint)} điểm" : "—";
+            PointsText = IsMemberFound
+                ? $"+{TicketRewards.Calculate(SelectedSeats.Select(s => (s.Type, s.Price)), DiscountAmount)} điểm" : "—";
         }
 
         // Tiền khách đưa chỉ lấy các chữ số (gõ "200.000" hay "200000" đều được).

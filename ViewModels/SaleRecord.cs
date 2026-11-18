@@ -33,7 +33,8 @@ namespace CinemaAPP.ViewModels
         public decimal CashGiven { get; init; }         // chỉ có khi trả tiền mặt
         public decimal Total { get; init; }
 
-        public int Points => CustomerPhone == null ? 0 : (int)(Total / SeatMapDemoViewModel.MoneyPerPoint);
+        public int Points { get; init; }
+        public int PointsUsed { get; init; }
 
         // ----- Hủy đơn -----
         private bool isCancelled;

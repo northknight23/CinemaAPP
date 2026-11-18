@@ -33,6 +33,7 @@ namespace CinemaAPP.Services
                 Seats = draft.Seats, StaffName = draft.StaffName, StaffUsername = draft.StaffUsername,
                 CustomerName = draft.CustomerName, CustomerPhone = draft.CustomerPhone,
                 Method = draft.Method, CashGiven = draft.CashGiven, Total = draft.Total,
+                Points = draft.Points, PointsUsed = draft.PointsUsed,
             };
             Sales.Add(sale);
             return sale;

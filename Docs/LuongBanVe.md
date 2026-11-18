@@ -93,7 +93,8 @@ Quy tắc:
 SELECT CustomerID, FullName, Phone, Points FROM CUSTOMER WHERE Phone = @Phone;
 ```
 
-- **Điểm tích lũy**: 1 điểm cho mỗi 10.000 đ (`MoneyPerPoint`), chỉ cộng khi có khách thành viên.
+- **Điểm tích lũy**: ghế thường tích 5%, VIP 7%, ghế đôi 10%; tính trên tiền thực trả (giảm giá phân bổ theo tỷ lệ giá từng ghế), quy đổi 1.000đ = 1 điểm và làm tròn xuống sau khi cộng cả đơn. Chỉ cộng khi có khách thành viên. Quy tắc dùng chung nằm ở `TicketRewards.Calculate`.
+- **Dùng điểm**: 1 điểm giảm 1.000đ; không vượt số dư hoặc 20% tiền vé trước giảm, chỉ dùng điểm nguyên. Thanh toán thành công mới trừ điểm đã dùng và cộng điểm mới. Bản POS hiện tại giữ số dư trong bộ nhớ, chưa cập nhật bảng CUSTOMER.
 
 ### 3.3 Phương thức thanh toán
 
@@ -147,7 +148,7 @@ Cần sửa `CreateBooking` của 8.4:
 
 ```
 Views/SeatMapDemoView.xaml(.cs)      Màn bán vé tại quầy (3 cột), tự tạo SeatMapDemoViewModel
-Views/Themes/PosLight.xaml           Bộ màu của màn, giá trị lấy từ Resources/Styles.xaml
+Resources/Styles.xaml                Bảng màu chung và hiệu ứng ánh sáng màn chiếu
 ViewModels/SeatMapDemoViewModel.cs   Toàn bộ trạng thái + lệnh của màn (suất, ghế, đơn, khách, thanh toán)
 ViewModels/MovieShowtimes.cs         Một phim + các suất của phim trong ngày
 ViewModels/ShowtimeOption.cs         Một suất chiếu (giờ, phòng, ghế còn trống, ghế đã bán)
