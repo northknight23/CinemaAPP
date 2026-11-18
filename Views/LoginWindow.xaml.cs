@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Input;
 using CinemaAPP.ViewModels;
 
@@ -18,7 +18,9 @@ namespace CinemaAPP.Views
             vm.FormCleared += (s, e) => { pwdBox.Clear(); txtUser.Focus(); };
             vm.LoginSucceeded += (s, e) =>
             {
-                new MainWindow().Show();
+                var main = new MainWindow();
+                Application.Current.MainWindow = main;
+                main.Show();
                 Close();
             };
 

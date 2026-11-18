@@ -1,0 +1,629 @@
+<UserControl x:Class="CinemaAPP.Views.MyShiftView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1086" d:DesignHeight="640"
+             Language="vi-VN">
+    <!-- Màn HÓA ĐƠN CA (chỉ Nhân viên). Hai tab: Hóa đơn trong ca | Chốt ca.
+         Cùng bố cục với màn Giao dịch & Đối soát của Quản trị viên, nhưng chỉ có đơn của chính nhân viên trong ca hôm nay. -->
+    <UserControl.DataContext>
+        <vm:MyShiftViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CinemaAPP;component/Views/Themes/SalesControls.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Chip trạng thái ca: Đang mở xanh lá, Chờ xác nhận xanh dương, Đã bàn giao xám -->
+            <Style x:Key="ShiftChip" TargetType="Border" BasedOn="{StaticResource Chip}">
+                <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource PosGood}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ShiftStatusKind}" Value="Pending">
+                        <Setter Property="Background" Value="{DynamicResource PosInfoBg}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosInfo}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ShiftStatusKind}" Value="Done">
+                        <Setter Property="Background" Value="{DynamicResource PosSubtle}"/>
+                        <Setter Property="TextElement.Foreground" Value="{DynamicResource PosTextMuted}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="SectionTitle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{DynamicResource PosText}"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ===== Tab + thông tin ca + bộ lọc ===== -->
+        <DockPanel>
+            <Border DockPanel.Dock="Left" Background="{DynamicResource PosCard}" BorderBrush="{DynamicResource PosCardBorder}"
+                    BorderThickness="1" CornerRadius="10" Padding="4" Height="42">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Content="Hóa đơn trong ca" Style="{StaticResource TabButton}" IsChecked="{Binding IsListTab}"/>
+                    <RadioButton Content="Chốt ca" Style="{StaticResource TabButton}" IsChecked="{Binding IsCloseTab}"/>
+                </StackPanel>
+            </Border>
+
+            <StackPanel DockPanel.Dock="Left" Margin="14,0,0,0" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding ShiftTitle}" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
+                    <Border Style="{StaticResource ShiftChip}" Margin="8,0,0,0">
+                        <TextBlock Text="{Binding ShiftStatusText}" FontSize="11.5" FontWeight="SemiBold"/>
+                    </Border>
+                </StackPanel>
+                <TextBlock Text="{Binding ShiftSubText}" Style="{StaticResource Muted}" Margin="0,2,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Visibility="{Binding IsListTab, Converter={StaticResource BoolToVis}}">
+                <ComboBox Style="{StaticResource FilterCombo}" Width="150" ItemsSource="{Binding MethodOptions}"
+                          SelectedItem="{Binding SelectedMethod}"/>
+                <TextBox Style="{StaticResource InputBox}" Width="190" Height="36" Margin="8,0,0,0" Tag="⌕  Mã đơn, SĐT hoặc tên khách"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+        </DockPanel>
+
+        <!-- ===== 4 ô số của cả ca ===== -->
+        <UniformGrid Grid.Row="1" Rows="1" Margin="0,8,0,8">
+            <Border Style="{StaticResource Card}" Margin="0,0,4,0" Padding="16,10">
+                <StackPanel>
+                    <TextBlock Text="Đơn đã bán" Style="{StaticResource Muted}"/>
+                    <TextBlock Text="{Binding OrdersText}" Style="{StaticResource KpiValue}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}" Margin="4,0" Padding="16,10">
+                <StackPanel>
+                    <TextBlock Text="Vé đã bán" Style="{StaticResource Muted}"/>
+                    <TextBlock Text="{Binding TicketsText}" Style="{StaticResource KpiValue}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}" Margin="4,0" Padding="16,10">
+                <StackPanel>
+                    <TextBlock Text="Doanh thu ca" Style="{StaticResource Muted}"/>
+                    <TextBlock Text="{Binding RevenueText}" Style="{StaticResource KpiValue}" Foreground="{DynamicResource PosGood}"/>
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource Card}" Margin="4,0,0,0" Padding="16,10">
+                <StackPanel>
+                    <TextBlock Text="Đơn đã hủy" Style="{StaticResource Muted}"/>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding CancelledText}" Style="{StaticResource KpiValue}" Foreground="{DynamicResource PosBad}"/>
+                        <TextBlock Text="{Binding RefundText}" Style="{StaticResource Muted}" VerticalAlignment="Bottom" Margin="8,0,0,4"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <!-- ===== Thông báo sau khi hủy đơn / nộp chốt ca ===== -->
+        <Border Grid.Row="2" CornerRadius="8" Padding="12,8" Margin="0,0,0,8">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Message}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsMessageError}" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource PosWarnBg}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding Message}" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource PosGood}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsMessageError}" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource PosWarn}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </Border>
+
+        <!-- ================= TAB 1: HÓA ĐƠN TRONG CA ================= -->
+        <Grid Grid.Row="3" Visibility="{Binding IsListTab, Converter={StaticResource BoolToVis}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="330"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Style="{StaticResource Card}" Padding="0">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Padding="19,10" Background="{DynamicResource PosSubtle}" CornerRadius="12,12,0,0"
+                            BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="0,0,0,1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="56"/><ColumnDefinition Width="44"/><ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="84"/><ColumnDefinition Width="104"/><ColumnDefinition Width="96"/>
+                                <ColumnDefinition Width="78"/><ColumnDefinition Width="96"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="MÃ ĐƠN" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="1" Text="GIỜ" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="2" Text="PHIM · SUẤT" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="3" Text="GHẾ" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="4" Text="KHÁCH" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="5" Text="THANH TOÁN" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="6" Text="TỔNG TIỀN" Style="{StaticResource Head}" HorizontalAlignment="Right" Margin="0,0,14,0"/>
+                            <TextBlock Grid.Column="7" Text="TRẠNG THÁI" Style="{StaticResource Head}"/>
+                        </Grid>
+                    </Border>
+                    <Grid>
+                        <ListBox Style="{StaticResource Table}" Margin="8,6" ItemsSource="{Binding Invoices}"
+                                 SelectedItem="{Binding SelectedSale}">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource RowItem}">
+                                    <Setter Property="Padding" Value="8,5"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="56"/><ColumnDefinition Width="44"/><ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="84"/><ColumnDefinition Width="104"/><ColumnDefinition Width="96"/>
+                                            <ColumnDefinition Width="78"/><ColumnDefinition Width="96"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding Code}" Style="{StaticResource Cell}" FontWeight="SemiBold"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding TimeText}" Style="{StaticResource Cell}"/>
+                                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,8,0">
+                                            <TextBlock Text="{Binding MovieTitle}" Style="{StaticResource Cell}" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding ShowText}" Style="{StaticResource Muted}" FontSize="11"/>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="3" Text="{Binding SeatsText}" Style="{StaticResource Cell}" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Column="4" Text="{Binding CustomerShort}" Style="{StaticResource Cell}" Margin="0,0,8,0"/>
+                                        <ContentPresenter Grid.Column="5" Content="{Binding}" ContentTemplate="{StaticResource MethodChip}"/>
+                                        <TextBlock Grid.Column="6" Text="{Binding Total, StringFormat=N0}" HorizontalAlignment="Right" Margin="0,0,14,0" FontWeight="SemiBold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource Cell}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCancelled}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource PosTextMuted}"/>
+                                                            <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <ContentPresenter Grid.Column="7" Content="{Binding}" ContentTemplate="{StaticResource StatusChip}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock Text="Chưa có hóa đơn nào trong ca. Bán vé ở mục Bán vé, đơn sẽ hiện ở đây." Style="{StaticResource Muted}" FontSize="13"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}"/>
+                    </Grid>
+                </DockPanel>
+            </Border>
+
+            <!-- Chi tiết hóa đơn + hỗ trợ khách hủy vé -->
+            <Border Grid.Column="2" Style="{StaticResource Card}">
+                <Grid>
+                    <TextBlock Text="Chọn một hóa đơn để xem chi tiết." FontSize="13"
+                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasSelection}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <DockPanel DataContext="{Binding SelectedSale}"
+                               Visibility="{Binding DataContext.HasSelection, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}">
+                        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                            <ContentPresenter DockPanel.Dock="Right" Content="{Binding}" ContentTemplate="{StaticResource StatusChip}"/>
+                            <TextBlock Style="{StaticResource Title}">
+                                <Run Text="Hóa đơn"/> <Run Text="{Binding Code, Mode=OneWay}"/>
+                            </TextBlock>
+                        </DockPanel>
+
+                        <!-- Đơn đã hủy: ai hủy, lúc nào, vì sao -->
+                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource PosBadBg}" CornerRadius="10" Padding="12"
+                                Visibility="{Binding IsCancelled, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="{Binding CancelInfo}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource PosBad}"/>
+                        </Border>
+
+                        <!-- Không hủy được (suất đã chiếu / ca đã chốt) -->
+                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource PosSubtle}" CornerRadius="10" Padding="12"
+                                DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CancelBlockedText}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding CancelBlockedText}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource PosTextMuted}"/>
+                        </Border>
+
+                        <!-- Hỗ trợ khách hủy vé -->
+                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource PosBadBg}" CornerRadius="10" Padding="12"
+                                DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                Visibility="{Binding CanCancel, Converter={StaticResource BoolToVis}}">
+                            <StackPanel>
+                                <TextBlock Text="Hỗ trợ khách hủy vé" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource PosBad}"/>
+                                <StackPanel>
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsConfirmingCancel}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+                                    <ListBox ItemsSource="{Binding CancelReasons}" SelectedItem="{Binding SelectedReason}" Margin="0,8,0,0"
+                                             BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource ReasonItem}"
+                                             ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                    </ListBox>
+                                    <!-- Ô ghi chú chỉ hiện sau khi chọn lý do, để phần chi tiết đơn không bị che -->
+                                    <TextBox Height="34" FontSize="12" Margin="0,0,0,6"
+                                             Tag="Ghi chú thêm (không bắt buộc)" Text="{Binding CancelNote, UpdateSourceTrigger=PropertyChanged}">
+                                        <TextBox.Style>
+                                            <Style TargetType="TextBox" BasedOn="{StaticResource InputBox}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding SelectedReason}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBox.Style>
+                                    </TextBox>
+                                </StackPanel>
+                                <TextBlock Text="{Binding CancelImpactText}" TextWrapping="Wrap" FontSize="11.5"
+                                           Foreground="{DynamicResource PosText}" Margin="0,2,0,10"/>
+
+                                <!-- Bước 1: chọn lý do rồi bấm -->
+                                <Button Content="HỦY VÉ &amp; HOÀN TIỀN" Background="{DynamicResource PosBad}"
+                                        Command="{Binding AskCancelCommand}">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource SolidButton}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsConfirmingCancel}" Value="True">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+
+                                <!-- Bước 2: xác nhận (không hoàn tác được) -->
+                                <StackPanel Visibility="{Binding IsConfirmingCancel, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap"
+                                               Foreground="{DynamicResource PosBad}" Margin="0,0,0,8">
+                                        <Run Text="Hủy vé với lý do"/> <Run Text="{Binding SelectedReason, Mode=OneWay}"/><Run Text="? Thao tác không hoàn tác được."/>
+                                    </TextBlock>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="8"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Content="Không" Style="{StaticResource OutlineButton}" Command="{Binding BackCommand}"/>
+                                        <Button Grid.Column="2" Content="Xác nhận hủy" Style="{StaticResource SolidButton}"
+                                                Background="{DynamicResource PosBad}" Command="{Binding ConfirmCancelCommand}"/>
+                                    </Grid>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,8">
+                        <StackPanel>
+                            <Grid Style="{StaticResource DetailRow}">
+                                <TextBlock Text="Phim" Style="{StaticResource Muted}"/>
+                                <TextBlock Text="{Binding MovieTitle}" Style="{StaticResource Cell}" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Style="{StaticResource DetailRow}">
+                                <TextBlock Text="Suất" Style="{StaticResource Muted}"/>
+                                <TextBlock Text="{Binding ShowLong}" Style="{StaticResource Cell}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Style="{StaticResource DetailRow}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Ghế" Style="{StaticResource Muted}" VerticalAlignment="Top" Margin="0,2,8,0"/>
+                                <ItemsControl Grid.Column="1" ItemsSource="{Binding Seats}" HorizontalAlignment="Right">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel HorizontalAlignment="Right"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border x:Name="seat" CornerRadius="5" Padding="6,2" Margin="4,0,0,4" BorderThickness="1"
+                                                    Background="{DynamicResource PosSeatStd}" BorderBrush="{DynamicResource PosSeatStdBorder}">
+                                                <TextBlock Text="{Binding Label}" FontSize="11" Foreground="{DynamicResource PosText}"/>
+                                            </Border>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static vm:SeatType.Vip}">
+                                                    <Setter TargetName="seat" Property="Background" Value="{DynamicResource PosSeatVip}"/>
+                                                    <Setter TargetName="seat" Property="BorderBrush" Value="{DynamicResource PosSeatVipBorder}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static vm:SeatType.Couple}">
+                                                    <Setter TargetName="seat" Property="Background" Value="{DynamicResource PosSeatCouple}"/>
+                                                    <Setter TargetName="seat" Property="BorderBrush" Value="{DynamicResource PosSeatCoupleBorder}"/>
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+                            <Grid Style="{StaticResource DetailRow}">
+                                <TextBlock Text="Khách" Style="{StaticResource Muted}"/>
+                                <TextBlock Text="{Binding CustomerText}" Style="{StaticResource Cell}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Style="{StaticResource DetailRow}">
+                                <TextBlock Text="Điểm tích lũy" Style="{StaticResource Muted}"/>
+                                <TextBlock Text="{Binding PointsText}" Style="{StaticResource Cell}" Foreground="{DynamicResource PosGood}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Style="{StaticResource DetailRow}">
+                                <TextBlock Text="Giờ bán" Style="{StaticResource Muted}"/>
+                                <TextBlock Text="{Binding TimeText}" Style="{StaticResource Cell}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Style="{StaticResource DetailRow}">
+                                <TextBlock Text="Thanh toán" Style="{StaticResource Muted}"/>
+                                <TextBlock Text="{Binding PaymentDetail}" Style="{StaticResource Cell}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Border Height="1" Background="{DynamicResource PosCardBorder}" Margin="0,2,0,10"/>
+                            <Grid>
+                                <TextBlock Text="Tổng tiền" Style="{StaticResource Title}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding AmountText}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PosTotal}" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                        </ScrollViewer>
+                    </DockPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ================= TAB 2: CHỐT CA ================= -->
+        <Grid Grid.Row="3" Visibility="{Binding IsCloseTab, Converter={StaticResource BoolToVis}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="8"/>
+                <ColumnDefinition Width="330"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Style="{StaticResource Card}" Padding="0">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Vé theo suất chiếu" Style="{StaticResource Title}" Margin="16,14,16,10"/>
+                    <Border DockPanel.Dock="Top" Padding="24,8" Background="{DynamicResource PosSubtle}"
+                            BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="0,1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/><ColumnDefinition Width="170"/><ColumnDefinition Width="50"/><ColumnDefinition Width="110"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="PHIM" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="1" Text="SUẤT" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="2" Text="VÉ" Style="{StaticResource Head}"/>
+                            <TextBlock Grid.Column="3" Text="DOANH THU" Style="{StaticResource Head}" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Theo phương thức thanh toán + đơn đã hủy -->
+                    <Grid DockPanel.Dock="Bottom" Margin="16,0,16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="8"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Background="{DynamicResource PosSubtle}" CornerRadius="10" Padding="14,12">
+                            <StackPanel>
+                                <TextBlock Text="Theo phương thức thanh toán" Style="{StaticResource SectionTitle}" Margin="0,0,0,8"/>
+                                <ItemsControl ItemsSource="{Binding MethodRows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="110"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource MethodChip}"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding OrdersText}" Style="{StaticResource Muted}" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding AmountText}" Style="{StaticResource Cell}" FontWeight="SemiBold"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Background="{DynamicResource PosSubtle}" CornerRadius="10" Padding="14,12">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="Vé đã hủy trong ca" Style="{StaticResource SectionTitle}" Margin="0,0,0,8"/>
+                                <Grid>
+                                    <ScrollViewer MaxHeight="84" VerticalScrollBarVisibility="Auto">
+                                        <ItemsControl ItemsSource="{Binding CancelledSales}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,0,0,6">
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="54"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Text="{Binding Code}" Style="{StaticResource Cell}" FontWeight="SemiBold"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding CancelReason}" Style="{StaticResource Muted}" TextTrimming="CharacterEllipsis"
+                                                                   VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                                        <TextBlock Grid.Column="2" Text="{Binding AmountText}" Style="{StaticResource Cell}" Foreground="{DynamicResource PosBad}"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                    <TextBlock Text="Không có vé nào bị hủy." FontSize="12">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding CancelledSales.Count}" Value="0">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Dòng tổng -->
+                    <Border DockPanel.Dock="Bottom" Padding="24,12" Margin="0,0,0,14" BorderBrush="{DynamicResource PosCardBorder}" BorderThickness="0,1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/><ColumnDefinition Width="170"/><ColumnDefinition Width="50"/><ColumnDefinition Width="110"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Tổng" Style="{StaticResource Cell}" FontWeight="Bold"/>
+                            <TextBlock Grid.Column="2" Text="{Binding TotalTicketsText}" Style="{StaticResource Cell}" FontWeight="Bold"/>
+                            <TextBlock Grid.Column="3" Text="{Binding TotalRevenueText}" Style="{StaticResource Cell}" FontWeight="Bold"
+                                       Foreground="{DynamicResource PosGood}" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                        </Grid>
+                    </Border>
+
+                    <Grid>
+                        <ListBox Style="{StaticResource Table}" Margin="8,6" ItemsSource="{Binding ShowRows}" Focusable="False">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem" BasedOn="{StaticResource RowItem}">
+                                    <Setter Property="Padding" Value="13,8,8,8"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/><ColumnDefinition Width="170"/><ColumnDefinition Width="50"/><ColumnDefinition Width="110"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="{Binding MovieTitle}" Style="{StaticResource Cell}" FontWeight="SemiBold" Margin="0,0,8,0"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding ShowText}" Style="{StaticResource Cell}"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding Tickets}" Style="{StaticResource Cell}"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding RevenueText}" Style="{StaticResource Cell}" HorizontalAlignment="Right" Margin="0,0,10,0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock Text="Chưa bán vé nào trong ca." FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ShowRows.Count}" Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </DockPanel>
+            </Border>
+
+            <!-- Nộp chốt ca: đếm két, ghi chú, gửi Quản trị viên xác nhận -->
+            <Border Grid.Column="2" Style="{StaticResource Card}">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+                        <TextBlock Text="Chốt ca" Style="{StaticResource Title}"/>
+                        <TextBlock Text="Đếm tiền mặt trong két rồi nộp. Chuyển khoản và thẻ do Quản trị viên đối chiếu." Style="{StaticResource Muted}"
+                                   TextWrapping="Wrap" Margin="0,3,0,0"/>
+                    </StackPanel>
+
+                    <Button DockPanel.Dock="Bottom" Content="NỘP BÁO CÁO CHỐT CA" Style="{StaticResource SolidButton}" Height="44"
+                            Background="{DynamicResource PosPay}" FontSize="14" Command="{Binding SubmitShiftCommand}"/>
+
+                    <!-- Đã nộp / đã bàn giao -->
+                    <Border DockPanel.Dock="Bottom" Background="{DynamicResource PosInfoBg}" CornerRadius="8" Padding="12,8" Margin="0,0,0,10">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CloseStatusText}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding CloseStatusText}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource PosInfo}"/>
+                    </Border>
+
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
+                    <StackPanel>
+                        <Border Background="{DynamicResource PosSubtle}" CornerRadius="10" Padding="12,10">
+                            <Grid>
+                                <TextBlock Text="Tiền mặt phải có trong két" Style="{StaticResource Muted}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SystemCashText}" Style="{StaticResource Cell}" FontSize="15" FontWeight="Bold" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="Tiền mặt đếm thực tế" Style="{StaticResource FieldLabel}"/>
+                        <Grid>
+                            <TextBox Style="{StaticResource InputBox}" Height="38" FontSize="14" Tag="Nhập số tiền đếm được"
+                                     Text="{Binding CountedCashText, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsShiftOpen}"/>
+                            <TextBlock Text="đ" Style="{StaticResource Muted}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        </Grid>
+
+                        <Border CornerRadius="8" Padding="12,8" Margin="0,10,0,0">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{DynamicResource PosSubtle}"/>
+                                    <Setter Property="TextElement.Foreground" Value="{DynamicResource PosTextMuted}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding DiffKind}" Value="Even">
+                                            <Setter Property="Background" Value="{DynamicResource PosGoodBg}"/>
+                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource PosGood}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding DiffKind}" Value="Short">
+                                            <Setter Property="Background" Value="{DynamicResource PosBadBg}"/>
+                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource PosBad}"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding DiffKind}" Value="Over">
+                                            <Setter Property="Background" Value="{DynamicResource PosWarnBg}"/>
+                                            <Setter Property="TextElement.Foreground" Value="{DynamicResource PosWarn}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <TextBlock Text="{Binding DiffLabel}" FontSize="12.5" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding DiffText}" FontSize="16" FontWeight="Bold" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="Ghi chú" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Style="{StaticResource InputBox}" Height="44" Padding="12,6" VerticalContentAlignment="Top"
+                                 TextWrapping="Wrap" AcceptsReturn="True" Tag="Ví dụ: thối nhầm cho khách đơn #1031"
+                                 Text="{Binding ShiftNote, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsShiftOpen}"/>
+                    </StackPanel>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

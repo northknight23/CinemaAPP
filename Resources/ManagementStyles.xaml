@@ -1,0 +1,698 @@
+<!--
+    Style dùng chung cho các màn quản lý của A (Tài khoản, Khách hàng, Thống kê).
+    Màu lấy từ Resources/Styles.xaml (đã nạp trong App.xaml) → luôn dùng DynamicResource/StaticResource theo tên.
+    Mỗi màn nạp file này trong UserControl.Resources, nên không ảnh hưởng màn của B và C.
+-->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+
+    <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+    <!-- ===== Chữ ===== -->
+    <Style x:Key="MgmtBreadcrumb" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+    </Style>
+
+    <Style x:Key="MgmtPageTitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="22"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Margin" Value="0,2,0,0"/>
+    </Style>
+
+    <Style x:Key="MgmtCardTitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="17"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+    </Style>
+
+    <Style x:Key="MgmtLabel" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Margin" Value="0,0,0,6"/>
+    </Style>
+
+    <Style x:Key="MgmtHint" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <Style x:Key="MgmtError" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="TextWrapping" Value="Wrap"/>
+        <Setter Property="Margin" Value="0,5,0,0"/>
+    </Style>
+
+    <Style x:Key="MgmtColumnHeader" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+    </Style>
+
+    <!-- ===== Thẻ (card) ===== -->
+    <Style x:Key="MgmtCard" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="16"/>
+    </Style>
+
+    <!-- Khung thông báo xanh/đỏ phía trên form. ViewModel phải có IsMessageError. -->
+    <Style x:Key="MgmtBanner" TargetType="Border">
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="Background" Value="{StaticResource SuccessBgBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{StaticResource SuccessBrush}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsMessageError}" Value="True">
+                <Setter Property="Background" Value="{StaticResource ErrorBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource ErrorBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ===== Ô nhập =====
+         Tag = true → viền đỏ (bind Tag vào HasXxxError của ViewModel). -->
+    <Style x:Key="MgmtTextBox" TargetType="TextBox">
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Background" Value="{StaticResource InputBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="box" CornerRadius="10" BorderThickness="1"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Center" Focusable="False"
+                                      HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource InputHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="Tag">
+                            <Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value>
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter TargetName="box" Property="BorderThickness" Value="2"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="box" Property="Background" Value="{StaticResource SubtleBrush}"/>
+                            <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MgmtPasswordBox" TargetType="PasswordBox">
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Background" Value="{StaticResource InputBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Border x:Name="box" CornerRadius="10" BorderThickness="1"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
+                                      VerticalAlignment="Center" Focusable="False"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource InputHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="Tag">
+                            <Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value>
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource ErrorBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter TargetName="box" Property="BorderThickness" Value="2"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Ô tìm kiếm có kính lúp; Tag = chữ gợi ý khi ô trống -->
+    <Style x:Key="MgmtSearchBox" TargetType="TextBox">
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Background" Value="{StaticResource InputBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource InputBorderBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="box" CornerRadius="10" BorderThickness="1"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Path Data="M10.5,3 A7.5,7.5 0 1 1 10.49,3 Z M16,16 L21,21" Stroke="{StaticResource IconBrush}"
+                                  StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Width="18" Height="18" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="placeholder" Grid.Column="1" Text="{TemplateBinding Tag}"
+                                       Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center"
+                                       Margin="2,0,0,0" IsHitTestVisible="False" Visibility="Collapsed"/>
+                            <ScrollViewer x:Name="PART_ContentHost" Grid.Column="1" VerticalAlignment="Center"
+                                          Margin="0,0,10,0" Focusable="False"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Text" Value="">
+                            <Setter TargetName="placeholder" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource InputHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="box" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                            <Setter TargetName="box" Property="BorderThickness" Value="2"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Nút ===== -->
+    <Style x:Key="MgmtButtonBase" TargetType="Button">
+        <Setter Property="Height" Value="44"/>
+        <Setter Property="Padding" Value="16,0"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" CornerRadius="10" Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MgmtPrimaryButton" TargetType="Button" BasedOn="{StaticResource MgmtButtonBase}">
+        <Setter Property="Background" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource PrimaryHoverBrush}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{StaticResource PrimaryPressBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MgmtGhostButton" TargetType="Button" BasedOn="{StaticResource MgmtButtonBase}">
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource SubtleBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MgmtDangerButton" TargetType="Button" BasedOn="{StaticResource MgmtButtonBase}">
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="#F3C4C4"/>
+        <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource ErrorBgBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MgmtDangerSolidButton" TargetType="Button" BasedOn="{StaticResource MgmtButtonBase}">
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Background" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource ErrorBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- ===== Nút nhỏ cho danh sách thẻ / bảng (Sửa, Xóa...) ===== -->
+    <Style x:Key="MgmtSmallGhostButton" TargetType="Button" BasedOn="{StaticResource MgmtGhostButton}">
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" CornerRadius="8" Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{StaticResource SubtleBrush}"/>
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MgmtSmallDangerButton" TargetType="Button" BasedOn="{StaticResource MgmtDangerButton}">
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="FontSize" Value="12.5"/>
+        <Setter Property="Padding" Value="10,0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" CornerRadius="8" Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{StaticResource ErrorBgBrush}"/>
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{StaticResource DangerBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Nút Menu (từ MainWindow.xaml) ===== -->
+    <Style x:Key="MenuButtonStyle" TargetType="Button">
+        <Setter Property="Foreground" Value="{StaticResource OnNavyMutedBrush}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Padding" Value="14,11"/>
+        <Setter Property="Margin" Value="0,3"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="ButtonBorder"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="8">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ButtonBorder"
+                                    Property="Background"
+                                    Value="#183B61"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="Tag" Value="True">
+                            <Setter TargetName="ButtonBorder"
+                                    Property="Background"
+                                    Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                        <Trigger Property="Tag">
+                            <Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value>
+                            <Setter TargetName="ButtonBorder"
+                                    Property="Background"
+                                    Value="{StaticResource PrimaryBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="Tag" Value="True"/>
+                                <Condition Property="IsMouseOver" Value="True"/>
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource PrimaryHoverBrush}"/>
+                        </MultiTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="MgmtMenuButton" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}"/>
+
+    <!-- ===== Nút Đầu Trang (Top Bar / Đăng xuất) ===== -->
+    <Style x:Key="MgmtHeaderButton" TargetType="Button">
+        <Setter Property="Height" Value="38"/>
+        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource SubtleBrush}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="{StaticResource InfoBgBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Nút lọc dạng viên thuốc (RadioButton) ===== -->
+    <Style x:Key="MgmtChip" TargetType="RadioButton">
+        <Setter Property="Height" Value="36"/>
+        <Setter Property="Padding" Value="14,0"/>
+        <Setter Property="Margin" Value="0,0,6,0"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="bg" CornerRadius="18" BorderThickness="1" Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{StaticResource InputHoverBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{StaticResource NavyBrush}"/>
+                            <Setter TargetName="bg" Property="BorderBrush" Value="{StaticResource NavyBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.55"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Nút chọn dạng phân đoạn (đặt trong một Border nền trắng) -->
+    <Style x:Key="MgmtSegment" TargetType="RadioButton" BasedOn="{StaticResource MgmtChip}">
+        <Setter Property="Height" Value="38"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="bg" CornerRadius="9" Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}">
+                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{StaticResource SubtleBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{StaticResource NavyBrush}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.55"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ===== Danh sách dạng bảng (ListBox) ===== -->
+    <Style x:Key="MgmtList" TargetType="ListBox">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style x:Key="MgmtRow" TargetType="ListBoxItem">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="bg" Background="{StaticResource CardBrush}" BorderBrush="{StaticResource CardBorderBrush}"
+                            BorderThickness="0,0,0,1" Padding="18,10" MinHeight="58">
+                        <ContentPresenter VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{StaticResource SubtleBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{StaticResource InfoBgBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Ô tròn chữ viết tắt -->
+    <Style x:Key="MgmtAvatar" TargetType="Border">
+        <Setter Property="Width" Value="34"/>
+        <Setter Property="Height" Value="34"/>
+        <Setter Property="CornerRadius" Value="17"/>
+        <Setter Property="Background" Value="{StaticResource InfoBgBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{StaticResource InfoBrush}"/>
+        <Setter Property="TextElement.FontWeight" Value="Bold"/>
+        <Setter Property="TextElement.FontSize" Value="12"/>
+    </Style>
+
+    <!-- Thanh ngang tỷ lệ (dùng ProgressBar, Value 0–100) -->
+    <Style x:Key="MgmtBar" TargetType="ProgressBar">
+        <Setter Property="Height" Value="8"/>
+        <Setter Property="Minimum" Value="0"/>
+        <Setter Property="Maximum" Value="100"/>
+        <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid>
+                        <Border x:Name="PART_Track" CornerRadius="4" Background="{StaticResource InfoBgBrush}"/>
+                        <Border x:Name="PART_Indicator" CornerRadius="4" HorizontalAlignment="Left"
+                                Background="{TemplateBinding Foreground}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- =====================================================================
+         Dùng chung cho các màn quản lý kiểu mới (Tài khoản, …):
+         thẻ số liệu, avatar nhiều màu, icon trong nút, ô số nhỏ, chữ gợi ý.
+         ===================================================================== -->
+
+    <!-- Thẻ số liệu: nền trắng + bóng đổ nhẹ. Đặt Border này làm LỚP NỀN riêng
+         (nội dung để ở lớp trên) để chữ không bị mờ do DropShadowEffect. -->
+    <Style x:Key="MgmtKpiShadow" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="#0F2A4A" Direction="270" ShadowDepth="1" BlurRadius="10" Opacity="0.10"/>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="MgmtKpiIconCircle" TargetType="Border">
+        <Setter Property="Width" Value="46"/>
+        <Setter Property="Height" Value="46"/>
+        <Setter Property="CornerRadius" Value="23"/>
+        <Setter Property="Background" Value="#EFF4FB"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="MgmtKpiIcon" TargetType="Path">
+        <Setter Property="Width" Value="22"/>
+        <Setter Property="Height" Value="22"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="Stroke" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="StrokeThickness" Value="1.8"/>
+        <Setter Property="StrokeStartLineCap" Value="Round"/>
+        <Setter Property="StrokeEndLineCap" Value="Round"/>
+        <Setter Property="StrokeLineJoin" Value="Round"/>
+    </Style>
+    <Style x:Key="MgmtKpiValue" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="40"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+        <Setter Property="HorizontalAlignment" Value="Right"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="MgmtKpiLabel" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+    </Style>
+    <!-- Biến thiên %: Tag = true → tăng (xanh lá); false → giảm (xanh dương) -->
+    <Style x:Key="MgmtTrendPanel" TargetType="StackPanel">
+        <Setter Property="Orientation" Value="Horizontal"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="TextElement.Foreground" Value="{StaticResource PrimaryBrush}"/>
+        <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
+        <Setter Property="TextElement.FontSize" Value="13.5"/>
+        <Style.Triggers>
+            <Trigger Property="Tag">
+                <Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value>
+                <Setter Property="TextElement.Foreground" Value="#15803D"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <!-- Mũi tên trong MgmtTrendPanel: tự quay lên/xuống theo Tag của panel -->
+    <Style x:Key="MgmtTrendArrow" TargetType="Path">
+        <Setter Property="Data" Value="M12,19 V5 M6,11 L12,5 L18,11"/>
+        <Setter Property="Width" Value="11"/>
+        <Setter Property="Height" Value="12"/>
+        <Setter Property="Margin" Value="4,0,0,1"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="StrokeThickness" Value="2.2"/>
+        <Setter Property="StrokeStartLineCap" Value="Round"/>
+        <Setter Property="StrokeEndLineCap" Value="Round"/>
+        <Setter Property="StrokeLineJoin" Value="Round"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Stroke" Value="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+        <Setter Property="RenderTransform">
+            <Setter.Value><RotateTransform Angle="180"/></Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=StackPanel}}" Value="True">
+                <Setter Property="RenderTransform">
+                    <Setter.Value><RotateTransform Angle="0"/></Setter.Value>
+                </Setter>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Avatar nhiều màu: DataContext cần có thuộc tính AvatarTone (0–5) -->
+    <Style x:Key="MgmtToneAvatar" TargetType="Border">
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="CornerRadius" Value="20"/>
+        <Setter Property="Background" Value="#EAF2FC"/>
+        <Setter Property="TextElement.Foreground" Value="#164F8F"/>
+        <Setter Property="TextElement.FontWeight" Value="Bold"/>
+        <Setter Property="TextElement.FontSize" Value="13.5"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="1">
+                <Setter Property="Background" Value="#FFF4DF"/>
+                <Setter Property="TextElement.Foreground" Value="#9A3412"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="2">
+                <Setter Property="Background" Value="#EEF7F0"/>
+                <Setter Property="TextElement.Foreground" Value="#166534"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="3">
+                <Setter Property="Background" Value="#F1ECFC"/>
+                <Setter Property="TextElement.Foreground" Value="#5B3FB0"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="4">
+                <Setter Property="Background" Value="#FDECEC"/>
+                <Setter Property="TextElement.Foreground" Value="#B91C1C"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AvatarTone}" Value="5">
+                <Setter Property="Background" Value="#E6F6F8"/>
+                <Setter Property="TextElement.Foreground" Value="#0E6773"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Icon nét mảnh đặt trong nút: tự lấy màu chữ của nút -->
+    <Style x:Key="MgmtButtonIcon" TargetType="Path">
+        <Setter Property="Width" Value="15"/>
+        <Setter Property="Height" Value="15"/>
+        <Setter Property="Margin" Value="0,0,8,0"/>
+        <Setter Property="Stretch" Value="Uniform"/>
+        <Setter Property="StrokeThickness" Value="2"/>
+        <Setter Property="StrokeStartLineCap" Value="Round"/>
+        <Setter Property="StrokeEndLineCap" Value="Round"/>
+        <Setter Property="StrokeLineJoin" Value="Round"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+    </Style>
+
+    <!-- Ô số nhỏ trong khung hồ sơ -->
+    <Style x:Key="MgmtStatTile" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource SubtleBrush}"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="12,10"/>
+    </Style>
+
+    <!-- Chữ gợi ý nằm đè lên ô nhập khi ô trống -->
+    <Style x:Key="MgmtInputHint" TargetType="TextBlock">
+        <Setter Property="Margin" Value="12,0,0,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="#8A97A8"/>
+        <Setter Property="IsHitTestVisible" Value="False"/>
+    </Style>
+</ResourceDictionary>
