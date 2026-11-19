@@ -1,5 +1,7 @@
 # Phác thảo luồng bán vé tại quầy (phần của C)
 
+> Cập nhật 19/11/2026: POS đã chuyển sang lưu SQL Server. Xem [BanVeSQL.md](BanVeSQL.md) cho luồng hiện hành và migration. Các SQL mẫu/kế hoạch bên dưới có thể khác implementation mới.
+
 Người dùng: **nhân viên quầy** (đã đăng nhập, có `AccountID`), bán trên máy POS tại rạp.
 Toàn bộ việc bán nằm trên **một màn hình chia 3 cột**, không chuyển qua lại giữa nhiều màn.
 Màn này **không có thanh tiêu đề riêng**: logo, tên nhân viên, Đăng xuất thuộc khung app (`MainWindow` của B),

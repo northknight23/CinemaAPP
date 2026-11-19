@@ -71,6 +71,7 @@ namespace CinemaAPP.ViewModels
                     OnPropertyChanged(nameof(IsOverviewSelected));
                     OnPropertyChanged(nameof(IsTicketsSelected));
                     OnPropertyChanged(nameof(IsTransactionsSelected));
+                    OnPropertyChanged(nameof(IsMyShiftSelected));
                     OnPropertyChanged(nameof(IsCustomersSelected));
                     OnPropertyChanged(nameof(IsMoviesSelected));
                     OnPropertyChanged(nameof(IsRoomsSelected));
@@ -86,6 +87,7 @@ namespace CinemaAPP.ViewModels
         public bool IsOverviewSelected => CurrentPageId == "Overview";
         public bool IsTicketsSelected => CurrentPageId == "Tickets";
         public bool IsTransactionsSelected => CurrentPageId == "Transactions";
+        public bool IsMyShiftSelected => CurrentPageId == "MyShift";
         public bool IsCustomersSelected => CurrentPageId == "Customers";
         public bool IsMoviesSelected => CurrentPageId == "Movies";
         public bool IsRoomsSelected => CurrentPageId == "Rooms";
@@ -98,6 +100,7 @@ namespace CinemaAPP.ViewModels
             "Overview" => "Tổng quan",
             "Tickets" => "Bán hàng",
             "Transactions" => "Bán hàng",
+            "MyShift" => "Bán hàng",
             "Customers" => "Bán hàng",
             "Movies" => "Quản lý",
             "Rooms" => "Quản lý",
@@ -112,6 +115,7 @@ namespace CinemaAPP.ViewModels
             "Overview" => IsAdmin ? "Tổng quan hôm nay" : "Ca làm của tôi",
             "Tickets" => "Bán vé & Chọn ghế",
             "Transactions" => "Giao dịch & Đối soát",
+            "MyShift" => "Hóa đơn & Chốt ca",
             "Customers" => "Quản lý khách hàng",
             "Movies" => "Quản lý danh sách phim",
             "Rooms" => "Quản lý phòng chiếu",
@@ -200,6 +204,8 @@ namespace CinemaAPP.ViewModels
                 "Movies" => new MovieManagementView(),
                 "Tickets" => new SeatMapDemoView(),
                 "Transactions" => new TransactionsView(),
+                "MyShift" => new MyShiftView(),
+                "Showtimes" => new ShowtimeManagementView(),
                 "Customers" => new CustomerManagementView(),
                 "Accounts" => new AccountManagementView(),
                 "Revenue" => new RevenueView(),

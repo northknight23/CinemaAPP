@@ -78,6 +78,18 @@
                             </StackPanel>
                         </Button>
 
+                        <!-- Hóa đơn & Chốt ca (chỉ Nhân viên) -->
+                        <Button Style="{StaticResource MenuButtonStyle}" Visibility="{Binding StaffVisibility}"
+                                Tag="{Binding IsMyShiftSelected}"
+                                Command="{Binding SelectPageCommand}" CommandParameter="MyShift">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M9 3h6v4H9z M7 5H5v16h14V5h-2 M9 14l2 2 4-4"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6"
+                                      StrokeLineJoin="Round" Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                                <TextBlock Text="Hóa đơn ca" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
                         <Button Style="{StaticResource MenuButtonStyle}"
                                 Tag="{Binding IsCustomersSelected}"
                                 Command="{Binding SelectPageCommand}" CommandParameter="Customers">

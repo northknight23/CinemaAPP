@@ -15,9 +15,10 @@ namespace CinemaAPP.ViewModels
     }
 
     // Màn GIAO DỊCH & ĐỐI SOÁT (chỉ Quản trị viên): tra cứu đơn đã bán, hủy đơn, đối soát tiền cuối ca.
-    // Dữ liệu lấy từ SalesDemoStore (đơn bán ở màn Bán vé trong lần chạy này); khi ghép CSDL đổi sang BookingService, giao diện giữ nguyên.
+    // Hóa đơn đọc từ SQL Server; phần bàn giao ca vẫn giữ trong bộ nhớ.
     public class TransactionsViewModel : ObservableObject
     {
+        private readonly BookingService bookingService = new();
         public const string AllStaff = "Tất cả nhân viên";
         public const string AllMethods = "Tất cả thanh toán";
 
@@ -222,7 +223,7 @@ namespace CinemaAPP.ViewModels
             selectedDate = DateOptions[0];
 
             StaffOptions = new List<string> { AllStaff };
-            StaffOptions.AddRange(SalesDemoStore.Sales.Select(s => s.StaffName).Distinct());
+
 
             AskCancelCommand = new RelayCommand(_ => IsConfirmingCancel = true,
                 _ => CanShowCancelBox && SelectedReason != null);
@@ -241,7 +242,18 @@ namespace CinemaAPP.ViewModels
             string? keepStaff = SelectedStaffRow?.Staff.Username;
 
             // Đơn trong khoảng ngày + nhân viên đang lọc
-            var inRange = SalesDemoStore.Sales
+            List<SaleRecord> stored;
+            try { stored = bookingService.GetSales(SelectedDate.From, SelectedDate.To); }
+            catch (Exception ex)
+            {
+                Transactions.Clear(); StaffRows.Clear(); SelectedSale = null; SelectedStaffRow = null; IsEmpty = true;
+                IsMessageError = true; Message = "Không tải được giao dịch SQL Server: " + ex.Message;
+                return;
+            }
+            var names = stored.Select(s => s.StaffName).Distinct().ToList();
+            StaffOptions.Clear(); StaffOptions.Add(AllStaff); StaffOptions.AddRange(names);
+            OnPropertyChanged(nameof(StaffOptions));
+            var inRange = stored
                 .Where(s => s.CreatedAt >= SelectedDate.From && s.CreatedAt < SelectedDate.To)
                 .Where(s => SelectedStaffFilter == AllStaff || s.StaffName == SelectedStaffFilter)
                 .ToList();
@@ -283,6 +295,7 @@ namespace CinemaAPP.ViewModels
                     Cash = ok.Where(s => s.Method == PaymentMethod.Cash).Sum(s => s.Total),
                     Transfer = ok.Where(s => s.Method == PaymentMethod.Transfer).Sum(s => s.Total),
                     Card = ok.Where(s => s.Method == PaymentMethod.Card).Sum(s => s.Total),
+                    UnknownAmount = ok.Where(s => s.Method == PaymentMethod.Unknown).Sum(s => s.Total),
                     CancelledCount = mine.Count(s => s.IsCancelled),
                     CancelledAmount = mine.Where(s => s.IsCancelled).Sum(s => s.Total),
                     Handover = SelectedDate.IsSingleDay && SalesDemoStore.Handovers.TryGetValue((SelectedDate.From, staff.Username), out var h) ? h : null,
@@ -291,7 +304,7 @@ namespace CinemaAPP.ViewModels
             }
 
             decimal cash = StaffRows.Sum(r => r.Cash), transfer = StaffRows.Sum(r => r.Transfer), card = StaffRows.Sum(r => r.Card);
-            decimal all = cash + transfer + card;
+            decimal all = StaffRows.Sum(r => r.Total);
             TotalOrders = StaffRows.Sum(r => r.Orders).ToString("N0", Vi);
             TotalTickets = StaffRows.Sum(r => r.Tickets).ToString("N0", Vi);
             TotalCash = cash.ToString("N0", Vi);
@@ -314,11 +327,18 @@ namespace CinemaAPP.ViewModels
 
         private void CancelSelected()
         {
-            SaleRecord sale = SelectedSale!;
-            sale.CancelReason = SelectedReason!;
-            sale.CancelledAt = DateTime.Now;
-            sale.CancelledBy = AppSession.CurrentUser?.FullName ?? "Quản trị viên";
-            sale.IsCancelled = true;
+            if (!CanShowCancelBox || SelectedSale == null || SelectedReason == null) return;
+            SaleRecord sale = SelectedSale;
+            string reason = SelectedReason;
+            try
+            {
+                bookingService.CancelBooking(sale.BookingID, AppSession.CurrentUser?.AccountID ?? 0, reason);
+            }
+            catch (Exception ex)
+            {
+                IsMessageError = true; Message = "Chưa hủy đơn: " + ex.Message;
+                return;
+            }
             IsConfirmingCancel = false;
 
             Refresh();
