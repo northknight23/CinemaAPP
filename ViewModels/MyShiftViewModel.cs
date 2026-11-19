@@ -22,9 +22,10 @@ namespace CinemaAPP.ViewModels
 
     // Màn HÓA ĐƠN CA (chỉ Nhân viên): hóa đơn của chính mình trong ca hôm nay, hỗ trợ khách hủy vé, nộp chốt ca.
     // Quản trị viên xem và xác nhận bàn giao ở màn Giao dịch & Đối soát.
-    // Dữ liệu lấy từ SalesDemoStore; khi ghép CSDL đổi sang BookingService, giao diện giữ nguyên.
+    // Hóa đơn đọc từ SQL Server; báo cáo chốt ca vẫn ở bộ nhớ cho tới khi có bảng ca.
     public class MyShiftViewModel : ObservableObject
     {
+        private readonly BookingService bookingService = new();
         public const string AllMethods = "Tất cả thanh toán";
         private static readonly CultureInfo Vi = new CultureInfo("vi-VN");
 
@@ -225,7 +226,15 @@ namespace CinemaAPP.ViewModels
         private void Refresh()
         {
             int? keepSale = SelectedSale?.BookingID;
-            var mine = SalesDemoStore.Sales
+            List<SaleRecord> stored;
+            try { stored = bookingService.GetSales(ShiftDay, ShiftDay.AddDays(1)); }
+            catch (Exception ex)
+            {
+                Invoices.Clear(); SelectedSale = null; IsEmpty = true;
+                IsMessageError = true; Message = "Không tải được hóa đơn SQL Server: " + ex.Message;
+                return;
+            }
+            var mine = stored
                 .Where(s => s.StaffUsername == StaffUsername && s.CreatedAt.Date == ShiftDay)
                 .ToList();
             var paid = mine.Where(s => !s.IsCancelled).ToList();
@@ -255,7 +264,7 @@ namespace CinemaAPP.ViewModels
                 ShowRows.Add(new ShowSummary(g.Key.MovieTitle, g.First().ShowLong, g.Sum(s => s.TicketCount), g.Sum(s => s.Total)));
 
             MethodRows.Clear();
-            foreach (PaymentMethod m in new[] { PaymentMethod.Cash, PaymentMethod.Transfer, PaymentMethod.Card })
+            foreach (PaymentMethod m in new[] { PaymentMethod.Cash, PaymentMethod.Transfer, PaymentMethod.Card, PaymentMethod.Unknown })
             {
                 var byMethod = paid.Where(s => s.Method == m).ToList();
                 MethodRows.Add(new MethodSummary(m, byMethod.Count, byMethod.Sum(s => s.Total)));
@@ -289,12 +298,19 @@ namespace CinemaAPP.ViewModels
 
         private void CancelSelected()
         {
-            SaleRecord sale = SelectedSale!;
+            if (!CanCancel || SelectedSale == null || SelectedReason == null) return;
+            SaleRecord sale = SelectedSale;
             string note = CancelNote.Trim();
-            sale.CancelReason = note == "" ? SelectedReason! : $"{SelectedReason} ({note})";
-            sale.CancelledAt = DateTime.Now;
-            sale.CancelledBy = StaffName;
-            sale.IsCancelled = true;
+            string reason = note == "" ? SelectedReason : $"{SelectedReason} ({note})";
+            try
+            {
+                bookingService.CancelBooking(sale.BookingID, AppSession.CurrentUser?.AccountID ?? 0, reason);
+            }
+            catch (Exception ex)
+            {
+                IsMessageError = true; Message = "Chưa hủy đơn: " + ex.Message;
+                return;
+            }
             IsConfirmingCancel = false;
 
             Refresh();

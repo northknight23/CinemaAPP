@@ -1,6 +1,6 @@
 namespace CinemaAPP.ViewModels
 {
-    public enum PaymentMethod { Cash, Transfer, Card }
+    public enum PaymentMethod { Cash, Transfer, Card, Unknown }
 
     // Một dòng trong "Đơn hiện tại": các ghế cùng loại gom lại, ví dụ "Vé VIP · D5, D6 | 2 vé".
     public class OrderLine

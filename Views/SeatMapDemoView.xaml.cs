@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using CinemaAPP.ViewModels;
+using CinemaAPP.Services;
 
 namespace CinemaAPP.Views
 {
@@ -29,8 +30,13 @@ namespace CinemaAPP.Views
         {
             try
             {
+                var service = new BookingService();
+                if (!service.IsBookingPaid(ticket.Sale!.BookingID))
+                    throw new InvalidOperationException("Đơn đã hủy hoặc không còn hợp lệ để in.");
                 var dialog = new PrintDialog();
                 if (dialog.ShowDialog() != true) return;
+                if (!service.IsBookingPaid(ticket.Sale.BookingID))
+                    throw new InvalidOperationException("Đơn đã hủy trong lúc chọn máy in.");
 
                 var capabilities = dialog.PrintQueue.GetPrintCapabilities(dialog.PrintTicket);
                 var area = capabilities.PageImageableArea;
@@ -44,7 +50,8 @@ namespace CinemaAPP.Views
                     $"UIT Cinema - Don {ticket.TicketCode}");
             }
             catch (Exception ex) when (ex is PrintSystemException
-                or System.Windows.Xps.XpsException or InvalidOperationException)
+                or System.Windows.Xps.XpsException or InvalidOperationException
+                or Microsoft.Data.SqlClient.SqlException)
             {
                 MessageBox.Show(Window.GetWindow(this), "Không gửi được vé đến máy in. Hãy kiểm tra máy in và thử lại.",
                     "In vé", MessageBoxButton.OK, MessageBoxImage.Warning);

@@ -11,12 +11,13 @@ namespace CinemaAPP.ViewModels
         public decimal Cash { get; init; }
         public decimal Transfer { get; init; }
         public decimal Card { get; init; }
+        public decimal UnknownAmount { get; init; }
         public int CancelledCount { get; init; }
         public decimal CancelledAmount { get; init; }
         public Handover? Handover { get; init; }   // null = chưa bàn giao (hoặc đang xem nhiều ngày)
         public ShiftReport? Report { get; init; }  // nhân viên đã tự nộp chốt ca, chờ xác nhận
 
-        public decimal Total => Cash + Transfer + Card;
+        public decimal Total => Cash + Transfer + Card + UnknownAmount;
         public bool IsHandedOver => Handover != null;
         public bool IsPending => Handover == null && Report != null;
 

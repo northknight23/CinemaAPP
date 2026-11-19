@@ -317,6 +317,10 @@
                 <Setter TargetName="b" Property="Background" Value="{DynamicResource SeatCoupleBrush}"/>
                 <Setter TargetName="t" Property="Foreground" Value="{DynamicResource SeatCoupleBorderBrush}"/>
             </DataTrigger>
+            <DataTrigger Binding="{Binding Method}" Value="{x:Static vm:PaymentMethod.Unknown}">
+                <Setter TargetName="b" Property="Background" Value="{DynamicResource SubtleBrush}"/>
+                <Setter TargetName="t" Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+            </DataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
 

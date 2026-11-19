@@ -4,7 +4,7 @@ using CinemaAPP.Helpers;
 namespace CinemaAPP.ViewModels
 {
     // Một ghế trong đơn đã bán (chỉ để hiện chip ghế ở màn Giao dịch).
-    public record SoldSeat(string Label, SeatType Type);
+    public record SoldSeat(string Label, SeatType Type, int Count = 1);
 
     // Một nhân viên bán vé (lấy từ người bán của đơn; sau này là ACCOUNT có AccountRole = Staff).
     public record StaffInfo(string FullName, string Username, string Shift)
@@ -19,6 +19,8 @@ namespace CinemaAPP.ViewModels
         private static readonly CultureInfo Vi = new CultureInfo("vi-VN");
 
         public int BookingID { get; init; }
+        public int AccountID { get; init; }
+        public int? CustomerID { get; init; }
         public DateTime CreatedAt { get; init; }
         public string MovieTitle { get; init; } = "";
         public DateTime ShowStart { get; init; }
@@ -59,7 +61,7 @@ namespace CinemaAPP.ViewModels
         public string TimeText => CreatedAt.ToString("HH:mm");
         public string ShowText => $"{ShowStart:HH:mm} · {RoomName.Replace("Phòng ", "P")} · {ShowFormat}";
         public string ShowLong => $"{ShowStart:HH:mm} · {RoomName} · {ShowFormat}";
-        public int TicketCount => Seats.Count;
+        public int TicketCount => Seats.Sum(s => s.Count);
         public string SeatsText => string.Join(", ", Seats.Select(s => s.Label));
         public string AmountText => Money(Total);
         public string MethodText => MethodName(Method);
@@ -79,7 +81,8 @@ namespace CinemaAPP.ViewModels
         {
             PaymentMethod.Cash => "Tiền mặt",
             PaymentMethod.Transfer => "Chuyển khoản",
-            _ => "Thẻ",
+            PaymentMethod.Card => "Thẻ",
+            _ => "Chưa có dữ liệu",
         };
 
         public static string Money(decimal value) => value.ToString("N0", Vi) + " đ";
