@@ -12,15 +12,6 @@
     </Window.InputBindings>
 
     <Window.Resources>
-        <!-- Màu lấy từ bản thiết kế -->
-        <SolidColorBrush x:Key="NavyBrush" Color="#0F2A4A"/>
-        <SolidColorBrush x:Key="AccentBrush" Color="#1F6FC5"/>
-        <SolidColorBrush x:Key="AccentDarkBrush" Color="#185BA3"/>
-        <SolidColorBrush x:Key="GoldBrush" Color="#F5A524"/>
-        <SolidColorBrush x:Key="MutedBrush" Color="#4A5B70"/>
-        <SolidColorBrush x:Key="IconBrush" Color="#5F6B7A"/>
-        <SolidColorBrush x:Key="LightTextBrush" Color="#A9C3E0"/>
-
         <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
 
         <!-- Khung bao quanh mỗi ô nhập: viền sáng xanh khi đang gõ -->
@@ -327,11 +318,7 @@
                         Visibility="{Binding HasMessage, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel Orientation="Horizontal">
                         <Viewbox Width="18" Height="18" VerticalAlignment="Center">
-                            <Canvas Width="24" Height="24">
-                                <Ellipse Canvas.Left="3" Canvas.Top="3" Width="18" Height="18" Stroke="#B91C1C" StrokeThickness="2"/>
-                                <Path Data="M12,8 V13 M12,16 V16.01" Stroke="#B91C1C" StrokeThickness="2"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                            </Canvas>
+                            <ContentControl Content="{StaticResource IconAlert }"/>
                         </Viewbox>
                         <TextBlock Text="{Binding Message}" Margin="10,0,0,0" FontSize="14" FontWeight="Medium"
                                    Foreground="#B91C1C" TextWrapping="Wrap" VerticalAlignment="Center"/>

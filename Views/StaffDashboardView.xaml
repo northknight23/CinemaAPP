@@ -1,0 +1,414 @@
+<UserControl x:Class="CinemaAPP.Views.StaffDashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="1040" d:DesignHeight="950"
+             FontFamily="Segoe UI" FontSize="14" Language="vi-VN"
+             Foreground="{StaticResource TextBrush}" Background="{StaticResource PageBrush}">
+    <!-- Màn Tổng quan của Nhân viên (Figma: dashboard-for-staff).
+         Icon: Resources/Icon_Logo.xaml · Style: Resources/ManagementStyles.xaml · Màu: Resources/Styles.xaml -->
+    <UserControl.DataContext>
+        <vm:StaffDashboardViewModel/>
+    </UserControl.DataContext>
+
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CinemaAPP;component/Resources/ManagementStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+            <StackPanel.Style>
+                <Style TargetType="StackPanel">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLoading}" Value="True">
+                            <Setter Property="Opacity" Value="0.6"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </StackPanel.Style>
+
+            <!-- Báo lỗi kết nối CSDL -->
+            <Border Style="{StaticResource MgmtBanner}" Margin="0,0,0,16"
+                    Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding Message}" TextWrapping="Wrap"/>
+            </Border>
+
+            <!-- ================= LỜI CHÀO + THAO TÁC NHANH ================= -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="{Binding Greeting}" FontSize="28" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding DateText}" Margin="0,4,0,0" Foreground="{StaticResource TextMutedBrush}"/>
+                </StackPanel>
+
+                <Border Grid.Column="1" Style="{StaticResource DashPill}" Tag="{Binding ShiftStatusTone}" Margin="10,0,0,0">
+                    <TextBlock Text="{Binding ShiftStatusText}"/>
+                </Border>
+
+                <Button Grid.Column="2" Margin="10,0,0,0" VerticalAlignment="Center" Style="{StaticResource DashButton}"
+                        Command="{Binding DataContext.SelectPageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        CommandParameter="MyShift">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcReceipt}" Stroke="{StaticResource TextBrush}"/>
+                        <TextBlock Text="Hóa đơn ca" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="3" Margin="10,0,0,0" VerticalAlignment="Center" Style="{StaticResource DashPrimaryButton}"
+                        Command="{Binding DataContext.SelectPageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        CommandParameter="Tickets">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcTicket}" Stroke="{StaticResource OnNavyBrush}"/>
+                        <TextBlock Text="Bán vé" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <!-- ================= 3 THẺ SỐ LIỆU CỦA CA ================= -->
+            <Grid Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="12"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource DashCard}" Padding="16,14">
+                    <StackPanel>
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Style="{StaticResource DashIconCircle}">
+                                <Path Style="{StaticResource DashIcon}" HorizontalAlignment="Center"
+                                      Data="{StaticResource IcTicket}" Stroke="{StaticResource InfoBrush}"/>
+                            </Border>
+                            <TextBlock Text="Vé tôi đã bán" Style="{StaticResource DashCardTitle}"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding TicketsText}" Margin="0,10,0,0" FontSize="30" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource DashCard}" Padding="16,14">
+                    <StackPanel>
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Style="{StaticResource DashIconCircle}">
+                                <Path Style="{StaticResource DashIcon}" HorizontalAlignment="Center"
+                                      Data="{StaticResource IcWallet}" Stroke="{StaticResource InfoBrush}"/>
+                            </Border>
+                            <TextBlock Text="Tiền thu trong ca" Style="{StaticResource DashCardTitle}"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding RevenueText}" Margin="0,10,0,0" FontSize="30" FontWeight="Bold"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="4" Style="{StaticResource DashCard}" Padding="16,14"
+                        ToolTip="Số suất hôm nay chưa bắt đầu và còn ghế để bán">
+                    <StackPanel>
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Style="{StaticResource DashIconCircle}">
+                                <Path Style="{StaticResource DashIcon}" HorizontalAlignment="Center"
+                                      Data="{StaticResource IcFilm}" Stroke="{StaticResource InfoBrush}"/>
+                            </Border>
+                            <TextBlock Text="Suất còn lại hôm nay" Style="{StaticResource DashCardTitle}"/>
+                        </DockPanel>
+                        <TextBlock Text="{Binding RemainingShowsText}" Margin="0,10,0,0" FontSize="30" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- ================= LƯỚI CHÍNH ================= -->
+            <Grid Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="320"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Cột trái: suất chiếu sắp tới + tra cứu khách (thẻ dưới giãn cho bằng cột phải) -->
+                <Grid Grid.Column="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="16"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Suất chiếu sắp tới -->
+                    <Border Style="{StaticResource DashCard}" Padding="12,16,12,6">
+                        <StackPanel>
+                            <DockPanel Margin="8,0,4,0">
+                                <Button DockPanel.Dock="Right" Style="{StaticResource DashButton}" VerticalAlignment="Center"
+                                        ToolTip="Mở màn Bán vé để xem toàn bộ suất hôm nay"
+                                        Command="{Binding DataContext.SelectPageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="Tickets">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcCalendar}" Stroke="{StaticResource TextBrush}"/>
+                                        <TextBlock Text="Xem lịch chiếu" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button DockPanel.Dock="Right" Margin="0,0,8,0" VerticalAlignment="Center"
+                                        Style="{StaticResource DashIconButton}" ToolTip="Tải lại số liệu"
+                                        Command="{Binding ReloadCommand}">
+                                    <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcRefresh}" Stroke="{StaticResource TextBrush}"/>
+                                </Button>
+                                <StackPanel>
+                                    <TextBlock Text="Suất chiếu sắp tới" Style="{StaticResource DashCardTitle}"/>
+                                    <TextBlock Text="{Binding ShowsSubtitle}" Margin="0,2,0,0" FontSize="12.5"
+                                               Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </DockPanel>
+
+                            <!-- Tiêu đề cột -->
+                            <Border Margin="0,12,0,0" Background="{StaticResource SubtleBrush}" CornerRadius="8" Padding="16,10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="64"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="166"/>
+                                        <ColumnDefinition Width="132"/>
+                                        <ColumnDefinition Width="76"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="GIỜ" Style="{StaticResource DashColumnHeader}"/>
+                                    <TextBlock Grid.Column="1" Text="PHIM" Margin="16,0,0,0" Style="{StaticResource DashColumnHeader}"/>
+                                    <TextBlock Grid.Column="2" Text="GHẾ ĐÃ BÁN" Margin="16,0,0,0" Style="{StaticResource DashColumnHeader}"/>
+                                    <TextBlock Grid.Column="3" Text="TRẠNG THÁI" Margin="16,0,0,0" Style="{StaticResource DashColumnHeader}"/>
+                                </Grid>
+                            </Border>
+
+                            <TextBlock Text="Không còn suất chiếu nào trong hôm nay." Margin="16,14,0,10"
+                                       Foreground="{StaticResource TextMutedBrush}"
+                                       Visibility="{Binding IsShowsEmpty, Converter={StaticResource BoolToVis}}"/>
+
+                            <ItemsControl ItemsSource="{Binding Shows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:UpcomingShowItem}">
+                                        <Border Style="{StaticResource DashRowBorder}" Height="60" Padding="16,0">
+                                            <Grid VerticalAlignment="Center">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="64"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="166"/>
+                                                    <ColumnDefinition Width="132"/>
+                                                    <ColumnDefinition Width="76"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Text="{Binding TimeText}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+                                                <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" FontSize="14.5" FontWeight="Medium"
+                                                               TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}"/>
+                                                    <TextBlock Text="{Binding Meta}" Margin="0,3,0,0" FontSize="12.5"
+                                                               Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2" Margin="16,0,0,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding SeatsText}" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}"/>
+                                                    <ProgressBar Style="{StaticResource DashSeatBar}" Margin="0,6,0,0"
+                                                                 Value="{Binding SoldPercent, Mode=OneWay}" Tag="{Binding Tone}"/>
+                                                </StackPanel>
+                                                <Border Grid.Column="3" Margin="16,0,0,0" Style="{StaticResource DashPill}" Tag="{Binding Tone}">
+                                                    <TextBlock Text="{Binding StatusText}"/>
+                                                </Border>
+                                                <Button Grid.Column="4" HorizontalAlignment="Right" Style="{StaticResource DashSmallButton}"
+                                                        Content="Bán vé" IsEnabled="{Binding CanSell}"
+                                                        Command="{Binding DataContext.SelectPageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="Tickets"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Tra cứu khách thành viên -->
+                    <Border Grid.Row="2" Style="{StaticResource DashCard}" Padding="20,16">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcUsers}" Stroke="{StaticResource InfoBrush}"/>
+                                <TextBlock Text="Tra cứu khách thành viên" Margin="8,0,0,0" Style="{StaticResource DashCardTitle}"/>
+                            </StackPanel>
+                            <TextBlock Text="Nhập số điện thoại để xem điểm tích lũy và áp dụng ưu đãi trước khi bán vé."
+                                       Margin="0,10,0,0" FontSize="13" TextWrapping="Wrap" Foreground="{StaticResource TextMutedBrush}"/>
+
+                            <DockPanel Margin="0,12,0,0">
+                                <Button DockPanel.Dock="Right" Margin="10,0,0,0" Style="{StaticResource DashPrimaryButton}"
+                                        Content="Tra cứu" Command="{Binding LookupCommand}"/>
+                                <TextBox Style="{StaticResource DashSearchBox}" Tag="Số điện thoại khách (VD: 0901 234 567)"
+                                         Text="{Binding PhoneQuery, UpdateSourceTrigger=PropertyChanged}">
+                                    <TextBox.InputBindings>
+                                        <KeyBinding Key="Enter" Command="{Binding LookupCommand}"/>
+                                    </TextBox.InputBindings>
+                                </TextBox>
+                            </DockPanel>
+
+                            <!-- Kết quả tra cứu -->
+                            <Border Style="{StaticResource DashInfoBox}" Margin="0,10,0,0"
+                                    Visibility="{Binding HasLookupResult, Converter={StaticResource BoolToVis}}">
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Right" Style="{StaticResource DashPill}" Tag="Info">
+                                        <TextBlock Text="{Binding LookupResult.PointsText}"/>
+                                    </Border>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding LookupResult.FullName}" FontWeight="Medium"/>
+                                        <TextBlock FontSize="12.5" Margin="0,2,0,0" Foreground="{StaticResource TextMutedBrush}">
+                                            <Run Text="{Binding LookupResult.PhoneText, Mode=OneWay}"/>
+                                            <Run Text=" · "/>
+                                            <Run Text="{Binding LookupResult.TierText, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                            <TextBlock Text="{Binding LookupMessage}" Margin="0,10,0,0" FontSize="13" TextWrapping="Wrap"
+                                       Visibility="{Binding HasLookupMessage, Converter={StaticResource BoolToVis}}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsLookupError}" Value="True">
+                                                <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+
+                            <!-- Khách vừa tra cứu trong phiên -->
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0"
+                                        Visibility="{Binding HasRecentLookups, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="Vừa tra cứu:" FontSize="12.5" Margin="0,0,8,0" VerticalAlignment="Center"
+                                           Foreground="{StaticResource TextMutedBrush}"/>
+                                <ItemsControl ItemsSource="{Binding RecentLookups}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Style="{StaticResource DashChipButton}"
+                                                    Command="{Binding DataContext.LookupRecentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding FullName}" FontWeight="Medium"/>
+                                                    <TextBlock Text="{Binding PointsText}" Margin="6,0,0,0" FontSize="12.5"
+                                                               Foreground="{StaticResource InfoBrush}"/>
+                                                </StackPanel>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Cột phải: giao dịch gần đây + chốt ca -->
+                <StackPanel Grid.Column="2">
+                    <Border Style="{StaticResource DashCard}" Padding="16,16,16,12">
+                        <StackPanel>
+                            <DockPanel>
+                                <Path DockPanel.Dock="Right" Style="{StaticResource DashIcon}" Data="{StaticResource IcReceipt}"/>
+                                <TextBlock Text="Giao dịch gần đây của tôi" Style="{StaticResource DashCardTitle}"/>
+                            </DockPanel>
+                            <TextBlock Text="{Binding SalesSubtitle}" Margin="0,2,0,4" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}"/>
+
+                            <TextBlock Text="Chưa có đơn nào trong ca." Margin="0,10,0,6" Foreground="{StaticResource TextMutedBrush}"
+                                       Visibility="{Binding IsSalesEmpty, Converter={StaticResource BoolToVis}}"/>
+
+                            <ItemsControl ItemsSource="{Binding Sales}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:MySaleItem}">
+                                        <Border Style="{StaticResource DashRowBorder}" Padding="0,12">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Style="{StaticResource DashIconBox}" VerticalAlignment="Center">
+                                                    <Path HorizontalAlignment="Center">
+                                                        <Path.Style>
+                                                            <Style TargetType="Path" BasedOn="{StaticResource DashIcon}">
+                                                                <Setter Property="Data" Value="{StaticResource IcTicket}"/>
+                                                                <Setter Property="Stroke" Value="{StaticResource TealBrush}"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding Kind}" Value="member">
+                                                                        <Setter Property="Data" Value="{StaticResource IcUsers}"/>
+                                                                        <Setter Property="Stroke" Value="{StaticResource TealDarkBrush}"/>
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Kind}" Value="cancel">
+                                                                        <Setter Property="Data" Value="{StaticResource IcAlert}"/>
+                                                                        <Setter Property="Stroke" Value="{StaticResource DangerBrush}"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Path.Style>
+                                                    </Path>
+                                                </Border>
+                                                <StackPanel Grid.Column="1" Margin="12,0,8,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Title}" FontWeight="Medium" TextTrimming="CharacterEllipsis"
+                                                               ToolTip="{Binding Title}"/>
+                                                    <TextBlock Text="{Binding Detail}" Margin="0,3,0,0" FontSize="12.5"
+                                                               Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis"
+                                                               ToolTip="{Binding Detail}"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding AmountText}" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                                    <Border Style="{StaticResource DashPill}" Tag="{Binding Tone}" Margin="0,4,0,0"
+                                                            HorizontalAlignment="Right">
+                                                        <TextBlock Text="{Binding StatusText}"/>
+                                                    </Border>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Button Margin="0,8,0,0" Style="{StaticResource DashButton}" HorizontalAlignment="Stretch"
+                                    Content="Xem tất cả hóa đơn ca"
+                                    Command="{Binding DataContext.SelectPageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="MyShift"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Chốt ca -->
+                    <Border Margin="0,16,0,0" Style="{StaticResource DashCard}" Padding="16">
+                        <StackPanel>
+                            <DockPanel>
+                                <Border DockPanel.Dock="Right" Style="{StaticResource DashPill}" Tag="{Binding ShiftStatusTone}">
+                                    <TextBlock Text="{Binding ShiftStatusText}"/>
+                                </Border>
+                                <StackPanel Orientation="Horizontal">
+                                    <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcClock}" Stroke="{StaticResource InfoBrush}"/>
+                                    <TextBlock Text="Chốt ca" Margin="8,0,0,0" Style="{StaticResource DashCardTitle}"/>
+                                </StackPanel>
+                            </DockPanel>
+                            <TextBlock Margin="0,10,0,0" FontSize="13" TextWrapping="Wrap" Foreground="{StaticResource TextMutedBrush}"
+                                       Text="Cuối ca, đếm tiền mặt trong két, đối chiếu với số dưới đây rồi nộp chốt ca để Quản trị viên xác nhận."/>
+                            <Border Margin="0,10,0,0" Style="{StaticResource DashInfoBox}">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding CashExpectedText}" FontSize="16" FontWeight="Bold"/>
+                                    <TextBlock Text="Tiền mặt phải có trong két" FontSize="13" VerticalAlignment="Center"
+                                               Foreground="{StaticResource TextMutedBrush}"/>
+                                </DockPanel>
+                            </Border>
+                            <Button Margin="0,10,0,0" Style="{StaticResource DashPrimaryButton}" HorizontalAlignment="Stretch"
+                                    Content="{Binding CloseButtonText}"
+                                    Command="{Binding DataContext.SelectPageCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="MyShift"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

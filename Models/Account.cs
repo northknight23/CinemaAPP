@@ -39,10 +39,13 @@
         }
 
         // 0–5: chọn màu nền avatar để mỗi người một màu
-        public int AvatarTone => AccountID % 6;
+        public int AvatarTone => AccountID % 6; // sai logic chỗ này
 
         // Có phải tài khoản đang đăng nhập không (gán khi tải danh sách)
         public bool IsSelf { get; set; }
+
+        // check xem còn hoạt động hay không
+        public bool IsActive { get; set; }
     }
 
     // Giá trị của cột ACCOUNT.AccountRole.
