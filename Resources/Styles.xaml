@@ -8,6 +8,10 @@
     <SolidColorBrush x:Key="PrimaryPressBrush" Color="#134B87"/>
     <SolidColorBrush x:Key="GoldBrush"         Color="#F5A524"/>
     <SolidColorBrush x:Key="AccentBrush"       Color="#1F6FC5"/>
+    <!-- Biểu đồ Tổng quan: tuần này / tuần trước / đường trung bình -->
+    <SolidColorBrush x:Key="TealBrush"         Color="#1A9DAE"/>
+    <SolidColorBrush x:Key="TealSoftBrush"     Color="#B5E3E9"/>
+    <SolidColorBrush x:Key="TealDarkBrush"     Color="#0E6773"/>
 
     <!-- ===== Nền, viền, chữ ===== -->
     <SolidColorBrush x:Key="PageBrush"         Color="#F3F6FA"/>
@@ -20,6 +24,7 @@
     <SolidColorBrush x:Key="TextBrush"         Color="#0F2A4A"/>
     <SolidColorBrush x:Key="TextMutedBrush"    Color="#4A5B70"/>
     <SolidColorBrush x:Key="IconBrush"         Color="#5F6B7A"/>
+    <SolidColorBrush x:Key="OnNavyBrush"       Color="#FFFFFF"/>
     <SolidColorBrush x:Key="OnNavyMutedBrush"  Color="#A9C3E0"/>
 
     <!-- ===== Trạng thái ===== -->
