@@ -118,7 +118,7 @@ namespace CinemaAPP.ViewModels
                 Message = "Không kết nối được cơ sở dữ liệu. Kiểm tra SQL Server rồi thử lại.";
                 return;
             }
-
+            //khi sai mật khẩu
             if (account == null)
             {
                 Password = "";                                // xóa mật khẩu, giữ tên
@@ -126,7 +126,14 @@ namespace CinemaAPP.ViewModels
                 Message = "Sai tên đăng nhập hoặc mật khẩu."; // đặt SAU khi xóa mật khẩu
                 return;
             }
-
+            //khi tài khoản bị khóa
+            if (!account.IsActive)
+            {
+                Password = "";                                // xóa mật khẩu, giữ tên
+                PasswordCleared?.Invoke(this, EventArgs.Empty);
+                Message = "Tài khoản đã bị khóa.";
+                return;
+            }
             if (RememberMe) RememberedLogin.Save(user);
             else RememberedLogin.Clear();
 
