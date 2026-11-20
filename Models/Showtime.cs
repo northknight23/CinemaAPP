@@ -18,6 +18,7 @@ namespace CinemaAPP.Models
         public int DurationMin { get; set; }                // MOVIE.DurationMin
         public string Genre { get; set; } = "";             // MOVIE.Genre
         public string AgeRating { get; set; } = "P";        // MOVIE.Agerating
+        public string? PosterPath { get; set; }              // MOVIE.PosterPath
         public string RoomName { get; set; } = "";          // ROOM.RoomName
         public string RoomType { get; set; } = "";          // ROOM.RoomType
         public int TotalSeats { get; set; }                 // số dòng SEAT của phòng (chưa sinh ghế thì NumRows × SeatsPerRow)

@@ -73,7 +73,7 @@ WHERE RoomID = @RoomID ORDER BY RowLabel, SeatNumber;
 
 Quy tắc:
 - Chỉ tải ghế của đúng phòng của suất. Kế hoạch ghi rõ đây là quy tắc CSDL không tự chặn được, C# phải tự kiểm tra.
-- Tối đa **8 ghế** một đơn (`MaxSeats`); chọn ghế thứ 9 → báo lỗi.
+- Một đơn có thể chọn các ghế còn trống trong cùng suất.
 - Màu ghế: Thường / VIP / Đôi / Đang chọn / Đã bán (màu lấy từ `Resources/Styles.xaml`).
 - Sơ đồ tự co giãn theo khung: màn quầy to thì ghế to, dễ bấm.
 

@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
+using System.Windows.Threading;
 using CinemaAPP.ViewModels;
 using CinemaAPP.Services;
 
@@ -13,6 +14,19 @@ namespace CinemaAPP.Views
         public SeatMapDemoView()
         {
             InitializeComponent();
+            var availabilityTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            void RefreshAvailability()
+            {
+                if (DataContext is SeatMapDemoViewModel vm)
+                    vm.RefreshShowtimeAvailability();
+            }
+            availabilityTimer.Tick += (_, _) => RefreshAvailability();
+            Loaded += (_, _) =>
+            {
+                RefreshAvailability();
+                availabilityTimer.Start();
+            };
+            Unloaded += (_, _) => availabilityTimer.Stop();
         }
 
         private void Checkout_Click(object sender, RoutedEventArgs e)

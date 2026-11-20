@@ -11,7 +11,6 @@ namespace CinemaAPP.ViewModels
     // POS đọc và lưu dữ liệu thật qua BookingService; chỉ cho in sau khi transaction thành công.
     public class SeatMapDemoViewModel : ObservableObject
     {
-        public const int MaxSeats = 8;          // tối đa số ghế một đơn
         private static readonly CultureInfo Vi = new CultureInfo("vi-VN");
         private readonly BookingService bookingService = new();
         private readonly CustomerService customerService = new();
@@ -193,11 +192,6 @@ namespace CinemaAPP.ViewModels
                     ShowMessage("Suất đã bắt đầu, hãy chọn suất khác.", true);
                     return;
                 }
-                if (!seat.IsSelected && SelectedCount + seat.SeatIDs.Count > MaxSeats)
-                {
-                    ShowMessage($"Mỗi đơn chỉ đặt tối đa {MaxSeats} ghế.", true);
-                    return;
-                }
                 seat.IsSelected = !seat.IsSelected;
                 if (seat.IsSelected) SelectedSeats.Add(seat);
                 else SelectedSeats.Remove(seat);
@@ -223,6 +217,23 @@ namespace CinemaAPP.ViewModels
         }
 
         private IEnumerable<SeatItem> AllSeats() => Rows.SelectMany(r => r.Seats).Where(s => !s.IsAisle);
+
+        private DateTime lastAvailabilityCheck = DateTime.Now;
+
+        internal void RefreshShowtimeAvailability()
+        {
+            DateTime now = DateTime.Now;
+            foreach (var show in Movies.SelectMany(m => m.Showtimes))
+            {
+                if (show.GetStatusBadge(lastAvailabilityCheck) != show.GetStatusBadge(now))
+                {
+                    show.NotifyAvailabilityChanged();
+                    if (show == CurrentShowtime)
+                        OnPropertyChanged(nameof(CanPay));
+                }
+            }
+            lastAvailabilityCheck = now;
+        }
 
         private void LoadShowtimes()
         {

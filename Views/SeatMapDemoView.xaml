@@ -16,6 +16,9 @@
     </UserControl.DataContext>
     <UserControl.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/CinemaAPP;component/Resources/SalesControls.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
         <!-- Khung bo góc cho 3 cột -->
         <Style x:Key="Card" TargetType="Border">
@@ -117,28 +120,17 @@
                 </Setter.Value>
             </Setter>
             <Style.Triggers>
-                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding IsCurrent}" Value="True"/>
+                        <Condition Binding="{Binding CanSell}" Value="True"/>
+                    </MultiDataTrigger.Conditions>
                     <Setter Property="Background" Value="{DynamicResource PrimaryBrush}"/>
                     <Setter Property="BorderBrush" Value="{DynamicResource PrimaryBrush}"/>
                     <Setter Property="Foreground" Value="White"/>
-                </DataTrigger>
+                </MultiDataTrigger>
             </Style.Triggers>
         </Style>
-        <!-- "Còn N ghế": xanh lá trên thẻ thường, trắng trên thẻ đang chọn -->
-        <Style x:Key="FreeText" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsCurrent}" Value="True">
-                    <Setter Property="Foreground" Value="White"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding FreeSeats}" Value="0">
-                    <Setter Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-
         <!-- ControlTemplate (chương 8): ô ghế. DataTrigger (chương 7) tô màu theo loại / trạng thái;
              trigger đứng sau thắng trigger đứng trước. -->
         <Style x:Key="SeatButton" TargetType="Button">
@@ -436,17 +428,8 @@
                                     <Border Style="{StaticResource MovieGroup}">
                                         <StackPanel>
                                             <DockPanel Margin="0,0,8,8">
-                                                <!-- Khung poster: ảnh từ MOVIE.PosterPath; chưa có ảnh thì để khung trống.
-                                                     ImageBrush làm nền để ảnh bo góc theo khung -->
-                                                <Border DockPanel.Dock="Right" Width="28" Height="38" CornerRadius="4"
-                                                        Background="{DynamicResource InfoBgBrush}" Margin="6,0,0,0">
-                                                    <Border CornerRadius="4">
-                                                        <Border.Background>
-                                                            <ImageBrush ImageSource="{Binding PosterPath, TargetNullValue={x:Null}}"
-                                                                        Stretch="UniformToFill"/>
-                                                        </Border.Background>
-                                                    </Border>
-                                                </Border>
+                                                <ContentControl DockPanel.Dock="Right" Margin="6,0,0,0" Content="{Binding PosterSource}"
+                                                                Style="{StaticResource CompactMoviePosterFrame}"/>
                                                 <StackPanel VerticalAlignment="Center">
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="{Binding Title}" Style="{StaticResource SectionTitle}" FontSize="13"/>
@@ -473,7 +456,8 @@
                                                             <StackPanel>
                                                                 <TextBlock Text="{Binding StartText}" FontSize="17" FontWeight="Bold"/>
                                                                 <TextBlock Text="{Binding RoomFormat}" FontSize="11" Opacity="0.8"/>
-                                                                <TextBlock Text="{Binding FreeText}" Style="{StaticResource FreeText}"/>
+                                                                <ContentPresenter Content="{Binding}"
+                                                                                  ContentTemplate="{StaticResource ShowtimeAvailabilityTemplate}"/>
                                                             </StackPanel>
                                                         </Button>
                                                     </DataTemplate>
