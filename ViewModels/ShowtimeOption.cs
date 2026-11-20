@@ -20,7 +20,8 @@ namespace CinemaAPP.ViewModels
         public HashSet<int> SoldSeatIds { get; } = new HashSet<int>();
 
         public string StartText => StartTime.ToString("HH:mm");
-        public string TimeRange => $"{StartText} – {StartTime.AddMinutes(DurationMin):HH:mm}";
+        public DateTime EndTime => StartTime.AddMinutes(DurationMin);
+        public string TimeRange => $"{StartText} – {EndTime:HH:mm}";
         public string RoomFormat => $"{RoomName} · {ShowFormat}";
         public string FormatAudio => $"{ShowFormat} · {AudioType}";
 
@@ -34,10 +35,25 @@ namespace CinemaAPP.ViewModels
                 {
                     OnPropertyChanged(nameof(FreeText));
                     OnPropertyChanged(nameof(CanSell));
+                    OnPropertyChanged(nameof(StatusBadge));
                 }
             }
         }
-        public string FreeText => FreeSeats == 0 ? "Hết ghế" : $"Còn {FreeSeats} ghế";
+        public string FreeText => $"Còn {FreeSeats} ghế";
+        public string StatusBadge => GetStatusBadge(DateTime.Now);
+
+        internal string GetStatusBadge(DateTime now)
+        {
+            if (now >= EndTime) return "END";
+            if (now >= StartTime) return "START";
+            return FreeSeats <= 0 ? "HẾT VÉ" : "";
+        }
+
+        internal void NotifyAvailabilityChanged()
+        {
+            OnPropertyChanged(nameof(CanSell));
+            OnPropertyChanged(nameof(StatusBadge));
+        }
 
         private bool isCurrent;
         public bool IsCurrent { get => isCurrent; set => SetProperty(ref isCurrent, value); }

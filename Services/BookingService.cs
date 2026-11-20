@@ -133,7 +133,7 @@ namespace CinemaAPP.Services
         public BookingResult CreateBooking(int accountId, int showtimeId, int? customerId,
             PaymentMethod method, decimal cashGiven, int pointsUsed, IReadOnlyList<SeatQuote> requestedSeats)
         {
-            if (!Enum.IsDefined(method) || method == PaymentMethod.Unknown || pointsUsed < 0 || requestedSeats.Count is < 1 or > 8
+            if (!Enum.IsDefined(method) || method == PaymentMethod.Unknown || pointsUsed < 0 || requestedSeats.Count == 0
                 || requestedSeats.Select(s => s.SeatID).Distinct().Count() != requestedSeats.Count)
                 throw new InvalidOperationException("Danh sách ghế hoặc thông tin thanh toán không hợp lệ.");
             using var conn = Db.Open();
