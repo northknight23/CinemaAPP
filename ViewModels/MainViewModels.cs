@@ -209,7 +209,9 @@ namespace CinemaAPP.ViewModels
                 "Customers" => new CustomerManagementView(),
                 "Accounts" => new AccountManagementView(),
                 "Revenue" => new RevenueView(),
-                _ => null // "Overview", "Rooms", "Showtimes": Để trống sẵn sàng nạp giao diện khi phát triển
+                "Overview" when IsAdmin => new DashboardView(),
+                "Overview" => new StaffDashboardView(),   // Tổng quan của nhân viên: ca làm của mình
+                _ => null // "Rooms": Để trống sẵn sàng nạp giao diện khi phát triển
             };
         }
 
