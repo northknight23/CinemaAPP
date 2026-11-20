@@ -327,11 +327,7 @@
                         Visibility="{Binding HasMessage, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel Orientation="Horizontal">
                         <Viewbox Width="18" Height="18" VerticalAlignment="Center">
-                            <Canvas Width="24" Height="24">
-                                <Ellipse Canvas.Left="3" Canvas.Top="3" Width="18" Height="18" Stroke="#B91C1C" StrokeThickness="2"/>
-                                <Path Data="M12,8 V13 M12,16 V16.01" Stroke="#B91C1C" StrokeThickness="2"
-                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                            </Canvas>
+                            <ContentControl Content="{StaticResource IconAlert }"/>
                         </Viewbox>
                         <TextBlock Text="{Binding Message}" Margin="10,0,0,0" FontSize="14" FontWeight="Medium"
                                    Foreground="#B91C1C" TextWrapping="Wrap" VerticalAlignment="Center"/>

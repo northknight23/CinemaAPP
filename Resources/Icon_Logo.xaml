@@ -41,7 +41,7 @@
         </StackPanel>
     </ControlTemplate>
     
-    <!--Logo-->
+    <!--LogoUIT nhỏ-->
     <ControlTemplate x:Key="LogoUIT" TargetType="ContentControl">
         <Viewbox Width="72" Height="72">
                 <Canvas Width="72" Height="72">
@@ -76,4 +76,11 @@
                 </Canvas>
             </Viewbox>
     </ControlTemplate>
+    
+    <!-- IconAlert dùng cho các thông báo-->
+    <Canvas x:Key="IconAlert" x:Shared ="False"  Width="24" Height="24">
+        <Ellipse Canvas.Left="3" Canvas.Top="3" Width="18" Height="18" Stroke="#B91C1C" StrokeThickness="2"/>
+        <Path Data="M12,8 V13 M12,16 V16.01" Stroke="#B91C1C" StrokeThickness="2"
+StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+    </Canvas>
 </ResourceDictionary>
