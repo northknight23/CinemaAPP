@@ -202,6 +202,7 @@ namespace CinemaAPP.ViewModels
             CurrentView = pageId switch
             {
                 "Movies" => new MovieManagementView(),
+                "Rooms" => new RoomManagementView(),
                 "Tickets" => new SeatMapDemoView(),
                 "Transactions" => new TransactionsView(),
                 "MyShift" => new MyShiftView(),
@@ -209,7 +210,7 @@ namespace CinemaAPP.ViewModels
                 "Customers" => new CustomerManagementView(),
                 "Accounts" => new AccountManagementView(),
                 "Revenue" => new RevenueView(),
-                _ => null // "Overview", "Rooms", "Showtimes": Để trống sẵn sàng nạp giao diện khi phát triển
+                _ => null // "Overview", "Showtimes": Để trống sẵn sàng nạp giao diện khi phát triển
             };
         }
 
