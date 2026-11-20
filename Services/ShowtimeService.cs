@@ -14,7 +14,7 @@ namespace CinemaAPP.Services
         private const string SelectSql =
             @"SELECT s.ShowtimeID, s.MovieID, s.RoomID, s.StartTime, s.ShowFormat, s.AudioType, s.BasePrice,
                      m.Title, m.DurationMin, m.Genre, m.Agerating, r.RoomName, r.RoomType,
-                     ISNULL(se.Total, r.NumRows * r.SeatsPerRow), ISNULL(t.Sold, 0), ISNULL(t.Revenue, 0)
+                     ISNULL(se.Total, r.NumRows * r.SeatsPerRow), ISNULL(t.Sold, 0), ISNULL(t.Revenue, 0), m.PosterPath
               FROM SHOWTIME s
               JOIN MOVIE m ON m.MovieID = s.MovieID
               JOIN ROOM r ON r.RoomID = s.RoomID
@@ -146,6 +146,7 @@ namespace CinemaAPP.Services
                     TotalSeats = r.GetInt32(13),
                     SoldSeats = r.GetInt32(14),
                     Revenue = r.GetDecimal(15),
+                    PosterPath = r.IsDBNull(16) ? null : r.GetString(16),
                 });
             }
             return list;

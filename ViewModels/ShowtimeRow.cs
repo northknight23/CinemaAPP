@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Media;
 using CinemaAPP.Models;
 using CinemaAPP.Services;
 
@@ -40,6 +41,7 @@ namespace CinemaAPP.ViewModels
 
         public string Code => CodeOf(Data.ShowtimeID);
         public string Title => Data.Title;
+        public ImageSource? PosterSource => new Movie { PosterPath = Data.PosterPath }.PosterSource;
         public string AgeRating => Data.AgeRating;
         public string MovieInfo => string.IsNullOrWhiteSpace(Data.Genre)
             ? $"{Data.DurationMin} phút"

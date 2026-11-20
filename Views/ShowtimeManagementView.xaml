@@ -179,18 +179,6 @@
                 <Setter Property="VerticalAlignment" Value="Center"/>
             </Style>
 
-            <!-- Khung poster: hiện đang trống, sau này gắn ảnh từ MOVIE.PosterPath (mục Phim của B) -->
-            <Style x:Key="PosterFrame" TargetType="Border">
-                <Setter Property="Width" Value="40"/>
-                <Setter Property="Height" Value="56"/>
-                <Setter Property="CornerRadius" Value="6"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
-                <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
-                <Setter Property="Margin" Value="0,0,12,0"/>
-                <Setter Property="VerticalAlignment" Value="Center"/>
-            </Style>
-
             <!-- Màu theo độ lấp đầy: dưới 50% xanh lá, 50–80% vàng, từ 80% đỏ -->
             <Style x:Key="FillBar" TargetType="Border">
                 <Setter Property="CornerRadius" Value="4"/>
@@ -400,7 +388,7 @@
                         </Grid>
                     </Border>
                     <Grid>
-                        <ListBox Style="{StaticResource Table}" Margin="10,6" ItemsSource="{Binding Showtimes}">
+                        <ListBox Style="{StaticResource Table}" Margin="10,6" ItemsSource="{Binding Showtimes}" SelectionChanged="ListBox_SelectionChanged">
                             <ListBox.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem" BasedOn="{StaticResource RowItem}">
                                     <Setter Property="Padding" Value="9,10"/>
@@ -421,10 +409,8 @@
                                         </Border>
 
                                         <DockPanel Grid.Column="1" Margin="0,0,12,0">
-                                            <Border DockPanel.Dock="Left" Style="{StaticResource PosterFrame}">
-                                                <Path Data="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2zM7 2v20M17 2v20M2 12h20"
-                                                      Stroke="{DynamicResource InputHoverBrush}" StrokeThickness="1.4" Width="18" Height="18" Stretch="Uniform"/>
-                                            </Border>
+                                            <ContentControl DockPanel.Dock="Left" Margin="0,0,12,0" Content="{Binding PosterSource}"
+                                                            Style="{StaticResource MoviePosterFrame}"/>
                                             <StackPanel VerticalAlignment="Center">
                                                 <StackPanel Orientation="Horizontal">
                                                     <Border Style="{StaticResource AgeChip}" Margin="0,0,8,0">
