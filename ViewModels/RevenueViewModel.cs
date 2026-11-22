@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Input;
 using CinemaAPP.Helpers;
 using CinemaAPP.Models;
@@ -7,9 +8,13 @@ using CinemaAPP.Services;
 namespace CinemaAPP.ViewModels
 {
     // Màn Thống kê doanh thu (chỉ Admin mở được — B kiểm tra AppSession.IsAdmin ở menu).
+    // Bố cục theo Figma "Thống kê doanh thu · v2": nhận xét → ô tổng + 4 ô số → heatmap + cơ cấu → phim + nhân viên.
     public class RevenueViewModel : ObservableObject
     {
-        private const double MaxBarHeight = 170;   // chiều cao cột cao nhất (pixel)
+        // Biểu đồ vùng trong ô Tổng doanh thu (phải khớp Height="150" trong RevenueView.xaml)
+        public const double ChartHeight = 150;
+        private const double ChartTopRoom = 40;      // chừa chỗ cho nhãn vàng phía trên điểm cao nhất
+        private const double ChartBottomRoom = 8;
         private const int MaxCustomDays = 31;
 
         private static readonly string[] DayShort = { "CN", "T2", "T3", "T4", "T5", "T6", "T7" };
@@ -32,27 +37,77 @@ namespace CinemaAPP.ViewModels
         private DateTime? toDate = DateTime.Today;
         public DateTime? ToDate { get => toDate; set => SetProperty(ref toDate, value); }
 
-        private string rangeText = "";
-        public string RangeText { get => rangeText; private set => SetProperty(ref rangeText, value); }
+        private string rangeText = "", rangeLongText = "";
+        public string RangeText { get => rangeText; private set => SetProperty(ref rangeText, value); }          // "14/11 – 20/11/2026"
+        public string RangeLongText { get => rangeLongText; private set => SetProperty(ref rangeLongText, value); } // "Thứ Bảy 14/11 – Thứ Sáu 20/11/2026"
 
-        // ================= Số liệu =================
-        private string revenueText = "—", ticketsText = "—", ordersText = "—", avgPriceText = "—", cancelledText = "—";
-        private string ticketsPerOrderText = "", withCustomerText = "";
-        public string RevenueText { get => revenueText; private set => SetProperty(ref revenueText, value); }
+        // ================= Ô Tổng doanh thu =================
+        private string revenueText = "—", revenueNumberText = "—", heroSubText = "";
+        public string RevenueText { get => revenueText; private set => SetProperty(ref revenueText, value); }             // "212.259.000 đ"
+        public string RevenueNumberText { get => revenueNumberText; private set => SetProperty(ref revenueNumberText, value); } // "212.259.000"
+        public string HeroSubText { get => heroSubText; private set => SetProperty(ref heroSubText, value); }             // "2.219 vé · 936 đơn · trung bình 96.000 đ/vé"
+
+        private double[]? trendHeights;
+        public double[]? TrendHeights { get => trendHeights; private set => SetProperty(ref trendHeights, value); }
+        public ObservableCollection<TrendPoint> TrendPoints { get; } = new ObservableCollection<TrendPoint>();
+
+        // ================= 4 ô số =================
+        private string ticketsText = "—", ticketsHintText = "", ordersText = "—", ticketsPerOrderText = "";
+        private string memberShareText = "—", memberHintText = "", cancelledText = "—", cancelHintText = "";
         public string TicketsText { get => ticketsText; private set => SetProperty(ref ticketsText, value); }
+        public string TicketsHintText { get => ticketsHintText; private set => SetProperty(ref ticketsHintText, value); }
         public string OrdersText { get => ordersText; private set => SetProperty(ref ordersText, value); }
-        public string AvgPriceText { get => avgPriceText; private set => SetProperty(ref avgPriceText, value); }
-        public string CancelledText { get => cancelledText; private set => SetProperty(ref cancelledText, value); }
         public string TicketsPerOrderText { get => ticketsPerOrderText; private set => SetProperty(ref ticketsPerOrderText, value); }
-        public string WithCustomerText { get => withCustomerText; private set => SetProperty(ref withCustomerText, value); }
+        public string MemberShareText { get => memberShareText; private set => SetProperty(ref memberShareText, value); }
+        public string MemberHintText { get => memberHintText; private set => SetProperty(ref memberHintText, value); }
+        public string CancelledText { get => cancelledText; private set => SetProperty(ref cancelledText, value); }
+        public string CancelHintText { get => cancelHintText; private set => SetProperty(ref cancelHintText, value); }
 
-        private string chartTitle = "Doanh thu theo ngày";
-        public string ChartTitle { get => chartTitle; private set => SetProperty(ref chartTitle, value); }
+        // ================= Nhận xét =================
+        private string insightText = "";
+        public string InsightText
+        {
+            get => insightText;
+            private set { if (SetProperty(ref insightText, value)) OnPropertyChanged(nameof(HasInsight)); }
+        }
+        public bool HasInsight => insightText.Length > 0;
 
-        public ObservableCollection<ChartBar> Bars { get; } = new ObservableCollection<ChartBar>();
+        // ================= Heatmap =================
+        public ObservableCollection<string> HeatDays { get; } = new ObservableCollection<string>();
+        public ObservableCollection<HeatRow> HeatRows { get; } = new ObservableCollection<HeatRow>();
+
+        private string heatSummaryText = "";
+        public string HeatSummaryText { get => heatSummaryText; private set => SetProperty(ref heatSummaryText, value); }
+
+        private bool hasHeatmap, showHeatNumbers = true;
+        public bool HasHeatmap
+        {
+            get => hasHeatmap;
+            private set { if (SetProperty(ref hasHeatmap, value)) OnPropertyChanged(nameof(IsHeatmapEmpty)); }
+        }
+        public bool IsHeatmapEmpty => !hasHeatmap;
+        public bool ShowHeatNumbers { get => showHeatNumbers; private set => SetProperty(ref showHeatNumbers, value); } // nhiều ngày quá thì ô nhỏ, bỏ số
+
+        // ================= Cơ cấu doanh thu =================
+        private double[]? donutValues;
+        public double[]? DonutValues { get => donutValues; private set => SetProperty(ref donutValues, value); }   // [thành viên, khách lẻ]
+
+        private string revenueShortText = "", memberPercentText = "", memberAmountText = "", walkInPercentText = "", walkInAmountText = "";
+        public string RevenueShortText { get => revenueShortText; private set => SetProperty(ref revenueShortText, value); }   // "212,3 tr"
+        public string MemberPercentText { get => memberPercentText; private set => SetProperty(ref memberPercentText, value); }
+        public string MemberAmountText { get => memberAmountText; private set => SetProperty(ref memberAmountText, value); }
+        public string WalkInPercentText { get => walkInPercentText; private set => SetProperty(ref walkInPercentText, value); }
+        public string WalkInAmountText { get => walkInAmountText; private set => SetProperty(ref walkInAmountText, value); }
+
+        private double[]? formatValues;
+        public double[]? FormatValues { get => formatValues; private set => SetProperty(ref formatValues, value); }
+        public ObservableCollection<FormatShare> Formats { get; } = new ObservableCollection<FormatShare>();
+
+        // ================= Phim + nhân viên =================
         public ObservableCollection<MovieRow> Movies { get; } = new ObservableCollection<MovieRow>();
         public ObservableCollection<StaffRow> Staff { get; } = new ObservableCollection<StaffRow>();
 
+        // ================= Trạng thái =================
         private bool hasData;
         public bool HasData
         {
@@ -82,7 +137,6 @@ namespace CinemaAPP.ViewModels
             }
         }
         public bool HasMessage => message.Length > 0;
-        public bool IsMessageError => true;   // màn này chỉ có thông báo lỗi
 
         // ================= Lệnh =================
         public ICommand ApplyCustomCommand { get; }
@@ -130,23 +184,26 @@ namespace CinemaAPP.ViewModels
             if (range == null) { ClearData(); return; }
             (DateTime from, DateTime to) = range.Value;
             bool byHour = (to - from).TotalDays <= 1;
+            DateTime last = to.AddDays(-1);
 
-            RangeText = byHour
-                ? $"{DayLong[(int)from.DayOfWeek]}, {from:dd'/'MM'/'yyyy}"
-                : $"{from:dd'/'MM} – {to.AddDays(-1):dd'/'MM'/'yyyy}";
-            ChartTitle = byHour ? "Doanh thu theo khung giờ" : "Doanh thu theo ngày";
+            RangeText = byHour ? $"{from:dd'/'MM'/'yyyy}" : $"{from:dd'/'MM} – {last:dd'/'MM'/'yyyy}";
+            RangeLongText = byHour
+                ? $"{DayLong[(int)from.DayOfWeek]} {from:dd'/'MM'/'yyyy}"
+                : $"{DayLong[(int)from.DayOfWeek]} {from:dd'/'MM} – {DayLong[(int)last.DayOfWeek]} {last:dd'/'MM'/'yyyy}";
 
             IsLoading = true;
             try
             {
-                // 4 truy vấn chạy ở luồng nền để cửa sổ không bị đơ
-                var result = await Task.Run(() => (
+                // 6 truy vấn chạy ở luồng nền để cửa sổ không bị đơ
+                var r = await Task.Run(() => (
                     summary: service.GetSummary(from, to),
                     points: service.GetByTime(from, to, byHour),
                     movies: service.GetTopMovies(from, to, 5),
-                    staff: service.GetByStaff(from, to)));
+                    staff: service.GetByStaff(from, to),
+                    heat: service.GetHeatmap(from, to),
+                    formats: service.GetByFormat(from, to)));
 
-                Fill(from, to, byHour, result.summary, result.points, result.movies, result.staff);
+                Fill(from, to, byHour, r.summary, r.points, r.movies, r.staff, r.heat, r.formats);
             }
             catch (Exception)
             {
@@ -156,25 +213,38 @@ namespace CinemaAPP.ViewModels
             IsLoading = false;
         }
 
-        private void Fill(DateTime from, DateTime to, bool byHour, RevenueSummary s,
-                          List<RevenuePoint> points, List<MovieRevenue> movies, List<StaffRevenue> staff)
+        private void Fill(DateTime from, DateTime to, bool byHour, RevenueSummary s, List<RevenuePoint> points,
+                          List<MovieRevenue> movies, List<StaffRevenue> staff, List<HeatCell> heat, List<FormatRevenue> formats)
         {
-            // ---- 5 ô số ----
-            RevenueText = Format.Money(s.Revenue);
-            TicketsText = Format.Number(s.Tickets);
-            OrdersText = Format.Number(s.Orders);
-            CancelledText = Format.Number(s.CancelledOrders);
-            AvgPriceText = s.Tickets > 0 ? Format.Money(Math.Round(s.Revenue / s.Tickets / 1000) * 1000) : "—";
-            TicketsPerOrderText = s.Orders > 0
-                ? "TB " + ((double)s.Tickets / s.Orders).ToString("0.0", Format.Vi) + " vé / đơn"
-                : "Chưa có đơn";
-            WithCustomerText = Format.Number(s.OrdersWithCustomer) + " đơn có khách thành viên";
+            int days = Math.Max(1, (int)(to - from).TotalDays);
 
-            // ---- Biểu đồ cột: chèn các mốc không có đơn = 0 ----
+            // ---- Ô Tổng doanh thu + 4 ô số ----
+            RevenueText = Format.Money(s.Revenue);
+            RevenueNumberText = s.Revenue.ToString("N0", Format.Vi);
+            string avg = s.Tickets > 0 ? " · trung bình " + Format.Money(Math.Round(s.Revenue / s.Tickets / 1000) * 1000) + "/vé" : "";
+            HeroSubText = $"{Format.Number(s.Tickets)} vé · {Format.Number(s.Orders)} đơn{avg}";
+
+            TicketsText = Format.Number(s.Tickets);
+            TicketsHintText = days > 1
+                ? "TB " + Format.Number((int)Math.Round((double)s.Tickets / days)) + " vé mỗi ngày"
+                : "Trong ngày đã chọn";
+            OrdersText = Format.Number(s.Orders);
+            TicketsPerOrderText = s.Orders > 0
+                ? ((double)s.Tickets / s.Orders).ToString("0.00", Format.Vi) + " vé mỗi đơn"
+                : "Chưa có đơn";
+            MemberShareText = s.Orders > 0 ? Math.Round(100.0 * s.OrdersWithCustomer / s.Orders) + "%" : "—";
+            MemberHintText = $"{Format.Number(s.OrdersWithCustomer)} / {Format.Number(s.Orders)} đơn";
+            CancelledText = Format.Number(s.CancelledOrders);
+            int allOrders = s.Orders + s.CancelledOrders;
+            CancelHintText = allOrders > 0
+                ? (100.0 * s.CancelledOrders / allOrders).ToString("0.0", Format.Vi) + "% tổng số đơn"
+                : "Không tính vào doanh thu";
+
+            // ---- Biểu đồ vùng: chèn các mốc không có đơn = 0 ----
             var buckets = new List<(string label, string tip, decimal amount)>();
             if (byHour)
             {
-                // Gộp 3 giờ một cột: 09–12h, 12–15h, … ; bỏ các khung sáng sớm không có đơn
+                // Gộp 3 giờ một mốc: 09–12h, 12–15h, … ; bỏ các khung sáng sớm không có đơn
                 for (int start = 0; start < 24; start += 3)
                 {
                     decimal sum = points.Where(p => p.Time.Hour >= start && p.Time.Hour < start + 3).Sum(p => p.Amount);
@@ -185,29 +255,45 @@ namespace CinemaAPP.ViewModels
             }
             else
             {
-                int days = (int)(to - from).TotalDays;
                 for (DateTime d = from; d < to; d = d.AddDays(1))
                 {
                     decimal sum = points.Where(p => p.Time.Date == d).Sum(p => p.Amount);
-                    string label = days <= 7 ? $"{DayShort[(int)d.DayOfWeek]} {d:dd'/'MM}" : d.ToString("dd");
+                    string label = days <= 7 ? $"{DayShort[(int)d.DayOfWeek]} {d:dd}" : d.ToString("dd");
                     buckets.Add((label, $"{DayShort[(int)d.DayOfWeek]} {d:dd'/'MM'/'yyyy}: {Format.Money(sum)}", sum));
                 }
             }
+            FillTrend(buckets);
 
-            decimal max = buckets.Count == 0 ? 0 : buckets.Max(b => b.amount);
-            Bars.Clear();
-            foreach (var b in buckets)
+            // ---- Heatmap + nhận xét ----
+            FillHeatmap(from, to, heat, out string busiestSlot);
+            FillInsight(byHour, buckets, busiestSlot, movies, s.Revenue);
+
+            // ---- Cơ cấu: khách thành viên / khách lẻ ----
+            decimal walkIn = s.Revenue - s.MemberRevenue;
+            DonutValues = s.Revenue > 0 ? new[] { (double)s.MemberRevenue, (double)walkIn } : null;
+            RevenueShortText = Million(s.Revenue);
+            MemberPercentText = Percent1(s.MemberRevenue, s.Revenue);
+            MemberAmountText = $"{Million(s.MemberRevenue)} · {Format.Number(s.OrdersWithCustomer)} đơn";
+            WalkInPercentText = Percent1(walkIn, s.Revenue);
+            WalkInAmountText = $"{Million(walkIn)} · {Format.Number(s.Orders - s.OrdersWithCustomer)} đơn";
+
+            // ---- Định dạng chiếu: 2 định dạng lớn nhất, còn lại gộp "Khác" ----
+            Formats.Clear();
+            decimal formatTotal = formats.Sum(f => f.Amount);
+            var parts = formats.Take(2).Select(f => (label: f.Format.Length > 0 ? f.Format : "Không rõ", amount: f.Amount)).ToList();
+            decimal rest = formats.Skip(2).Sum(f => f.Amount);
+            if (rest > 0) parts.Add(("Khác", rest));
+            for (int i = 0; i < parts.Count; i++)
             {
-                Bars.Add(new ChartBar
+                Formats.Add(new FormatShare
                 {
-                    Label = b.label,
-                    ToolTip = b.tip,
-                    ValueText = b.amount > 0 ? Format.Million(b.amount) : "",
-                    BarHeight = max == 0 ? 2 : Math.Max(b.amount > 0 ? 4 : 2, (double)(b.amount / max) * MaxBarHeight),
-                    IsMax = max > 0 && b.amount == max,
-                    ShowValue = buckets.Count <= 14
+                    Label = parts[i].label,
+                    AmountText = Million(parts[i].amount),
+                    PercentText = Percent(parts[i].amount, formatTotal),
+                    Tone = i
                 });
             }
+            FormatValues = formatTotal > 0 ? parts.Select(p => (double)p.amount).ToArray() : null;
 
             // ---- Top phim ----
             Movies.Clear();
@@ -225,34 +311,155 @@ namespace CinemaAPP.ViewModels
                 });
             }
 
-            // ---- Theo nhân viên ----
+            // ---- Xếp hạng nhân viên (đã sắp theo doanh thu giảm dần) ----
             Staff.Clear();
-            foreach (StaffRevenue st in staff)
+            decimal topStaff = staff.Count > 0 ? staff[0].Amount : 0;
+            for (int i = 0; i < staff.Count; i++)
             {
+                StaffRevenue st = staff[i];
                 Staff.Add(new StaffRow
                 {
+                    Rank = i + 1,
+                    IsTop = i == 0,
+                    IsLast = i == staff.Count - 1,
                     Initials = NameHelper.Initials(st.FullName),
                     FullName = st.FullName,
-                    Username = st.Username,
-                    OrdersText = Format.Number(st.Orders),
-                    TicketsText = Format.Number(st.Tickets),
+                    DetailText = $"{st.Username} · {Format.Number(st.Orders)} đơn · {Format.Number(st.Tickets)} vé",
                     AmountText = Format.Money(st.Amount),
                     ShareText = Percent(st.Amount, s.Revenue),
-                    Percent = s.Revenue == 0 ? 0 : (double)(st.Amount / s.Revenue) * 100
+                    Percent = topStaff == 0 ? 0 : (double)(st.Amount / topStaff) * 100
                 });
             }
 
             HasData = s.Orders > 0;
         }
 
+        // Độ cao (pixel, tính từ đáy) của từng mốc. Trục không bắt đầu từ 0 mà từ dưới mốc thấp nhất một chút,
+        // để thấy rõ ngày nào hơn ngày nào (giống biểu đồ vùng trên Figma).
+        private void FillTrend(List<(string label, string tip, decimal amount)> buckets)
+        {
+            TrendPoints.Clear();
+            if (buckets.Count == 0) { TrendHeights = null; return; }
+
+            decimal max = buckets.Max(b => b.amount), min = buckets.Min(b => b.amount);
+            decimal lo = Math.Max(0, min - (max - min) / 2);
+            double usable = ChartHeight - ChartTopRoom - ChartBottomRoom;
+
+            var heights = new double[buckets.Count];
+            for (int i = 0; i < buckets.Count; i++)
+            {
+                var b = buckets[i];
+                double h = max == lo
+                    ? (max == 0 ? ChartBottomRoom : ChartBottomRoom + usable / 2)
+                    : ChartBottomRoom + (double)((b.amount - lo) / (max - lo)) * usable;
+                heights[i] = h;
+                TrendPoints.Add(new TrendPoint
+                {
+                    Label = b.label,
+                    ToolTip = b.tip,
+                    ValueText = Million(b.amount),
+                    PointMargin = new Thickness(0, 0, 0, h - 6),     // chấm 12×12, tâm nằm trên đường
+                    TipMargin = new Thickness(0, 0, 0, h + 10),
+                    IsMax = max > 0 && b.amount == max
+                });
+            }
+            TrendHeights = heights;
+        }
+
+        private void FillHeatmap(DateTime from, DateTime to, List<HeatCell> heat, out string busiestSlot)
+        {
+            HeatDays.Clear();
+            HeatRows.Clear();
+            busiestSlot = "";
+
+            var days = new List<DateTime>();
+            for (DateTime d = from; d < to; d = d.AddDays(1)) days.Add(d);
+            List<int> slots = heat.Select(c => c.Slot).Distinct().OrderBy(x => x).ToList();
+            HasHeatmap = slots.Count > 0;
+            ShowHeatNumbers = days.Count <= 14;
+            if (!HasHeatmap) { HeatSummaryText = ""; return; }
+
+            foreach (DateTime d in days)
+                HeatDays.Add(days.Count <= 7 ? $"{DayShort[(int)d.DayOfWeek]}/{d:dd}" : d.ToString("dd"));
+
+            var lookup = heat.ToDictionary(c => (c.Day.Date, c.Slot), c => c.Tickets);
+            int Get(DateTime d, int slot) => lookup.TryGetValue((d, slot), out int n) ? n : 0;
+            int max = heat.Max(c => c.Tickets);
+            int min = days.SelectMany(d => slots.Select(sl => Get(d, sl))).Min();
+
+            foreach (int slot in slots)
+            {
+                var row = new HeatRow { Label = SlotText(slot) };
+                foreach (DateTime d in days)
+                {
+                    int n = Get(d, slot);
+                    double level = n == 0 ? 0.05 : max == min ? 0.6 : 0.12 + 0.88 * (n - min) / (max - min);
+                    row.Cells.Add(new HeatCellRow
+                    {
+                        Text = n.ToString(),
+                        ToolTip = $"{DayShort[(int)d.DayOfWeek]} {d:dd'/'MM} · suất {slot}h–{slot + 3}h: {Format.Number(n)} vé",
+                        Level = level,
+                        IsStrong = level > 0.55
+                    });
+                }
+                HeatRows.Add(row);
+            }
+
+            // Khung giờ đông / vắng nhất (cộng cả khoảng)
+            var totals = slots.Select(sl => (slot: sl, total: days.Sum(d => Get(d, sl)))).ToList();
+            var top = totals.OrderByDescending(t => t.total).First();
+            var low = totals.OrderBy(t => t.total).First();
+            busiestSlot = SlotText(top.slot);
+            HeatSummaryText = totals.Count > 1
+                ? $"Đông nhất: khung {SlotText(top.slot)} ({Format.Number(top.total)} vé) · Vắng nhất: khung {SlotText(low.slot)} ({Format.Number(low.total)} vé)"
+                : $"Chỉ có khung {SlotText(top.slot)} ({Format.Number(top.total)} vé)";
+        }
+
+        // Một câu tóm tắt ghép từ số liệu đã có: mốc cao nhất, khung giờ đông nhất, phim đứng đầu.
+        private void FillInsight(bool byHour, List<(string label, string tip, decimal amount)> buckets,
+                                 string busiestSlot, List<MovieRevenue> movies, decimal revenue)
+        {
+            // Chưa có doanh thu thì không nhận xét (heatmap vẫn có thể có vé bán trước cho suất hôm nay)
+            if (revenue <= 0) { InsightText = ""; return; }
+
+            var parts = new List<string>();
+            if (buckets.Count > 1 && buckets.Any(b => b.amount > 0))
+            {
+                var best = buckets.OrderByDescending(b => b.amount).First();
+                string when = byHour ? "Khung " + best.label : best.tip[..best.tip.IndexOf(':')];
+                parts.Add($"{when} có doanh thu cao nhất ({Million(best.amount)}).");
+            }
+            if (busiestSlot.Length > 0) parts.Add($"Khung {busiestSlot} bán nhiều vé nhất.");
+            if (movies.Count > 0 && revenue > 0)
+                parts.Add($"Phim \"{movies[0].Title}\" chiếm {Percent(movies[0].Amount, revenue)} doanh thu.");
+            InsightText = string.Join(" ", parts);
+        }
+
         private static string Percent(decimal part, decimal total)
             => total == 0 ? "0%" : Math.Round(part / total * 100) + "%";
 
+        private static string Percent1(decimal part, decimal total)
+            => total == 0 ? "0%" : (part / total * 100).ToString("0.0", Format.Vi) + "%";
+
+        private static string Million(decimal amount) => Format.Million(amount) + " tr";
+
+        // Nhãn khung giờ: 9 → "9–12h"
+        private static string SlotText(int slot) => $"{slot}–{slot + 3}h";
+
         private void ClearData()
         {
-            RevenueText = TicketsText = OrdersText = AvgPriceText = CancelledText = "—";
-            TicketsPerOrderText = WithCustomerText = "";
-            Bars.Clear();
+            RevenueText = RevenueNumberText = TicketsText = OrdersText = MemberShareText = CancelledText = "—";
+            HeroSubText = TicketsHintText = TicketsPerOrderText = MemberHintText = CancelHintText = "";
+            InsightText = HeatSummaryText = RevenueShortText = "";
+            MemberPercentText = MemberAmountText = WalkInPercentText = WalkInAmountText = "";
+            TrendHeights = null;
+            DonutValues = null;
+            FormatValues = null;
+            TrendPoints.Clear();
+            HeatDays.Clear();
+            HeatRows.Clear();
+            HasHeatmap = false;
+            Formats.Clear();
             Movies.Clear();
             Staff.Clear();
             HasData = false;

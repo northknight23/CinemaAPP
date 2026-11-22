@@ -4,7 +4,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
-             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="900"
+             xmlns:v="clr-namespace:CinemaAPP.Views"
+             mc:Ignorable="d" d:DesignWidth="1088" d:DesignHeight="1200"
              FontFamily="Segoe UI" FontSize="14" Language="vi-VN"
              Foreground="{StaticResource TextBrush}" Background="{StaticResource PageBrush}">
     <UserControl.DataContext>
@@ -15,114 +16,85 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/CinemaAPP;component/Resources/ManagementStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-
-            <Style x:Key="KpiCard" TargetType="Border" BasedOn="{StaticResource MgmtCard}">
-                <Setter Property="Padding" Value="18,16"/>
-            </Style>
-            <Style x:Key="KpiLabel" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="12.5"/>
-                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
-            </Style>
-            <Style x:Key="KpiValue" TargetType="TextBlock">
-                <Setter Property="FontSize" Value="24"/>
-                <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Margin" Value="0,4,0,2"/>
-                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="28,22,28,28">
+    <!-- Bố cục theo Figma "Thống kê doanh thu · v2 (theo trend)":
+         nhận xét → ô Tổng doanh thu + 4 ô số → heatmap + cơ cấu → phim + xếp hạng nhân viên -->
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="28,22,28,28" Style="{StaticResource RevLoadingPanel}">
 
-            <!-- ===== Tiêu đề trang ===== -->
-            <DockPanel Margin="0,0,0,18">
-                <Button DockPanel.Dock="Right" Style="{StaticResource MgmtGhostButton}" Height="40"
-                        Command="{Binding ReloadCommand}" VerticalAlignment="Center" Content="Tải lại"/>
-                <StackPanel>
-                    <TextBlock Style="{StaticResource MgmtBreadcrumb}" Text="Báo cáo › Doanh thu"/>
-                    <TextBlock Style="{StaticResource MgmtPageTitle}" Text="Thống kê doanh thu"/>
-                </StackPanel>
-            </DockPanel>
-
-            <!-- ===== Chọn khoảng thời gian ===== -->
-            <DockPanel Margin="0,0,0,18">
-                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="Đang tải…" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,12,0"
-                               VerticalAlignment="Center" Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
-                    <TextBlock Text="{Binding RangeText}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <!-- ================= TIÊU ĐỀ + CHỌN KHOẢNG ================= -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <!-- Tiêu đề trang đã có ở thanh đầu cửa sổ → ở đây chỉ ghi khoảng đang xem -->
+                <StackPanel Margin="0,0,16,0">
+                    <TextBlock Text="{Binding RangeLongText}" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="Chỉ tính đơn đã thanh toán" Margin="0,2,0,0" Foreground="{StaticResource TextMutedBrush}"
+                               TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal">
-                    <Border Background="{StaticResource CardBrush}" BorderBrush="{StaticResource CardBorderBrush}"
-                            BorderThickness="1" CornerRadius="12" Padding="4">
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                    <RadioButton Style="{StaticResource DashSegment}" Height="36" Margin="0,0,6,0" GroupName="preset" IsChecked="{Binding IsToday}" Content="Hôm nay"/>
+                    <RadioButton Style="{StaticResource DashSegment}" Height="36" Margin="0,0,6,0" GroupName="preset" IsChecked="{Binding IsWeek}" Content="7 ngày qua"/>
+                    <RadioButton Style="{StaticResource DashSegment}" Height="36" Margin="0,0,6,0" GroupName="preset" IsChecked="{Binding IsMonth}" Content="Tháng này"/>
+                    <RadioButton Style="{StaticResource DashSegment}" Height="36" Margin="0,0,10,0" GroupName="preset" IsChecked="{Binding IsCustom}" Content="Tùy chọn"/>
+
+                    <!-- Khoảng đang xem (chỉ hiển thị) -->
+                    <Border Height="36" Padding="12,0" CornerRadius="8" BorderThickness="1"
+                            Background="{StaticResource CardBrush}" BorderBrush="{StaticResource CardBorderBrush}">
                         <StackPanel Orientation="Horizontal">
-                            <RadioButton Style="{StaticResource MgmtSegment}" GroupName="preset" IsChecked="{Binding IsToday}" Content="Hôm nay"/>
-                            <RadioButton Style="{StaticResource MgmtSegment}" GroupName="preset" IsChecked="{Binding IsWeek}" Content="7 ngày qua"/>
-                            <RadioButton Style="{StaticResource MgmtSegment}" GroupName="preset" IsChecked="{Binding IsMonth}" Content="Tháng này"/>
-                            <RadioButton Style="{StaticResource MgmtSegment}" GroupName="preset" IsChecked="{Binding IsCustom}" Content="Tùy chọn"/>
+                            <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcCalendar}"/>
+                            <TextBlock Text="{Binding RangeText}" Margin="8,0,0,0" FontSize="13.5" FontWeight="Medium" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
 
-                    <StackPanel Orientation="Horizontal" Margin="14,0,0,0" VerticalAlignment="Center"
-                                Visibility="{Binding IsCustom, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="Từ" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{StaticResource TextMutedBrush}"/>
-                        <DatePicker SelectedDate="{Binding FromDate}" Width="130" VerticalAlignment="Center"/>
-                        <TextBlock Text="đến" VerticalAlignment="Center" Margin="10,0,6,0" Foreground="{StaticResource TextMutedBrush}"/>
-                        <DatePicker SelectedDate="{Binding ToDate}" Width="130" VerticalAlignment="Center"/>
-                        <Button Style="{StaticResource MgmtPrimaryButton}" Height="38" Margin="10,0,0,0"
-                                Command="{Binding ApplyCustomCommand}" Content="Xem"/>
-                    </StackPanel>
+                    <Button Style="{StaticResource DashIconButton}" Margin="10,0,0,0" ToolTip="Tải lại số liệu"
+                            Command="{Binding ReloadCommand}">
+                        <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcRefresh}" Stroke="{StaticResource TextBrush}"/>
+                    </Button>
                 </StackPanel>
-            </DockPanel>
+            </Grid>
+
+            <!-- Hai ô chọn ngày (chỉ hiện khi chọn "Tùy chọn") -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0"
+                        Visibility="{Binding IsCustom, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="Từ" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{StaticResource TextMutedBrush}"/>
+                <DatePicker SelectedDate="{Binding FromDate}" Width="130" VerticalAlignment="Center"/>
+                <TextBlock Text="đến" VerticalAlignment="Center" Margin="10,0,6,0" Foreground="{StaticResource TextMutedBrush}"/>
+                <DatePicker SelectedDate="{Binding ToDate}" Width="130" VerticalAlignment="Center"/>
+                <Button Style="{StaticResource DashPrimaryButton}" Margin="10,0,0,0"
+                        Command="{Binding ApplyCustomCommand}" Content="Xem"/>
+            </StackPanel>
 
             <!-- Lỗi kết nối / chọn ngày sai -->
-            <Border Style="{StaticResource MgmtBanner}" Margin="0,0,0,16"
+            <Border Style="{StaticResource MgmtBanner}" Margin="0,16,0,0"
                     Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
                 <TextBlock Text="{Binding Message}" TextWrapping="Wrap"/>
             </Border>
 
-            <!-- ===== 5 ô số ===== -->
-            <UniformGrid Rows="1" Margin="0,0,0,20">
-                <Border Style="{StaticResource KpiCard}" Background="{StaticResource NavyBrush}" BorderBrush="{StaticResource NavyBrush}" Margin="0,0,7,0">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource KpiLabel}" Foreground="{StaticResource OnNavyMutedBrush}" Text="Doanh thu"/>
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="White" Text="{Binding RevenueText}"/>
-                        <TextBlock Style="{StaticResource KpiLabel}" Foreground="{StaticResource OnNavyMutedBrush}" Text="Chỉ tính đơn đã thanh toán"/>
+            <!-- ================= NHẬN XÉT ================= -->
+            <Border Margin="0,16,0,0" Padding="16,12" CornerRadius="10" Background="{StaticResource InfoBgBrush}"
+                    Visibility="{Binding HasInsight, Converter={StaticResource BoolToVis}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcStar}" Stroke="{StaticResource PrimaryBrush}"
+                          VerticalAlignment="Top" Margin="0,2,12,0"/>
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Điểm nổi bật" FontWeight="SemiBold" Foreground="{StaticResource InfoBrush}"/>
+                        <TextBlock Text="{Binding InsightText}" Margin="0,2,0,0" FontSize="13" TextWrapping="Wrap"/>
                     </StackPanel>
-                </Border>
-                <Border Style="{StaticResource KpiCard}" Margin="7,0">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource KpiLabel}" Text="Vé đã bán"/>
-                        <TextBlock Style="{StaticResource KpiValue}" Text="{Binding TicketsText}"/>
-                        <TextBlock Style="{StaticResource KpiLabel}" Text="{Binding TicketsPerOrderText}"/>
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource KpiCard}" Margin="7,0">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource KpiLabel}" Text="Số đơn"/>
-                        <TextBlock Style="{StaticResource KpiValue}" Text="{Binding OrdersText}"/>
-                        <TextBlock Style="{StaticResource KpiLabel}" Text="{Binding WithCustomerText}" TextTrimming="CharacterEllipsis"/>
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource KpiCard}" Margin="7,0">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource KpiLabel}" Text="Giá vé trung bình"/>
-                        <TextBlock Style="{StaticResource KpiValue}" Text="{Binding AvgPriceText}"/>
-                        <TextBlock Style="{StaticResource KpiLabel}" Text="Doanh thu ÷ số vé"/>
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource KpiCard}" Margin="7,0,0,0">
-                    <StackPanel>
-                        <TextBlock Style="{StaticResource KpiLabel}" Text="Đơn đã hủy"/>
-                        <TextBlock Style="{StaticResource KpiValue}" Foreground="{StaticResource ErrorBrush}" Text="{Binding CancelledText}"/>
-                        <TextBlock Style="{StaticResource KpiLabel}" Text="Không tính vào doanh thu"/>
-                    </StackPanel>
-                </Border>
-            </UniformGrid>
+                </Grid>
+            </Border>
 
             <!-- Không có đơn trong khoảng đã chọn -->
-            <Border Style="{StaticResource MgmtCard}" Padding="20" Margin="0,0,0,20"
+            <Border Style="{StaticResource DashCard}" Padding="20" Margin="0,16,0,0"
                     Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
                 <StackPanel HorizontalAlignment="Center">
                     <TextBlock Text="Chưa có đơn đã thanh toán trong khoảng thời gian này" FontWeight="SemiBold" HorizontalAlignment="Center"/>
@@ -131,73 +103,310 @@
                 </StackPanel>
             </Border>
 
-            <!-- ===== Biểu đồ + Top phim ===== -->
-            <Grid Margin="0,0,0,20">
+            <!-- ================= Ô TỔNG DOANH THU + 4 Ô SỐ ================= -->
+            <Grid Margin="0,16,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*"/>
-                    <ColumnDefinition Width="20"/>
-                    <ColumnDefinition Width="2*" MinWidth="320"/>
+                    <ColumnDefinition Width="7*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="5*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border Style="{StaticResource MgmtCard}" Padding="20,18">
+                <Border Background="{StaticResource NavyBrush}" CornerRadius="14" Padding="24,20,24,16">
                     <StackPanel>
-                        <DockPanel>
-                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Style="{StaticResource MgmtHint}" Text="Đơn vị: triệu đồng · "/>
-                                <Border Width="10" Height="10" CornerRadius="3" Background="{StaticResource GoldBrush}" Margin="0,0,5,0"/>
-                                <TextBlock Style="{StaticResource MgmtHint}" Text="cao nhất"/>
-                            </StackPanel>
-                            <TextBlock Style="{StaticResource MgmtCardTitle}" FontSize="16" Text="{Binding ChartTitle}"/>
-                        </DockPanel>
+                        <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource OnNavyMutedBrush}">
+                            <Run Text="TỔNG DOANH THU ·"/>
+                            <Run Text="{Binding RangeText, Mode=OneWay}"/>
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="{Binding RevenueNumberText}" FontSize="40" FontWeight="Bold" Foreground="{StaticResource OnNavyBrush}"/>
+                            <TextBlock Text="đ" FontSize="22" FontWeight="SemiBold" Margin="8,0,0,7" VerticalAlignment="Bottom"
+                                       Foreground="{StaticResource OnNavyMutedBrush}"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding HeroSubText}" FontSize="13" FontWeight="Medium" Foreground="{StaticResource OnNavyMutedBrush}"/>
 
-                        <!-- Mỗi cột là một ô của UniformGrid 1 hàng → các cột tự chia đều chiều ngang -->
-                        <ItemsControl ItemsSource="{Binding Bars}" Margin="0,16,0,0">
+                        <!-- Biểu đồ vùng: Height phải khớp RevenueViewModel.ChartHeight -->
+                        <Grid Height="150" Margin="0,12,0,0">
+                            <Grid IsHitTestVisible="False" Opacity="0.12">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition/><RowDefinition/><RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Border Grid.Row="1" BorderBrush="{StaticResource OnNavyBrush}" BorderThickness="0,1,0,0"/>
+                                <Border Grid.Row="2" BorderBrush="{StaticResource OnNavyBrush}" BorderThickness="0,1,0,0"/>
+                            </Grid>
+
+                            <v:AreaChart Values="{Binding TrendHeights}" Stroke="{StaticResource TealBrush}" IsHitTestVisible="False"/>
+
+                            <!-- Điểm + nhãn vàng ở mốc cao nhất; rê chuột vào điểm để xem số -->
+                            <ItemsControl ItemsSource="{Binding TrendPoints}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:TrendPoint}">
+                                        <Grid>
+                                            <!-- Canvas rộng 0 để nhãn không bị cắt khi cột hẹp (xem cả tháng) -->
+                                            <Canvas Width="0" Height="22" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                                                    Margin="{Binding TipMargin}"
+                                                    Visibility="{Binding IsMax, Converter={StaticResource BoolToVis}}">
+                                                <Grid Width="90" Height="22" Canvas.Left="-45">
+                                                    <Border HorizontalAlignment="Center" Background="{StaticResource GoldBrush}" CornerRadius="6" Padding="8,2">
+                                                        <TextBlock Text="{Binding ValueText}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource NavyBrush}"/>
+                                                    </Border>
+                                                </Grid>
+                                            </Canvas>
+                                            <Ellipse Style="{StaticResource RevTrendDot}" VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                                                     Margin="{Binding PointMargin}"
+                                                     ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="60000">
+                                                <Ellipse.ToolTip>
+                                                    <ToolTip Style="{StaticResource NavyTip}">
+                                                        <TextBlock Text="{Binding ToolTip}" Foreground="{StaticResource OnNavyBrush}"/>
+                                                    </ToolTip>
+                                                </Ellipse.ToolTip>
+                                            </Ellipse>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+
+                        <!-- Nhãn ngày: cùng UniformGrid nên thẳng hàng với điểm -->
+                        <ItemsControl ItemsSource="{Binding TrendPoints}" Margin="0,8,0,0">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Rows="1"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Margin="3,0" ToolTip="{Binding ToolTip}" Background="Transparent">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="200"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <StackPanel VerticalAlignment="Bottom">
-                                            <TextBlock x:Name="value" Text="{Binding ValueText}" FontSize="12" FontWeight="SemiBold"
-                                                       HorizontalAlignment="Center" Margin="0,0,0,4" Visibility="Collapsed"/>
-                                            <Border x:Name="bar" Height="{Binding BarHeight}" MaxWidth="52" CornerRadius="6,6,0,0"
-                                                    Background="{StaticResource PrimaryBrush}"/>
-                                        </StackPanel>
-                                        <Border Grid.Row="1" BorderBrush="{StaticResource SeatStdBorderBrush}" BorderThickness="0,1,0,0" Padding="0,6,0,0">
-                                            <TextBlock Text="{Binding Label}" FontSize="11.5" HorizontalAlignment="Center"
-                                                       Foreground="{StaticResource TextMutedBrush}"/>
-                                        </Border>
-                                    </Grid>
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding IsMax}" Value="True">
-                                            <Setter TargetName="bar" Property="Background" Value="{StaticResource GoldBrush}"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding ShowValue}" Value="True">
-                                            <Setter TargetName="value" Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
+                                <DataTemplate DataType="{x:Type vm:TrendPoint}">
+                                    <TextBlock Style="{StaticResource RevTrendLabel}" Text="{Binding Label}"/>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="2" Style="{StaticResource MgmtCard}" Padding="20,18">
+                <UniformGrid Grid.Column="2" Rows="2" Columns="2">
+                    <Border Style="{StaticResource DashCard}" Padding="16,14" Margin="0,0,8,8">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RevKpiLabel}" Text="Vé đã bán"/>
+                            <TextBlock Style="{StaticResource RevKpiValue}" Text="{Binding TicketsText}"/>
+                            <TextBlock Style="{StaticResource RevKpiHint}" Text="{Binding TicketsHintText}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource DashCard}" Padding="16,14" Margin="8,0,0,8">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RevKpiLabel}" Text="Đơn đã thanh toán"/>
+                            <TextBlock Style="{StaticResource RevKpiValue}" Text="{Binding OrdersText}"/>
+                            <TextBlock Style="{StaticResource RevKpiHint}" Text="{Binding TicketsPerOrderText}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource DashCard}" Padding="16,14" Margin="0,8,8,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RevKpiLabel}" Text="Khách thành viên"/>
+                            <TextBlock Style="{StaticResource RevKpiValue}" Text="{Binding MemberShareText}"/>
+                            <TextBlock Style="{StaticResource RevKpiHint}" Text="{Binding MemberHintText}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource DashCard}" Padding="16,14" Margin="8,8,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource RevKpiLabel}" Text="Đơn đã hủy"/>
+                            <TextBlock Style="{StaticResource RevKpiValue}" Text="{Binding CancelledText}"/>
+                            <TextBlock Style="{StaticResource RevKpiHint}" Text="{Binding CancelHintText}"/>
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+            </Grid>
+
+            <!-- ================= HEATMAP + CƠ CẤU ================= -->
+            <Grid Margin="0,16,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Heatmap: vé theo ngày × khung giờ chiếu -->
+                <Border Style="{StaticResource DashCard}" Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource RevCardTitle}" Text="Vé bán theo khung giờ chiếu"/>
+                        
+
+                        <TextBlock Style="{StaticResource MgmtHint}" Margin="0,16,0,0" Text="Chưa có suất chiếu nào bán được vé trong khoảng này."
+                                   Visibility="{Binding IsHeatmapEmpty, Converter={StaticResource BoolToVis}}"/>
+
+                        <StackPanel Visibility="{Binding HasHeatmap, Converter={StaticResource BoolToVis}}">
+                            <!-- Hàng tên ngày -->
+                            <Grid Margin="0,14,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="56"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ItemsControl Grid.Column="1" ItemsSource="{Binding HeatDays}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" FontSize="12" FontWeight="Medium" HorizontalAlignment="Center"
+                                                       Foreground="{StaticResource TextMutedBrush}"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Grid>
+
+                            <!-- Mỗi hàng một khung giờ, mỗi ô một ngày: càng nhiều vé càng đậm -->
+                            <ItemsControl ItemsSource="{Binding HeatRows}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type vm:HeatRow}">
+                                        <Grid Margin="0,3">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="56"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Label}" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"
+                                                       Foreground="{StaticResource TextMutedBrush}"/>
+                                            <ItemsControl Grid.Column="1" ItemsSource="{Binding Cells}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <UniformGrid Rows="1"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate DataType="{x:Type vm:HeatCellRow}">
+                                                        <Grid Height="38" Margin="3,0" Background="Transparent"
+                                                              ToolTipService.InitialShowDelay="0">
+                                                            <Grid.ToolTip>
+                                                                <ToolTip Style="{StaticResource NavyTip}">
+                                                                    <TextBlock Text="{Binding ToolTip}" Foreground="{StaticResource OnNavyBrush}"/>
+                                                                </ToolTip>
+                                                            </Grid.ToolTip>
+                                                            <!-- Opacity đặt trên lớp nền riêng để chữ không bị mờ theo -->
+                                                            <Border CornerRadius="6" Background="{StaticResource TealBrush}" Opacity="{Binding Level}"/>
+                                                            <TextBlock Style="{StaticResource RevHeatText}" 
+                                                                       Visibility="{Binding DataContext.ShowHeatNumbers, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Chú thích màu + khung giờ đông / vắng nhất -->
+                            <DockPanel Margin="0,12,0,0">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="Ít" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,0,6,0"/>
+                                    <Border Width="18" Height="10" CornerRadius="3" Margin="2,0" Background="{StaticResource TealBrush}" Opacity="0.12"/>
+                                    <Border Width="18" Height="10" CornerRadius="3" Margin="2,0" Background="{StaticResource TealBrush}" Opacity="0.34"/>
+                                    <Border Width="18" Height="10" CornerRadius="3" Margin="2,0" Background="{StaticResource TealBrush}" Opacity="0.56"/>
+                                    <Border Width="18" Height="10" CornerRadius="3" Margin="2,0" Background="{StaticResource TealBrush}" Opacity="0.78"/>
+                                    <Border Width="18" Height="10" CornerRadius="3" Margin="2,0" Background="{StaticResource TealBrush}"/>
+                                    <TextBlock Text="Nhiều" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="6,0,16,0"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding HeatSummaryText}" FontSize="12" FontWeight="Medium" TextAlignment="Right"
+                                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Cơ cấu doanh thu: khách thành viên / khách lẻ + định dạng chiếu -->
+                <Border Grid.Column="2" Style="{StaticResource DashCard}" Padding="20,16">
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Top">
+                            <TextBlock Style="{StaticResource RevCardTitle}" Text="Cơ cấu doanh thu"/>
+                            <TextBlock Style="{StaticResource RevCardSubtitle}" Text="Theo loại khách và định dạng chiếu"/>
+                        </StackPanel>
+
+                        <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,1,0,0" Padding="0,14,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Định dạng chiếu" FontSize="13" FontWeight="Medium" Foreground="{StaticResource TextMutedBrush}"/>
+                                <ItemsControl ItemsSource="{Binding Formats}" Margin="0,6,0,0">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:FormatShare}">
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,16,4">
+                                                <Ellipse Style="{StaticResource RevToneDot}"/>
+                                                <TextBlock Text="{Binding Label}" FontSize="13" FontWeight="SemiBold" Margin="6,0,6,0"/>
+                                                <TextBlock FontSize="13" Foreground="{StaticResource TextMutedBrush}">
+                                                    <Run Text="{Binding AmountText, Mode=OneWay}"/><Run Text=" · "/><Run Text="{Binding PercentText, Mode=OneWay}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <v:ShareBar Height="10" Margin="0,6,0,0" Values="{Binding FormatValues}"
+                                            Stroke="{StaticResource PrimaryBrush}" Stroke2="{StaticResource GoldBrush}" Stroke3="{StaticResource TealBrush}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,14">
+                            <Grid Width="148" Height="148">
+                                <v:DonutChart Values="{Binding DonutValues}" Thickness="18"
+                                              Stroke="{StaticResource TealBrush}" Stroke2="{StaticResource NavyBrush}"/>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding RevenueShortText}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="doanh thu" FontSize="12" HorizontalAlignment="Center" Foreground="{StaticResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Margin="20,0,0,0" VerticalAlignment="Center">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse Width="10" Height="10" Margin="0,5,8,0" VerticalAlignment="Top" Fill="{StaticResource TealBrush}"/>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Khách thành viên" FontSize="13" FontWeight="Medium" Foreground="{StaticResource TextMutedBrush}"/>
+                                        <TextBlock Text="{Binding MemberPercentText}" FontSize="18" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding MemberAmountText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+                                <Grid Margin="0,14,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Ellipse Width="10" Height="10" Margin="0,5,8,0" VerticalAlignment="Top" Fill="{StaticResource NavyBrush}"/>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="Khách lẻ" FontSize="13" FontWeight="Medium" Foreground="{StaticResource TextMutedBrush}"/>
+                                        <TextBlock Text="{Binding WalkInPercentText}" FontSize="18" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding WalkInAmountText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </Grid>
+
+            <!-- ================= TOP PHIM + XẾP HẠNG NHÂN VIÊN ================= -->
+            <Grid Margin="0,16,0,0" Visibility="{Binding HasData, Converter={StaticResource BoolToVis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="16"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource DashCard}" Padding="20,16">
                     <StackPanel>
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Right" Style="{StaticResource MgmtHint}" Text="Top 5" VerticalAlignment="Center"/>
-                            <TextBlock Style="{StaticResource MgmtCardTitle}" FontSize="16" Text="Doanh thu theo phim"/>
+                            <TextBlock Style="{StaticResource RevCardTitle}" Text="Doanh thu theo phim"/>
                         </DockPanel>
                         <ItemsControl ItemsSource="{Binding Movies}" Margin="0,14,0,0">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate>
+                                <DataTemplate DataType="{x:Type vm:MovieRow}">
                                     <Grid Margin="0,0,0,14">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="26"/>
@@ -221,89 +430,52 @@
                         </ItemsControl>
                     </StackPanel>
                 </Border>
-            </Grid>
 
-            <!-- ===== Theo nhân viên ===== -->
-            <Border Style="{StaticResource MgmtCard}" ClipToBounds="True">
-                <StackPanel>
-                    <DockPanel Margin="20,16">
-                        <TextBlock DockPanel.Dock="Right" Style="{StaticResource MgmtHint}" VerticalAlignment="Center"
-                                   Text="Theo tài khoản lập đơn (BOOKING.AccountID)"/>
-                        <TextBlock Style="{StaticResource MgmtCardTitle}" FontSize="16" Text="Doanh thu theo nhân viên bán"/>
-                    </DockPanel>
-
-                    <Border Background="{StaticResource SubtleBrush}" Padding="20,9">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1.6*"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="160"/>
-                                <ColumnDefinition Width="*" MinWidth="150"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Style="{StaticResource MgmtColumnHeader}" Text="NHÂN VIÊN"/>
-                            <TextBlock Grid.Column="1" Style="{StaticResource MgmtColumnHeader}" Text="SỐ ĐƠN" TextAlignment="Right"/>
-                            <TextBlock Grid.Column="2" Style="{StaticResource MgmtColumnHeader}" Text="SỐ VÉ" TextAlignment="Right"/>
-                            <TextBlock Grid.Column="3" Style="{StaticResource MgmtColumnHeader}" Text="DOANH THU" TextAlignment="Right"/>
-                            <TextBlock Grid.Column="4" Style="{StaticResource MgmtColumnHeader}" Text="TỶ TRỌNG" Margin="24,0,0,0"/>
-                        </Grid>
-                    </Border>
-
-                    <ItemsControl ItemsSource="{Binding Staff}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="0,1,0,0" Padding="20,10">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="1.6*"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="90"/>
-                                            <ColumnDefinition Width="160"/>
-                                            <ColumnDefinition Width="*" MinWidth="150"/>
-                                        </Grid.ColumnDefinitions>
-                                        <StackPanel Orientation="Horizontal">
-                                            <Border Style="{StaticResource MgmtAvatar}" Width="32" Height="32" CornerRadius="16">
+                <Border Grid.Column="2" Style="{StaticResource DashCard}" Padding="20,16">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource RevCardTitle}" Text="Xếp hạng nhân viên bán"/>
+                        <TextBlock Style="{StaticResource RevCardSubtitle}">
+                            <Run Text="Doanh thu và tỷ trọng trong tổng"/>
+                            <Run Text="{Binding RevenueText, Mode=OneWay}"/>
+                        </TextBlock>
+                        <ItemsControl ItemsSource="{Binding Staff}" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:StaffRow}">
+                                    <Border Style="{StaticResource DashRowBorder}" Padding="0,10">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="190"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="120"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Style="{StaticResource RevRankBadge}">
+                                                <TextBlock Text="{Binding Rank}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <Border Grid.Column="1" Style="{StaticResource MgmtAvatar}" Margin="12,0">
                                                 <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
-                                            <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding FullName}" FontWeight="SemiBold"/>
-                                                <TextBlock Text="{Binding Username}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,12,0">
+                                                <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding DetailText}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"
+                                                           TextTrimming="CharacterEllipsis"/>
                                             </StackPanel>
-                                        </StackPanel>
-                                        <TextBlock Grid.Column="1" Text="{Binding OrdersText}" TextAlignment="Right" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding TicketsText}" TextAlignment="Right" VerticalAlignment="Center"/>
-                                        <TextBlock Grid.Column="3" Text="{Binding AmountText}" TextAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                                        <DockPanel Grid.Column="4" Margin="24,0,0,0" VerticalAlignment="Center">
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding ShareText}" Width="42" TextAlignment="Right"
-                                                       FontSize="12" Foreground="{StaticResource TextMutedBrush}"/>
-                                            <ProgressBar Style="{StaticResource MgmtBar}" Foreground="{StaticResource NavyBrush}"
-                                                         Value="{Binding Percent, Mode=OneWay}"/>
-                                        </DockPanel>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <!-- Dòng tổng -->
-                    <Border Background="{StaticResource SubtleBrush}" BorderBrush="{StaticResource SeatStdBorderBrush}"
-                            BorderThickness="0,1,0,0" Padding="20,12">
-                        <Grid TextElement.FontWeight="Bold">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="1.6*"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="90"/>
-                                <ColumnDefinition Width="160"/>
-                                <ColumnDefinition Width="*" MinWidth="150"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Tổng"/>
-                            <TextBlock Grid.Column="1" Text="{Binding OrdersText}" TextAlignment="Right"/>
-                            <TextBlock Grid.Column="2" Text="{Binding TicketsText}" TextAlignment="Right"/>
-                            <TextBlock Grid.Column="3" Text="{Binding RevenueText}" TextAlignment="Right"/>
-                        </Grid>
-                    </Border>
-                </StackPanel>
-            </Border>
+                                            <ProgressBar Grid.Column="3" Style="{StaticResource MgmtBar}" Foreground="{StaticResource TealBrush}"
+                                                         Value="{Binding Percent, Mode=OneWay}" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding AmountText}" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                                <TextBlock Text="{Binding ShareText}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right"
+                                                           Foreground="{StaticResource TealDarkBrush}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
