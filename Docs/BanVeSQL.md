@@ -13,7 +13,7 @@
 
 1. BookingService đọc suất hôm nay từ SQL, ghế theo RoomID, vé Active; khách tra qua CustomerService.FindByPhone.
 2. Ghế thường = BasePrice, VIP = BasePrice × 1,2, ghế đôi = hai ghế vật lý liền nhau, mỗi ghế BasePrice × 1,2 (theo seed dùng chung). Giá làm tròn 4 chữ số thập phân tương thích SQL MONEY.
-3. Tối đa 8 ghế vật lý/đơn; một cặp đôi tính 2 ghế nhưng vẫn một dòng trên vé chung.
+3. Có thể chọn các ghế còn trống trong cùng suất. Một cặp đôi tính 2 ghế vật lý và hiển thị một dòng trên vé chung.
 4. CreateBooking kiểm tra lại nhân viên còn hoạt động, giờ chiếu, ghế thuộc đúng phòng, cặp đôi, giá từng ghế, tiền khách và số dư điểm.
 5. Một SqlTransaction Serializable lưu BOOKING + từng TICKET + cập nhật CUSTOMER.Points. Các khóa suất/ghế/khách và unique index vé Active bảo vệ bán trùng, dùng trùng điểm.
 6. Chỉ sau Commit mới hiển thị vé đã trả và nút In vé, dùng BookingID thật. Lỗi giữa chừng rollback cả đơn.

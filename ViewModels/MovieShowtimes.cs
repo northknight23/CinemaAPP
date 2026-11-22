@@ -1,4 +1,6 @@
+using System.Windows.Media;
 using CinemaAPP.Helpers;
+using CinemaAPP.Models;
 
 namespace CinemaAPP.ViewModels
 {
@@ -10,6 +12,7 @@ namespace CinemaAPP.ViewModels
         public string Genre { get; init; } = "";
         public int DurationMin { get; init; }
         public string? PosterPath { get; init; }        // cột MOVIE.PosterPath, chưa có thì để khung trống
+        public ImageSource? PosterSource => new Movie { PosterPath = PosterPath }.PosterSource;
         public List<ShowtimeOption> Showtimes { get; } = new List<ShowtimeOption>();
 
         public string InfoLine => $"{Genre} · {DurationMin} phút";

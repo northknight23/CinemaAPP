@@ -7,6 +7,36 @@
 
     <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
+    <Style x:Key="MoviePosterFrame" TargetType="ContentControl">
+        <Setter Property="Width" Value="40"/>
+        <Setter Property="Height" Value="56"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContentControl">
+                    <Border CornerRadius="5" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <Border CornerRadius="4">
+                            <Border.Background>
+                                <ImageBrush Stretch="UniformToFill"
+                                            ImageSource="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"/>
+                            </Border.Background>
+                        </Border>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="CompactMoviePosterFrame" TargetType="ContentControl" BasedOn="{StaticResource MoviePosterFrame}">
+        <Setter Property="Width" Value="28"/>
+        <Setter Property="Height" Value="38"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
+    </Style>
+
     <!-- ===== Khung, chữ ===== -->
     <Style x:Key="Card" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
@@ -320,6 +350,34 @@
             <DataTrigger Binding="{Binding Method}" Value="{x:Static vm:PaymentMethod.Unknown}">
                 <Setter TargetName="b" Property="Background" Value="{DynamicResource SubtleBrush}"/>
                 <Setter TargetName="t" Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+
+    <!-- Trạng thái trên thẻ suất chiếu tại quầy. -->
+    <DataTemplate x:Key="ShowtimeAvailabilityTemplate">
+        <Grid MinHeight="14" Margin="0,1,0,0">
+            <TextBlock x:Name="FreeSeatsText" Text="{Binding FreeText}" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{DynamicResource SuccessBrush}"/>
+            <Border x:Name="StatusBadge" HorizontalAlignment="Left" CornerRadius="4" Padding="5,0"
+                    Background="{DynamicResource ErrorBgBrush}">
+                <TextBlock x:Name="StatusLabel" Text="{Binding StatusBadge}" FontSize="10" FontWeight="Bold"
+                           Foreground="{DynamicResource ErrorBrush}" VerticalAlignment="Center"/>
+            </Border>
+        </Grid>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                <Setter TargetName="FreeSeatsText" Property="Foreground" Value="White"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding CanSell}" Value="False">
+                <Setter TargetName="FreeSeatsText" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StatusBadge}" Value="START">
+                <Setter TargetName="StatusBadge" Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                <Setter TargetName="StatusLabel" Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StatusBadge}" Value="">
+                <Setter TargetName="StatusBadge" Property="Visibility" Value="Collapsed"/>
             </DataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>
