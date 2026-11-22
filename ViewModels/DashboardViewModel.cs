@@ -21,6 +21,7 @@ namespace CinemaAPP.ViewModels
 
         private readonly ShowtimeService showtimes = new ShowtimeService();
         private readonly BookingService booking = new BookingService();
+        private readonly RevenueService revenue = new RevenueService();   // tiền + vé: dùng chung với màn Thống kê doanh thu
         private readonly DispatcherTimer autoRefresh = new() { Interval = TimeSpan.FromMinutes(2) };
         private bool isBusy;
         private List<ActivityItem> allActivities = new();
@@ -89,6 +90,15 @@ namespace CinemaAPP.ViewModels
         // Độ lệch ngang (pixel) của từng ngày, từ tâm ô tới tâm cột kỳ này — đường TB 3 ngày đi qua đúng giữa cột
         private double[] trendOffsets = Array.Empty<double>();
         public double[] TrendOffsets { get => trendOffsets; private set => SetProperty(ref trendOffsets, value); }
+
+        // Đường "Lấp đầy kỳ trước" (nét đứt): đi qua đúng tâm cột kỳ trước
+        private double[] prevTrendHeights = Array.Empty<double>(), prevTrendOffsets = Array.Empty<double>();
+        public double[] PrevTrendHeights { get => prevTrendHeights; private set => SetProperty(ref prevTrendHeights, value); }
+        public double[] PrevTrendOffsets { get => prevTrendOffsets; private set => SetProperty(ref prevTrendOffsets, value); }
+
+        // Kỳ trước có ít nhất 1 ngày có suất chiếu thì mới vẽ (ngày không có suất: đường đứt đoạn)
+        private bool showPrevTrend;
+        public bool ShowPrevTrend { get => showPrevTrend; private set => SetProperty(ref showPrevTrend, value); }
 
         // ================= "Giao dịch mới nhất" =================
         private string feedTab = "today";   // "today" | "yesterday" | "week"
@@ -184,14 +194,18 @@ namespace CinemaAPP.ViewModels
             DateTime from = today.AddDays(-(RangeDays * 2 - 1));   // gồm cả kỳ trước để so sánh
             DateTime to = today.AddDays(1);
             DateTime salesFrom = today.AddDays(-6);                 // "Tuần này" ở cột hoạt động = 7 ngày gần nhất
+            DateTime yesterday = today.AddDays(-1);
+            DateTime yesterdaySameTime = yesterday + DateTime.Now.TimeOfDay;
 
             try
             {
                 var result = await Task.Run(() => (
-                    shows: showtimes.GetRange(from, to),
-                    sales: booking.GetSales(from, to)));
-                var stats = BuildDailyStats(from, to, result.sales, result.shows);
-                Fill(stats, result.sales.Where(s => s.CreatedAt >= salesFrom).ToList());
+                    shows: showtimes.GetRange(from, to),                      // ghế, vé của suất: theo NGÀY CHIẾU
+                    daily: revenue.GetByTime(from, to, byHour: false),       // tiền, vé bán: theo NGÀY LẬP ĐƠN
+                    ySame: revenue.GetSummary(yesterday, yesterdaySameTime), // hôm qua tính tới giờ này
+                    sales: booking.GetSales(salesFrom, to)));                 // từng đơn: chỉ cần 7 ngày cho cột hoạt động
+                var stats = BuildDailyStats(from, to, result.daily, result.shows);
+                Fill(stats, result.sales, result.ySame);
                 Message = "";             // tải được → tắt thông báo lỗi cũ (nếu có)
             }
             catch (Exception)
@@ -203,28 +217,28 @@ namespace CinemaAPP.ViewModels
             isBusy = false;
         }
         // Gộp số liệu theo ngày từ dữ liệu có sẵn:
-        //   - doanh thu, số vé: đơn chưa hủy (BookingService.GetSales), theo NGÀY LẬP ĐƠN
-        //   - tỷ lệ lấp đầy: ghế đã bán / tổng ghế (ShowtimeService.GetRange), theo NGÀY CHIẾU
-        private static List<DailyStat> BuildDailyStats(DateTime from, DateTime to, List<SaleRecord> sales, List<Showtime> shows)
+        //   - doanh thu, số vé bán: đơn đã thanh toán (RevenueService.GetByTime), theo NGÀY LẬP ĐƠN
+        //     → cùng nguồn với màn Thống kê doanh thu nên hai màn luôn ra cùng một số
+        //   - vé của suất, tỷ lệ lấp đầy: ghế đã bán / tổng ghế (ShowtimeService.GetRange), theo NGÀY CHIẾU
+        private static List<DailyStat> BuildDailyStats(DateTime from, DateTime to, List<RevenuePoint> daily, List<Showtime> shows)
         {
             var list = new List<DailyStat>();
             for (DateTime d = from.Date; d < to; d = d.AddDays(1))
             {
-                var paid = sales.Where(s => !s.IsCancelled && s.CreatedAt.Date == d).ToList();
+                var day = daily.Where(p => p.Time.Date == d).ToList();
                 var dayShows = shows.Where(s => s.StartTime.Date == d).ToList();
                 list.Add(new DailyStat
                 {
                     Day = d,
-                    Revenue = paid.Sum(s => s.Total),
-                    Tickets = paid.Sum(s => s.TicketCount),
+                    Revenue = day.Sum(p => p.Amount),
+                    Tickets = day.Sum(p => p.Tickets),
                     Seats = dayShows.Sum(s => s.TotalSeats),
                     SoldSeats = dayShows.Sum(s => s.SoldSeats),
-                    ShowRevenue = dayShows.Sum(s => s.Revenue),
                 });
             }
             return list;
         }
-        private void Fill(List<DailyStat> stats, List<SaleRecord> sales)
+        private void Fill(List<DailyStat> stats, List<SaleRecord> sales, RevenueSummary ySame)
         {
             var current = stats.Skip(RangeDays).ToList();      // RangeDays ngày gần nhất, ngày cuối = hôm nay
             var previous = stats.Take(RangeDays).ToList();     // cùng số ngày ngay trước đó
@@ -236,11 +250,9 @@ namespace CinemaAPP.ViewModels
             TicketsTodayText = Format.Number(today.Tickets);
             OccupancyTodayText = Math.Round(today.Occupancy) + "%";
             bool hasOrderToday = today.Tickets > 0;
-            TimeSpan nowTime = DateTime.Now.TimeOfDay;
-            var ySameTime = sales.Where(s => !s.IsCancelled && s.CreatedAt.Date == yesterday.Day
-                                             && s.CreatedAt.TimeOfDay <= nowTime).ToList();
-            RevenueDelta = hasOrderToday ? DeltaInfo.Percent(today.Revenue, ySameTime.Sum(s => s.Total), " so với giờ này hôm qua") : null;
-            TicketsDelta = hasOrderToday ? DeltaInfo.Percent(today.Tickets, ySameTime.Sum(s => s.TicketCount), "") : null;
+            // So với hôm qua tính tới cùng giờ (ySame lấy từ RevenueService.GetSummary)
+            RevenueDelta = hasOrderToday ? DeltaInfo.Percent(today.Revenue, ySame.Revenue, " so với giờ này hôm qua") : null;
+            TicketsDelta = hasOrderToday ? DeltaInfo.Percent(today.Tickets, ySame.Tickets, "") : null;
             OccupancyDelta = hasOrderToday && yesterday.Seats > 0 ? DeltaInfo.Points(today.Occupancy, yesterday.Occupancy) : null;
             // Biểu đồ nhỏ ở 3 thẻ luôn là 7 ngày gần nhất (không theo khoảng 7/14 ngày của biểu đồ lớn)
             var week = current.TakeLast(7).ToList();
@@ -288,6 +300,13 @@ namespace CinemaAPP.ViewModels
             var occupancy = current.Select(d => d.Occupancy).ToArray();
             var heights = occupancy.Select(o => Math.Min(o, 100) / 100 * PlotHeight).ToArray();
 
+            // Lấp đầy kỳ trước: cùng trục 0–100%. Tâm cột kỳ trước luôn lệch phải (barWidth/2 + 2) so với tâm ô
+            // (cặp cột: kỳ này | 4px | kỳ trước). Ngày kỳ trước KHÔNG có suất chiếu → NaN: đường đứt đoạn, không kéo về 0%.
+            var prevOccupancy = previous.Select(d => d.Occupancy).ToArray();
+            var prevHeights = previous.Select(d => d.Seats > 0 ? Math.Min(d.Occupancy, 100) / 100 * PlotHeight : double.NaN).ToArray();
+            double prevOffset = barWidth / 2 + 2;
+            bool showPrev = previous.Any(p => p.Seats > 0);
+
             ChartDays.Clear();
             for (int i = 0; i < current.Count; i++)
             {
@@ -304,11 +323,14 @@ namespace CinemaAPP.ViewModels
                     ChipText = $"Hôm nay: {Format.Number(d.SoldSeats)}",
                     TipDate = $"{DayLong[(int)d.Day.DayOfWeek]}, {d.Day:dd'/'MM'/'yyyy}",
                     TipTickets = $"{Format.Number(d.SoldSeats)} vé",
-                    TipRevenue = Format.Money(d.ShowRevenue),
                     TipPrevious = $"Cùng kỳ trước ({p.Day:dd'/'MM}): {Format.Number(p.SoldSeats)} vé",
                     TipOccupancy = $"Lấp đầy: {Format.Number((int)Math.Round(occupancy[i]))}%",
                     PointMargin = new Thickness(0, 0, 0, heights[i] - 6),   // điểm cao 12 (vùng rê chuột) → tâm ở đúng heights[i]
                     PointOffset = offsets[i],
+                    HasPrevOccupancy = p.Seats > 0,
+                    TipPrevOccupancy = $"Lấp đầy: {Format.Number((int)Math.Round(prevOccupancy[i]))}%",
+                    PrevPointMargin = new Thickness(0, 0, 0, double.IsNaN(prevHeights[i]) ? 0 : prevHeights[i] - 6),
+                    PrevPointOffset = prevOffset,
                 });
             }
 
@@ -316,6 +338,9 @@ namespace CinemaAPP.ViewModels
             AverageMargin = new Thickness(0, PlotHeight - average / axisMax * PlotHeight, 0, 0);
             TrendOffsets = offsets;
             TrendHeights = heights;
+            PrevTrendOffsets = previous.Select(_ => prevOffset).ToArray();
+            PrevTrendHeights = prevHeights;
+            ShowPrevTrend = showPrev;
         }
 
         // Bước chia trục đẹp: 1, 2, 2.5, 3, 4, 5 × 10^k (tối thiểu 25 vé / vạch)
@@ -432,6 +457,9 @@ namespace CinemaAPP.ViewModels
             TicketsSpark = OccupancySpark = Array.Empty<double>();
             TrendHeights = Array.Empty<double>();
             TrendOffsets = Array.Empty<double>();
+            PrevTrendHeights = Array.Empty<double>();
+            PrevTrendOffsets = Array.Empty<double>();
+            ShowPrevTrend = false;
             ChartDays.Clear();
             allActivities = new();
             recentAll = new();
@@ -471,14 +499,19 @@ namespace CinemaAPP.ViewModels
         public bool IsToday { get; init; }
         public string ChipText { get; init; } = "";
         public string TipDate { get; init; } = "";
-        public string TipTickets { get; init; } = "";
-        public string TipRevenue { get; init; } = "";
+        public string TipTickets { get; init; } = "";   // vé của các suất chiếu trong ngày (gồm cả vé bán trước)
         public string TipPrevious { get; init; } = "";
         public string TipOccupancy { get; init; } = "";
 
         // Điểm "TB 3 ngày" của ngày này (phần tử riêng để rê chuột hiện chú thích)
         public Thickness PointMargin { get; init; }
         public double PointOffset { get; init; }
+
+        // Điểm "Lấp đầy kỳ trước": nằm đúng tâm cột kỳ trước
+        public bool HasPrevOccupancy { get; init; }   // kỳ trước ngày này có suất chiếu → mới hiện điểm
+        public string TipPrevOccupancy { get; init; } = "";
+        public Thickness PrevPointMargin { get; init; }
+        public double PrevPointOffset { get; init; }
     }
 
     // Một dòng ở cột "Giao dịch mới nhất". Kind: sale | member | cancel (View chọn icon theo Kind).
