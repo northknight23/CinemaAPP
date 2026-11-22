@@ -8,7 +8,6 @@ namespace CinemaAPP.Models
         public int Tickets { get; set; }       // số vé thuộc các đơn đó
         public int Seats { get; set; }         // tổng ghế của các suất chiếu trong ngày
         public int SoldSeats { get; set; }     // số vé Active của các suất chiếu trong ngày
-        public decimal ShowRevenue { get; set; } // tổng giá vé của các suất chiếu trong ngày
         public double Occupancy => Seats == 0 ? 0 : (double)SoldSeats / Seats * 100;
     }
 }
