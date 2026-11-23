@@ -251,8 +251,8 @@ namespace CinemaAPP.ViewModels
             OccupancyTodayText = Math.Round(today.Occupancy) + "%";
             bool hasOrderToday = today.Tickets > 0;
             // So với hôm qua tính tới cùng giờ (ySame lấy từ RevenueService.GetSummary)
-            RevenueDelta = hasOrderToday ? DeltaInfo.Percent(today.Revenue, ySame.Revenue, " so với giờ này hôm qua") : null;
-            TicketsDelta = hasOrderToday ? DeltaInfo.Percent(today.Tickets, ySame.Tickets, "") : null;
+            RevenueDelta = hasOrderToday ? DeltaInfo.Percent(today.Revenue, yesterday.Revenue, " so với hôm qua") : null;
+            TicketsDelta = hasOrderToday ? DeltaInfo.Percent(today.Tickets, yesterday.Tickets, "") : null;
             OccupancyDelta = hasOrderToday && yesterday.Seats > 0 ? DeltaInfo.Points(today.Occupancy, yesterday.Occupancy) : null;
             // Biểu đồ nhỏ ở 3 thẻ luôn là 7 ngày gần nhất (không theo khoảng 7/14 ngày của biểu đồ lớn)
             var week = current.TakeLast(7).ToList();
