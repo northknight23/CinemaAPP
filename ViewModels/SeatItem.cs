@@ -21,10 +21,20 @@ namespace CinemaAPP.ViewModels
         public string Label => RowLabel + NumberText;  // ví dụ "E5"
 
         private bool isSold;
-        public bool IsSold { get => isSold; set => SetProperty(ref isSold, value); }
+        public bool IsSold
+        {
+            get => isSold;
+            set
+            {
+                if (SetProperty(ref isSold, value))
+                    OnPropertyChanged(nameof(AdminStatusText));
+            }
+        }
 
         private bool isSelected;
         public bool IsSelected { get => isSelected; set => SetProperty(ref isSelected, value); }
+
+        public string AdminStatusText => IsSold ? $"Ghế {Label} – Đã bán" : $"Ghế {Label} – Còn trống";
 
         public static SeatItem Aisle() => new SeatItem { IsAisle = true };
     }
