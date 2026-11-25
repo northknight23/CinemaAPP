@@ -1,21 +1,24 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using CinemaAPP.Helpers;
-using CinemaAPP.Views;
 
 namespace CinemaAPP.ViewModels
 {
     public sealed class MainViewModel : ObservableObject
     {
         private readonly DispatcherTimer timer;
+        private readonly Func<string, bool, object?>? viewFactory;
+        private readonly Dictionary<string, object> cachedViews = new();
         private string currentTime = "";
         private string currentDate = "";
         private string currentPageId = "Overview";
         private bool isAdmin = true;
         private object? currentView;
+        private bool isLogoutConfirmOpen;
 
         public string CurrentTime
         {
@@ -131,13 +134,27 @@ namespace CinemaAPP.ViewModels
             set => SetProperty(ref currentView, value);
         }
 
+        public bool IsLogoutConfirmOpen
+        {
+            get => isLogoutConfirmOpen;
+            set => SetProperty(ref isLogoutConfirmOpen, value);
+        }
+
+        public event EventHandler? LogoutRequested;
+
         // ================= Lệnh =================
         public ICommand SelectPageCommand { get; }
         public ICommand ToggleRoleCommand { get; }
         public ICommand LogoutCommand { get; }
+        public ICommand ConfirmLogoutCommand { get; }
+        public ICommand CancelLogoutCommand { get; }
 
-        public MainViewModel()
+        public MainViewModel() : this(null) { }
+
+        public MainViewModel(Func<string, bool, object?>? pageViewFactory)
         {
+            viewFactory = pageViewFactory;
+
             if (AppSession.CurrentUser != null)
             {
                 isAdmin = AppSession.IsAdmin;
@@ -162,20 +179,21 @@ namespace CinemaAPP.ViewModels
 
             LogoutCommand = new RelayCommand(_ =>
             {
-                AppSession.Logout();
-                var loginWin = new LoginWindow();
-                Application.Current.MainWindow = loginWin;
-                loginWin.Show();
+                IsLogoutConfirmOpen = true;
+            });
 
-                // Đóng MainWindow hiện tại
-                foreach (Window w in Application.Current.Windows)
-                {
-                    if (w is MainWindow)
-                    {
-                        w.Close();
-                        break;
-                    }
-                }
+            CancelLogoutCommand = new RelayCommand(_ =>
+            {
+                IsLogoutConfirmOpen = false;
+            });
+
+            ConfirmLogoutCommand = new RelayCommand(_ =>
+            {
+                IsLogoutConfirmOpen = false;
+                timer?.Stop();
+                cachedViews.Clear();
+                AppSession.Logout();
+                LogoutRequested?.Invoke(this, EventArgs.Empty);
             });
 
             // Đồng hồ thời gian thực
@@ -184,36 +202,41 @@ namespace CinemaAPP.ViewModels
             timer.Tick += (s, e) => UpdateClock();
             timer.Start();
 
-            // Mặc định ở màn Tổng quan (chưa có giao diện, để trống vùng bên phải)
+            // Mặc định ở màn Tổng quan
             NavigateTo("Overview");
         }
 
         private void NavigateTo(string pageId)
         {
-            // Kiểm tra phân quyền: Staff không truy cập các mục Quản lý và Báo cáo
-            if (!IsAdmin && (pageId == "Movies" || pageId == "Rooms" || pageId == "Showtimes" || pageId == "Accounts" || pageId == "Revenue"))
+            // Kiểm tra phân quyền đầy đủ theo vai trò
+            if (!IsAdmin && pageId is "Transactions" or "Movies" or "Rooms" or "Showtimes" or "Accounts" or "Revenue")
+            {
+                pageId = "Overview";
+            }
+            else if (IsAdmin && pageId is "Tickets" or "MyShift")
             {
                 pageId = "Overview";
             }
 
+            // Bấm lại đúng tab đang mở thì giữ nguyên màn hiện tại (tránh làm mới mất dữ liệu đang nhập)
+            if (pageId == CurrentPageId && CurrentView != null)
+                return;
+
             CurrentPageId = pageId;
 
-            // Khi ấn nút nào thì giao diện tương ứng sẽ hiện ra ở vùng bên phải
-            CurrentView = pageId switch
+            // Giữ trạng thái màn Bán vé (Tickets) khi nhân viên chuyển tab sang xem ca/khách rồi quay lại
+            if (pageId == "Tickets")
             {
-                "Movies" => new MovieManagementView(),
-                "Rooms" => new RoomManagementView(),
-                "Tickets" => new SeatMapDemoView(),
-                "Transactions" => new TransactionsView(),
-                "MyShift" => new MyShiftView(),
-                "Showtimes" => new ShowtimeManagementView(),
-                "Customers" => new CustomerManagementView(),
-                "Accounts" => new AccountManagementView(),
-                "Revenue" => new RevenueView(),
-                "Overview" when IsAdmin => new DashboardView(),
-                "Overview" => new StaffDashboardView(),   // Tổng quan của nhân viên: ca làm của mình
-                _ => null //
-            };
+                if (!cachedViews.TryGetValue(pageId, out var ticketsView) && viewFactory != null)
+                {
+                    ticketsView = viewFactory(pageId, IsAdmin)!;
+                    if (ticketsView != null) cachedViews[pageId] = ticketsView;
+                }
+                CurrentView = ticketsView;
+                return;
+            }
+
+            CurrentView = viewFactory?.Invoke(pageId, IsAdmin);
         }
 
         private void UpdateClock()
