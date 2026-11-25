@@ -235,6 +235,120 @@ namespace CinemaAPP.ViewModels
             lastAvailabilityCheck = now;
         }
 
+        private bool isSyncing;
+
+        internal async Task SyncFromDatabaseAsync()
+        {
+            if (isSyncing) return;
+            isSyncing = true;
+            try
+            {
+                int currentShowId = CurrentShowtime.ShowtimeID;
+                int currentRoomId = CurrentShowtime.RoomID;
+
+                var (latestMovies, latestSeats, latestSoldIds) = await Task.Run(() =>
+                {
+                    var mList = bookingService.GetTodayShowtimes();
+                    List<PhysicalSeat>? seats = null;
+                    HashSet<int>? sold = null;
+                    if (currentShowId > 0 && currentRoomId > 0)
+                    {
+                        seats = bookingService.GetSeats(currentRoomId);
+                        sold = bookingService.GetSoldSeatIds(currentShowId);
+                    }
+                    return (mList, seats, sold);
+                });
+
+                // 1. Đồng bộ danh sách phim & suất chiếu hôm nay (số ghế trống, tên phòng...)
+                var currentIds = Movies.SelectMany(m => m.Showtimes).Select(s => s.ShowtimeID).ToList();
+                var latestFlat = latestMovies.SelectMany(m => m.Showtimes).ToList();
+                var latestIds = latestFlat.Select(s => s.ShowtimeID).ToList();
+
+                if (currentIds.SequenceEqual(latestIds))
+                {
+                    var lookup = latestFlat.ToDictionary(s => s.ShowtimeID);
+                    foreach (var existing in Movies.SelectMany(m => m.Showtimes))
+                    {
+                        if (lookup.TryGetValue(existing.ShowtimeID, out var src))
+                        {
+                            existing.RoomName = src.RoomName;
+                            existing.FreeSeats = src.FreeSeats;
+                        }
+                    }
+                }
+                else
+                {
+                    Movies.Clear();
+                    foreach (var m in latestMovies) Movies.Add(m);
+                    var restored = latestFlat.FirstOrDefault(s => s.ShowtimeID == currentShowId);
+                    if (restored != null)
+                    {
+                        restored.IsCurrent = true;
+                        var parent = Movies.FirstOrDefault(m => m.Showtimes.Contains(restored));
+                        if (parent != null) parent.IsCurrent = true;
+                        CurrentShowtime = restored;
+                    }
+                    OnPropertyChanged(nameof(ShowtimeCount));
+                }
+
+                // 2. Đồng bộ sơ đồ ghế (ghế đã bán / chưa bán & thay đổi cấu trúc phòng từ Admin)
+                if (currentShowId > 0 && latestSeats != null && latestSoldIds != null)
+                {
+                    var currentSeatIds = AllSeats().SelectMany(s => s.SeatIDs).ToList();
+                    var latestSeatIds = latestSeats.Select(s => s.ID).ToList();
+
+                    if (!currentSeatIds.SequenceEqual(latestSeatIds))
+                    {
+                        // Cấu trúc ghế phòng chiếu vừa được Admin cập nhật -> dựng lại sơ đồ ghế
+                        Rows.Clear();
+                        var rebuilt = BookingService.BuildSeatRows(latestSeats, CurrentShowtime.BasePrice, latestSoldIds);
+                        foreach (var row in rebuilt) Rows.Add(row);
+                        TotalSeats = latestSeats.Count;
+                        OnPropertyChanged(nameof(TotalSeats));
+
+                        if (!IsPaidTicket && SelectedSeats.Count > 0)
+                        {
+                            foreach (var s in SelectedSeats) s.IsSelected = false;
+                            SelectedSeats.Clear();
+                            UpdateSummary();
+                            ShowMessage("Sơ đồ ghế của phòng vừa được cập nhật, vui lòng chọn lại ghế.", true);
+                        }
+                    }
+                    else
+                    {
+                        bool deselectedAny = false;
+                        foreach (var seat in AllSeats())
+                        {
+                            bool soldNow = seat.SeatIDs.Any(latestSoldIds.Contains);
+                            seat.IsSold = soldNow;
+                            if (soldNow && seat.IsSelected && !IsPaidTicket)
+                            {
+                                seat.IsSelected = false;
+                                SelectedSeats.Remove(seat);
+                                deselectedAny = true;
+                            }
+                        }
+                        if (deselectedAny)
+                        {
+                            UpdateSummary();
+                            ShowMessage("Một số ghế bạn đang chọn vừa được bán ở nơi khác.", true);
+                        }
+                    }
+
+                    CurrentShowtime.FreeSeats = AllSeats().Where(s => !s.IsSold).Sum(s => s.SeatIDs.Count);
+                    OnPropertyChanged(nameof(CanPay));
+                }
+            }
+            catch
+            {
+                // Bỏ qua lỗi thoáng qua khi đồng bộ nền
+            }
+            finally
+            {
+                isSyncing = false;
+            }
+        }
+
         private void LoadShowtimes()
         {
             ResetOrder();
@@ -261,25 +375,11 @@ namespace CinemaAPP.ViewModels
         {
             Rows.Clear();
             var seats = bookingService.GetSeats(CurrentShowtime.RoomID);
-            var items = BookingService.BuildSeatItems(seats, CurrentShowtime.BasePrice);
             var sold = bookingService.GetSoldSeatIds(CurrentShowtime.ShowtimeID);
-            foreach (var group in items.GroupBy(s => s.RowLabel))
-            {
-                var row = new SeatRowItem { RowLabel = group.Key };
-                int lastNumber = seats.Where(s => s.Row == group.Key).Max(s => s.Number);
-                foreach (var seat in group)
-                {
-                    int number = int.Parse(seat.NumberText.Split('-')[0], CultureInfo.InvariantCulture);
-                    // Giữ hai dãy ghế biên, lối đi chỉ là ô hiển thị, không có SeatID SQL.
-                    if (lastNumber >= 6 && (number == 3 || number == lastNumber - 1))
-                        row.Seats.Add(SeatItem.Aisle());
-                    seat.IsSold = seat.SeatIDs.Any(sold.Contains);
-                    row.Seats.Add(seat);
-                }
-                Rows.Add(row);
-            }
+            var rows = BookingService.BuildSeatRows(seats, CurrentShowtime.BasePrice, sold);
+            foreach (var row in rows) Rows.Add(row);
             TotalSeats = seats.Count;
-            CurrentShowtime.FreeSeats = items.Where(s => !s.IsSold).Sum(s => s.SeatIDs.Count);
+            CurrentShowtime.FreeSeats = rows.SelectMany(r => r.Seats).Where(s => !s.IsAisle && !s.IsSold).Sum(s => s.SeatIDs.Count);
             OnPropertyChanged(nameof(TotalSeats));
         }
 

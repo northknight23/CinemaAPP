@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Markup;
 using System.Windows.Threading;
+using CinemaAPP.Helpers;
 using CinemaAPP.ViewModels;
 using CinemaAPP.Services;
 
@@ -14,19 +15,42 @@ namespace CinemaAPP.Views
         public SeatMapDemoView()
         {
             InitializeComponent();
+            int tickCount = 0;
             var availabilityTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             void RefreshAvailability()
             {
                 if (DataContext is SeatMapDemoViewModel vm)
                     vm.RefreshShowtimeAvailability();
             }
-            availabilityTimer.Tick += (_, _) => RefreshAvailability();
+            availabilityTimer.Tick += async (_, _) =>
+            {
+                RefreshAvailability();
+                tickCount++;
+                if (tickCount % 3 == 0 && DataContext is SeatMapDemoViewModel vm)
+                    await vm.SyncFromDatabaseAsync();
+            };
             Loaded += (_, _) =>
             {
+                CinemaSync.RoomsChanged += OnExternalDataChanged;
+                CinemaSync.BookingsChanged += OnExternalDataChanged;
                 RefreshAvailability();
                 availabilityTimer.Start();
             };
-            Unloaded += (_, _) => availabilityTimer.Stop();
+            Unloaded += (_, _) =>
+            {
+                availabilityTimer.Stop();
+                CinemaSync.RoomsChanged -= OnExternalDataChanged;
+                CinemaSync.BookingsChanged -= OnExternalDataChanged;
+            };
+        }
+
+        private void OnExternalDataChanged()
+        {
+            Dispatcher.BeginInvoke(async () =>
+            {
+                if (DataContext is SeatMapDemoViewModel vm)
+                    await vm.SyncFromDatabaseAsync();
+            });
         }
 
         private void Checkout_Click(object sender, RoutedEventArgs e)

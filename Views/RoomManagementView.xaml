@@ -20,107 +20,139 @@
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="0,0,0,24">
-                
-                <!-- ================= 1. BỐN THẺ CHỈ SỐ TỔNG QUAN (KPI CARDS) ================= -->
+
+                <!-- ================= BANNER THÔNG BÁO (LỖI / THÀNH CÔNG) ================= -->
+                <Border Style="{StaticResource MgmtBanner}" Margin="0,0,0,16"
+                        Visibility="{Binding ShowBanner, Converter={StaticResource BoolToVis}}">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource MgmtIconButton}" Width="28" Height="28"
+                                Command="{Binding DismissBannerCommand}" ToolTip="Ẩn thông báo">
+                            <TextBlock Text="✕" FontSize="13"/>
+                        </Button>
+                        <TextBlock Text="{Binding BannerMessage}" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Medium"/>
+                    </DockPanel>
+                </Border>
+
+                <!-- ================= 1. NĂM THẺ CHỈ SỐ TỔNG QUAN (KPI CARDS) ================= -->
                 <Grid Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="12" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="12" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Thẻ 1: Tổng số phòng -->
-                    <Border Grid.Column="0" Style="{StaticResource MgmtCard}" Padding="16,14" Background="{StaticResource CardBrush}">
+                    <Border Grid.Column="0" Style="{StaticResource MgmtCard}" Padding="14,12" Background="{StaticResource CardBrush}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <!-- Icon phòng chiếu -->
-                            <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10" Background="#DBEAFE" Margin="0,0,12,0">
+                            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10" Background="{StaticResource InfoBgBrush}" Margin="0,0,10,0">
                                 <Path Data="M4 18v3 M20 18v3 M2 11a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7H2v-7z M6 9V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4"
-                                      Stroke="#1D4ED8" StrokeThickness="1.8" Width="20" Height="20" Stretch="Uniform"
+                                      Stroke="{StaticResource InfoBrush}" StrokeThickness="1.8" Width="18" Height="18" Stretch="Uniform"
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding TotalRoomsCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
-                                    <TextBlock Text=" phòng" FontSize="13" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,2"/>
+                                    <TextBlock Text="{Binding TotalRoomsCount}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                                    <TextBlock Text=" phòng" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,2"/>
                                 </StackPanel>
-                                <TextBlock Text="Tổng số phòng chiếu" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
+                                <TextBlock Text="Tổng số phòng" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <!-- Thẻ 2: Tổng sức chứa ghế -->
-                    <Border Grid.Column="2" Style="{StaticResource MgmtCard}" Padding="16,14" Background="{StaticResource CardBrush}">
+                    <Border Grid.Column="2" Style="{StaticResource MgmtCard}" Padding="14,12" Background="{StaticResource CardBrush}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <!-- Icon ghế ngồi -->
-                            <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10" Background="#EDE9FE" Margin="0,0,12,0">
+                            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10" Background="{StaticResource SeatCoupleBrush}" Margin="0,0,10,0">
                                 <Path Data="M7 13v-3a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3 M5 9v9 M19 9v9 M5 15h14"
-                                      Stroke="#6D28D9" StrokeThickness="1.8" Width="20" Height="20" Stretch="Uniform"
+                                      Stroke="{StaticResource SeatCoupleBorderBrush}" StrokeThickness="1.8" Width="18" Height="18" Stretch="Uniform"
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding TotalSeatsCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
-                                    <TextBlock Text=" ghế" FontSize="13" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,2"/>
+                                    <TextBlock Text="{Binding TotalSeatsCount}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                                    <TextBlock Text=" ghế" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,2"/>
                                 </StackPanel>
-                                <TextBlock Text="Tổng sức chứa cụm rạp" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
+                                <TextBlock Text="Tổng sức chứa" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <!-- Thẻ 3: Đang chiếu phim -->
-                    <Border Grid.Column="4" Style="{StaticResource MgmtCard}" Padding="16,14" Background="{StaticResource CardBrush}">
+                    <Border Grid.Column="4" Style="{StaticResource MgmtCard}" Padding="14,12" Background="{StaticResource CardBrush}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <!-- Icon cuộn phim đang phát -->
-                            <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10" Background="#DCFCE7" Margin="0,0,12,0">
+                            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10" Background="{StaticResource SuccessBgBrush}" Margin="0,0,10,0">
                                 <Path Data="M10 8l6 4-6 4V8z M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"
-                                      Stroke="#166534" StrokeThickness="1.8" Width="20" Height="20" Stretch="Uniform"
+                                      Stroke="{StaticResource SuccessBrush}" StrokeThickness="1.8" Width="18" Height="18" Stretch="Uniform"
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding ActiveRoomsCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
-                                    <TextBlock Text=" phòng" FontSize="13" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,2"/>
+                                    <TextBlock Text="{Binding ActiveRoomsCount}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                                    <TextBlock Text=" phòng" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,2"/>
                                 </StackPanel>
-                                <TextBlock Text="Đang chiếu phim" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
+                                <TextBlock Text="Đang chiếu phim" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <!-- Thẻ 4: Phòng sẵn sàng -->
-                    <Border Grid.Column="6" Style="{StaticResource MgmtCard}" Padding="16,14" Background="{StaticResource CardBrush}">
+                    <Border Grid.Column="6" Style="{StaticResource MgmtCard}" Padding="14,12" Background="{StaticResource CardBrush}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <!-- Icon sẵn sàng -->
-                            <Border Grid.Column="0" Width="44" Height="44" CornerRadius="10" Background="#FEF3C7" Margin="0,0,12,0">
+                            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10" Background="{StaticResource WarningBgBrush}" Margin="0,0,10,0">
                                 <Path Data="M12 2v4 M12 18v4 M4.93 4.93l2.83 2.83 M16.24 16.24l2.83 2.83 M2 12h4 M18 12h4 M4.93 19.07l2.83-2.83 M16.24 7.76l2.83-2.83"
-                                      Stroke="#B45309" StrokeThickness="1.8" Width="20" Height="20" Stretch="Uniform"
+                                      Stroke="{StaticResource WarningBrush}" StrokeThickness="1.8" Width="18" Height="18" Stretch="Uniform"
                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding ReadyRoomsCount}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
-                                    <TextBlock Text=" phòng" FontSize="13" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,2"/>
+                                    <TextBlock Text="{Binding ReadyRoomsCount}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                                    <TextBlock Text=" phòng" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,2"/>
                                 </StackPanel>
-                                <TextBlock Text="Phòng sẵn sàng" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
+                                <TextBlock Text="Phòng sẵn sàng" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Thẻ 5: Ghế đã bán hôm nay -->
+                    <Border Grid.Column="8" Style="{StaticResource MgmtCard}" Padding="14,12" Background="{StaticResource CardBrush}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="10" Background="{StaticResource SuccessBgBrush}" Margin="0,0,10,0">
+                                <Path Data="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z M13 5v2 M13 17v2 M13 11v2"
+                                      Stroke="{StaticResource SuccessBrush}" StrokeThickness="1.8" Width="18" Height="18" Stretch="Uniform"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding TotalTodaySoldCount}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}"/>
+                                    <TextBlock Text=" ghế" FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="4,0,0,2"/>
+                                </StackPanel>
+                                <TextBlock Text="Đã bán hôm nay" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -132,6 +164,8 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Ô TÌM KIẾM -->
@@ -140,7 +174,7 @@
                              Tag="Tìm tên phòng, loại phòng..."
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <!-- BỘ LỌC CÔNG NGHỆ PHÒNG (CHIPS) -->
+                    <!-- BỘ LỌC CÔNG NGHỆ PHÒNG (CHIPS: Tất cả, 2D, 3D, IMAX) -->
                     <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
                         <RadioButton Content="{Binding CountAllText}"
                                      Style="{StaticResource MgmtChip}"
@@ -161,15 +195,16 @@
                                      Style="{StaticResource MgmtChip}"
                                      IsChecked="{Binding IsFilterIMAX, Mode=OneWay}"
                                      Command="{Binding SetFilterCommand}" CommandParameter="IMAX" />
-
-                        <RadioButton Content="{Binding CountVIPText}"
-                                     Style="{StaticResource MgmtChip}"
-                                     IsChecked="{Binding IsFilterVIP, Mode=OneWay}"
-                                     Command="{Binding SetFilterCommand}" CommandParameter="VIP" />
                     </StackPanel>
 
-                    <!-- NÚT THÊM PHÒNG CHIẾU MỚI -->
-                    <Button Grid.Column="2"
+                    <!-- NÚT TẢI LẠI -->
+                    <Button Grid.Column="2" Style="{StaticResource MgmtGhostButton}" Height="42" Padding="14,0"
+                            Command="{Binding ReloadCommand}" ToolTip="Tải lại từ SQL Server">
+                        <TextBlock Text="Tải lại" VerticalAlignment="Center"/>
+                    </Button>
+
+                    <!-- NÚT THÊM PHIM / PHÒNG CHIẾU MỚI -->
+                    <Button Grid.Column="4"
                             Style="{StaticResource MgmtPrimaryButton}"
                             Height="42" Padding="18,0"
                             Command="{Binding NewRoomCommand}">
@@ -182,7 +217,7 @@
                     </Button>
                 </Grid>
 
-                <!-- ================= 3. LƯỚI THẺ PHÒNG CHIẾU (3 CỘT THEO CHUẨN MOCKUP) ================= -->
+                <!-- ================= 3. LƯỚI THẺ PHÒNG CHIẾU (3 CỘT) ================= -->
                 <ItemsControl ItemsSource="{Binding FilteredRooms}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -192,11 +227,13 @@
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Style="{StaticResource MgmtCard}"
+                            <Border Style="{StaticResource MgmtInteractiveCard}"
                                     CornerRadius="16" Padding="18" Margin="0,0,16,18"
-                                    Background="{StaticResource CardBrush}">
+                                    Background="{StaticResource CardBrush}"
+                                    MouseLeftButtonUp="RoomCard_MouseLeftButtonUp">
                                 <Grid>
                                     <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
@@ -211,10 +248,9 @@
                                         </Grid.ColumnDefinitions>
 
                                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                                            <!-- Icon màn chiếu tròn nhẹ -->
-                                            <Border Width="34" Height="34" CornerRadius="8" Background="#F1F5F9" Margin="0,0,10,0">
+                                            <Border Width="34" Height="34" CornerRadius="8" Background="{StaticResource SubtleBrush}" Margin="0,0,10,0">
                                                 <Path Data="M3 5h18v11H3z M8 19h8 M12 16v3"
-                                                      Stroke="#475569" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform"
+                                                      Stroke="{StaticResource TextMutedBrush}" StrokeThickness="1.6" Width="17" Height="17" Stretch="Uniform"
                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                             <TextBlock Text="{Binding RoomName}"
@@ -224,25 +260,16 @@
                                                        TextTrimming="CharacterEllipsis"/>
                                         </StackPanel>
 
-                                        <!-- Badge Công nghệ (2D, 3D, IMAX, VIP) -->
-                                        <Border Grid.Column="1" CornerRadius="6" Padding="8,3"
-                                                Background="{Binding RoomTypeBg}"
-                                                BorderBrush="{Binding RoomTypeBorder}"
-                                                BorderThickness="1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding RoomType}"
-                                                       Foreground="{Binding RoomTypeFg}"
-                                                       FontSize="11.5" FontWeight="Bold"/>
+                                        <Border Grid.Column="1" Style="{StaticResource MgmtRoomTypeBadge}" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding RoomType}" FontSize="11.5" FontWeight="Bold"/>
                                         </Border>
                                     </Grid>
 
                                     <!-- 2. TRẠNG THÁI & LỊCH CHIẾU HIỆN TẠI -->
                                     <StackPanel Grid.Row="1" Margin="0,12,0,0">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Border CornerRadius="10" Padding="8,2"
-                                                    Background="{Binding StatusBg}" Margin="0,0,8,0">
-                                                <TextBlock Text="{Binding RoomStatus}"
-                                                           Foreground="{Binding StatusFg}"
-                                                           FontSize="11" FontWeight="SemiBold"/>
+                                            <Border Style="{StaticResource MgmtRoomStatusBadge}" Margin="0,0,8,0">
+                                                <TextBlock Text="{Binding RoomStatus}" FontSize="11" FontWeight="SemiBold"/>
                                             </Border>
                                             <TextBlock Text="{Binding CurrentSchedule}"
                                                        FontSize="12.5" Foreground="{StaticResource TextMutedBrush}"
@@ -251,15 +278,14 @@
                                     </StackPanel>
 
                                     <!-- 3. KHUNG CẤU HÌNH GHẾ & TỔNG SỨC CHỨA -->
-                                    <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="8"
-                                            Padding="12,10" Margin="0,14,0,0" BorderBrush="#E2E8F0" BorderThickness="1">
+                                    <Border Grid.Row="2" Background="{StaticResource SubtleBrush}" CornerRadius="8"
+                                            Padding="12,10" Margin="0,14,0,0" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
 
-                                            <!-- Kích thước: Hàng x Cột -->
                                             <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Path Data="M3 4h18v12H3z M3 10h18 M9 4v12 M15 4v12"
                                                       Stroke="{StaticResource TextMutedBrush}" StrokeThickness="1.2"
@@ -269,23 +295,44 @@
                                                            VerticalAlignment="Center"/>
                                             </StackPanel>
 
-                                            <!-- Tổng ghế -->
-                                            <Border Grid.Column="1" Background="#E2E8F0" CornerRadius="5" Padding="6,2">
+                                            <Border Grid.Column="1" Background="{StaticResource CardBorderBrush}" CornerRadius="5" Padding="6,2">
                                                 <TextBlock Text="{Binding TotalSeatsBadge}"
-                                                           FontSize="12" FontWeight="Bold" Foreground="#334155"/>
+                                                           FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
                                             </Border>
                                         </Grid>
                                     </Border>
 
-                                    <!-- 4. CÁC NÚT THAO TÁC [XEM SƠ ĐỒ] [SỬA] [XÓA] -->
-                                    <Grid Grid.Row="3" Margin="0,14,0,0">
+                                    <!-- 4. SỐ GHẾ ĐÃ BÁN HÔM NAY -->
+                                    <Border Grid.Row="3" Style="{StaticResource MgmtRoomSoldPill}" Margin="0,8,0,0">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Path Data="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"
+                                                      Stroke="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource AncestorType=Border}}"
+                                                      StrokeThickness="1.5" Width="14" Height="14" Stretch="Uniform" Margin="0,0,7,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding TodaySoldText}"
+                                                           FontSize="12.5" FontWeight="SemiBold"
+                                                           VerticalAlignment="Center"/>
+                                            </StackPanel>
+
+                                            <TextBlock Grid.Column="1" Text="{Binding TodayShowtimeText}"
+                                                       FontSize="11.5" Foreground="{StaticResource TextMutedBrush}"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- 5. CÁC NÚT THAO TÁC [XEM SƠ ĐỒ] [SỬA] [XÓA] -->
+                                    <Grid Grid.Row="4" Margin="0,12,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="65" />
                                             <ColumnDefinition Width="65" />
                                         </Grid.ColumnDefinitions>
 
-                                        <!-- Nút Xem sơ đồ ghế -->
                                         <Button Grid.Column="0"
                                                 Style="{StaticResource MgmtSmallGhostButton}"
                                                 Margin="0,0,6,0"
@@ -299,7 +346,6 @@
                                             </StackPanel>
                                         </Button>
 
-                                        <!-- Nút Sửa phòng -->
                                         <Button Grid.Column="1"
                                                 Style="{StaticResource MgmtSmallGhostButton}"
                                                 Margin="0,0,6,0"
@@ -313,7 +359,6 @@
                                             </StackPanel>
                                         </Button>
 
-                                        <!-- Nút Xóa phòng -->
                                         <Button Grid.Column="2"
                                                 Style="{StaticResource MgmtSmallDangerButton}"
                                                 Command="{Binding DataContext.DeleteRoomCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -337,9 +382,8 @@
         <!-- ================= MODAL 1: HỘP THOẠI FORM THÊM / CHỈNH SỬA PHÒNG CHIẾU ================= -->
         <Grid Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
             <Border Width="480" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Style="{StaticResource MgmtCard}" Padding="26" Background="White">
+                    Style="{StaticResource MgmtCard}" Padding="26" Background="{StaticResource CardBrush}">
                 <StackPanel>
-                    <!-- Tiêu đề hộp thoại & Nút đóng '✕' -->
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -351,10 +395,10 @@
                         </Button>
                     </Grid>
 
-                    <!-- Khung thông báo lỗi (Banner) nếu có -->
-                    <Border Style="{StaticResource MgmtBanner}" Margin="0,0,0,14"
-                            Visibility="{Binding ShowBanner, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="{Binding BannerMessage}" TextWrapping="Wrap" FontSize="13"/>
+                    <!-- Lỗi khi lưu trong form -->
+                    <Border Background="{StaticResource ErrorBgBrush}" CornerRadius="8" Padding="12,8" Margin="0,0,0,14"
+                            Visibility="{Binding HasEditorError, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="{Binding EditorError}" Foreground="{StaticResource ErrorBrush}" TextWrapping="Wrap" FontSize="13"/>
                     </Border>
 
                     <!-- Tên phòng chiếu -->
@@ -380,15 +424,15 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Số hàng ghế (1 - 26) *" Style="{StaticResource MgmtLabel}"/>
-                            <TextBox Text="{Binding FormNumRows, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBlock Text="Số hàng ghế (1 - 25) *" Style="{StaticResource MgmtLabel}"/>
+                            <TextBox Text="{Binding FormNumRowsText, UpdateSourceTrigger=PropertyChanged}"
                                      Tag="{Binding HasDimensionError}"
                                      Style="{StaticResource MgmtTextBox}"/>
                         </StackPanel>
 
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Số ghế / hàng (1 - 50) *" Style="{StaticResource MgmtLabel}"/>
-                            <TextBox Text="{Binding FormSeatsPerRow, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox Text="{Binding FormSeatsPerRowText, UpdateSourceTrigger=PropertyChanged}"
                                      Tag="{Binding HasDimensionError}"
                                      Style="{StaticResource MgmtTextBox}"/>
                         </StackPanel>
@@ -397,12 +441,12 @@
                                Visibility="{Binding HasDimensionError, Converter={StaticResource BoolToVis}}"/>
 
                     <!-- Khung xem trước số lượng ghế dự kiến -->
-                    <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="8"
+                    <Border Background="{StaticResource InfoBgBrush}" BorderBrush="{StaticResource InputBorderBrush}" BorderThickness="1" CornerRadius="8"
                             Padding="12,10" Margin="0,14,0,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Path Data="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                  Stroke="#2563EB" StrokeThickness="1.8" Width="18" Height="18" Stretch="Uniform" Margin="0,0,8,0"/>
-                            <TextBlock Text="{Binding FormSeatPreview}" FontSize="13" Foreground="#1E40AF" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                  Stroke="{StaticResource InfoBrush}" StrokeThickness="1.8" Width="18" Height="18" Stretch="Uniform" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding FormSeatPreview}" FontSize="13" Foreground="{StaticResource InfoBrush}" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
 
@@ -421,13 +465,12 @@
             </Border>
         </Grid>
 
-        <!-- ================= MODAL 2: HỘP THOẠI XEM SƠ ĐỒ GHẾ NGỒI ================= -->
+        <!-- ================= MODAL 2: HỘP THOẠI XEM SƠ ĐỒ GHẾ NGỒI (ĐỒNG BỘ VỚI MÀN BÁN VÉ) ================= -->
         <Grid Visibility="{Binding IsSeatMapOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
-            <Border Width="740" MaxHeight="640" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Style="{StaticResource MgmtCard}" Padding="26" Background="White">
+            <Border Width="820" MaxHeight="700" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Style="{StaticResource MgmtCard}" Padding="26" Background="{StaticResource CardBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
@@ -435,89 +478,163 @@
                     </Grid.RowDefinitions>
 
                     <!-- Header Modal Sơ đồ ghế -->
-                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding SeatMapTitle}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
-                        <Button Grid.Column="1" Style="{StaticResource MgmtIconButton}" Command="{Binding CloseSeatMapCommand}">
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding SeatMapTitle}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                            <TextBlock Text="{Binding SeatMapSummary}" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Style="{StaticResource MgmtIconButton}" Command="{Binding CloseSeatMapCommand}" VerticalAlignment="Top">
                             <TextBlock Text="✕" FontSize="16" Foreground="{StaticResource TextMutedBrush}"/>
                         </Button>
                     </Grid>
 
-                    <!-- Màn hình chiếu (Screen Bar) -->
-                    <Border Grid.Row="1" Height="36" CornerRadius="8" Background="#F1F5F9" BorderBrush="#CBD5E1" BorderThickness="1" Margin="20,0,20,18">
-                        <TextBlock Text="M À N   H Ì N H   /   S C R E E N"
-                                   FontSize="12" FontWeight="Bold" Foreground="#64748B"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
+                    <!-- Chọn suất chiếu hôm nay để xem ghế đã bán / chưa bán -->
+                    <Grid Grid.Row="1" Margin="0,0,0,8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-                    <!-- Ma trận các hàng và ghế ngồi (Scrollable) -->
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" MaxHeight="380">
-                        <ItemsControl ItemsSource="{Binding SeatMapRows}" HorizontalAlignment="Center">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Margin="0,2">
-                                        <!-- Nhãn hàng ghế (A, B, C...) bên trái -->
-                                        <TextBlock Text="{Binding RowLabel}" Width="24" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"
-                                                   VerticalAlignment="Center" TextAlignment="Center" Margin="0,0,8,0"/>
+                        <Grid Grid.Row="0" Margin="0,0,0,10"
+                              Visibility="{Binding HasRoomShowtimes, Converter={StaticResource BoolToVis}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Suất chiếu hôm nay:" Style="{StaticResource MgmtLabel}"
+                                       Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <ComboBox Grid.Column="1" ItemsSource="{Binding RoomShowtimes}"
+                                      SelectedItem="{Binding SelectedRoomShowtime}"
+                                      DisplayMemberPath="DisplayText"
+                                      Height="36" VerticalContentAlignment="Center"/>
+                        </Grid>
 
-                                        <!-- Danh sách các ghế trong hàng -->
-                                        <ItemsControl ItemsSource="{Binding Seats}">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal" />
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Width="26" Height="26" CornerRadius="5" Margin="2"
-                                                            Background="{Binding SeatBg}"
-                                                            BorderBrush="{Binding SeatBorder}"
-                                                            BorderThickness="1"
-                                                            ToolTip="{Binding SeatCode}">
-                                                        <TextBlock Text="{Binding SeatNumber}"
-                                                                   FontSize="10.5"
-                                                                   Foreground="{Binding SeatFg}"
-                                                                   FontWeight="SemiBold"
-                                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                        <Border Grid.Row="1" Background="{StaticResource SubtleBrush}" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1" CornerRadius="8"
+                                Padding="12,8" Margin="0,0,0,10"
+                                Visibility="{Binding NoRoomShowtimes, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="Hôm nay phòng này chưa có suất chiếu — toàn bộ ghế đang trống."
+                                       FontSize="12.5" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+                        </Border>
 
-                                        <!-- Nhãn hàng ghế bên phải -->
-                                        <TextBlock Text="{Binding RowLabel}" Width="24" FontWeight="Bold" Foreground="{StaticResource TextMutedBrush}"
-                                                   VerticalAlignment="Center" TextAlignment="Center" Margin="8,0,0,0"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                        <!-- Màn hình chiếu + Ma trận ghế co giãn đồng nhất với màn Bán vé nhân viên -->
+                        <Viewbox Grid.Row="2" Stretch="Uniform" Margin="0,4,0,6">
+                            <StackPanel>
+                                <!-- Màn hình chiếu cong phát sáng (giống hệt SeatMapDemoView) -->
+                                <Grid Width="560" Height="78" Margin="0,0,0,4">
+                                    <Path Stretch="Fill" VerticalAlignment="Top" Height="72" Margin="14,8,14,0"
+                                          Data="M 6,0 Q 50,-8 94,0 L 100,60 L 0,60 Z" Fill="{DynamicResource PosScreenGlow}">
+                                        <Path.OpacityMask>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                <GradientStop Color="Transparent" Offset="0"/>
+                                                <GradientStop Color="Black" Offset="0.2"/>
+                                                <GradientStop Color="Black" Offset="0.8"/>
+                                                <GradientStop Color="Transparent" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Path.OpacityMask>
+                                    </Path>
+                                    <Path Stretch="Fill" Height="12" VerticalAlignment="Top" Margin="20,2,20,0"
+                                          Data="M 0,12 Q 50,0 100,12" Stroke="{DynamicResource InputHoverBrush}"
+                                          StrokeThickness="3.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+                                        <Path.Effect>
+                                            <DropShadowEffect Color="#A9C9EC" BlurRadius="18" ShadowDepth="0" Opacity="0.9"/>
+                                        </Path.Effect>
+                                    </Path>
+                                    <TextBlock Text="M À N   H Ì N H" Foreground="{DynamicResource TextBrush}" Opacity="0.75"
+                                               FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center"
+                                               VerticalAlignment="Top" Margin="0,30,0,0"/>
+                                </Grid>
 
-                    <!-- Chú thích loại ghế (Legend) -->
-                    <Border Grid.Row="3" Background="#F8FAFC" CornerRadius="8" Padding="14,10" Margin="0,16,0,0" BorderBrush="#E2E8F0" BorderThickness="1">
+                                <!-- Ma trận các hàng và ghế ngồi thật từ SQL -->
+                                <ItemsControl ItemsSource="{Binding SeatMapRows}" HorizontalAlignment="Center">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding RowLabel}" Style="{StaticResource MgmtSeatRowLabel}"/>
+                                                <ItemsControl ItemsSource="{Binding Seats}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Border Style="{StaticResource MgmtSeatCell}" ToolTip="{Binding AdminStatusText}">
+                                                                <TextBlock Text="{Binding Label}"
+                                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                                <TextBlock Text="{Binding RowLabel}" Style="{StaticResource MgmtSeatRowLabel}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Viewbox>
+                    </Grid>
+
+                    <!-- Chú thích loại ghế đồng bộ với màn Bán vé (Thường / VIP / Đôi / Đã bán) -->
+                    <Border Grid.Row="2" Background="{StaticResource SubtleBrush}" CornerRadius="8" Padding="14,10" Margin="0,8,0,0" BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="1">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <!-- Ghế thường -->
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,24,0">
-                                <Border Width="18" Height="18" CornerRadius="4" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" Margin="0,0,6,0"/>
-                                <TextBlock Text="Ghế Thường" FontSize="12.5" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,22,0">
+                                <Border Width="18" Height="16" CornerRadius="3" Background="{DynamicResource SeatStdBrush}" BorderBrush="{DynamicResource SeatStdBorderBrush}" BorderThickness="1.5" Margin="0,0,6,0"/>
+                                <TextBlock Text="Ghế Thường (Chưa bán)" FontSize="12.5" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
                             </StackPanel>
 
-                            <!-- Ghế VIP -->
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,22,0">
+                                <Border Width="18" Height="16" CornerRadius="3" Background="{DynamicResource SeatVipBrush}" BorderBrush="{DynamicResource SeatVipBorderBrush}" BorderThickness="1.5" Margin="0,0,6,0"/>
+                                <TextBlock Text="Ghế VIP (Chưa bán)" FontSize="12.5" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,22,0">
+                                <Border Width="18" Height="16" CornerRadius="3" Background="{DynamicResource SeatCoupleBrush}" BorderBrush="{DynamicResource SeatCoupleBorderBrush}" BorderThickness="1.5" Margin="0,0,6,0"/>
+                                <TextBlock Text="Ghế Đôi (Chưa bán)" FontSize="12.5" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                            </StackPanel>
+
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Width="18" Height="18" CornerRadius="4" Background="#FEF3C7" BorderBrush="#F59E0B" BorderThickness="1" Margin="0,0,6,0"/>
-                                <TextBlock Text="Ghế VIP" FontSize="12.5" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                                <Border Width="18" Height="16" CornerRadius="3" Background="{DynamicResource SeatSoldBrush}" BorderBrush="{DynamicResource SeatSoldBrush}" BorderThickness="1.5" Margin="0,0,6,0"/>
+                                <TextBlock Text="Đã bán" FontSize="12.5" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
                     <!-- Nút đóng hộp thoại sơ đồ ghế -->
-                    <Grid Grid.Row="4" Margin="0,16,0,0">
+                    <Grid Grid.Row="3" Margin="0,14,0,0">
                         <Button Content="Đóng" Style="{StaticResource MgmtGhostButton}" Width="120" HorizontalAlignment="Right" Command="{Binding CloseSeatMapCommand}"/>
                     </Grid>
                 </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ================= MODAL 3: XÁC NHẬN XÓA PHÒNG CHIẾU ================= -->
+        <Grid Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
+            <Border Width="420" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Style="{StaticResource MgmtCard}" Padding="24" Background="{StaticResource CardBrush}">
+                <StackPanel>
+                    <TextBlock Text="Xác nhận xóa phòng chiếu" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                    <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" Foreground="{StaticResource TextMutedBrush}" FontSize="13.5">
+                        <Run Text="Bạn có chắc muốn xóa "/>
+                        <Run Text="{Binding RoomToDelete.RoomName, Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                        <Run Text="? Toàn bộ sơ đồ ghế của phòng sẽ bị xóa và không thể hoàn tác."/>
+                    </TextBlock>
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Hủy" Style="{StaticResource MgmtGhostButton}"
+                                Command="{Binding CancelDeleteCommand}"/>
+                        <Button Grid.Column="2" Content="Xóa phòng" Style="{StaticResource MgmtDangerSolidButton}"
+                                Height="44" Command="{Binding ConfirmDeleteCommand}"/>
+                    </Grid>
+                </StackPanel>
             </Border>
         </Grid>
     </Grid>

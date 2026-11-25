@@ -12,7 +12,16 @@ namespace CinemaAPP.ViewModels
         public string MovieTitle { get; init; } = "";
         public DateTime StartTime { get; init; }
         public int DurationMin { get; init; }
-        public string RoomName { get; init; } = "";
+        private string roomName = "";
+        public string RoomName
+        {
+            get => roomName;
+            set
+            {
+                if (SetProperty(ref roomName, value))
+                    OnPropertyChanged(nameof(RoomFormat));
+            }
+        }
         public string ShowFormat { get; init; } = "";   // 2D / 3D
         public string AudioType { get; init; } = "";    // Phụ đề / Lồng tiếng
 

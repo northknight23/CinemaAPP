@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using CinemaAPP.Helpers;
 
 namespace CinemaAPP.Models
@@ -9,10 +8,13 @@ namespace CinemaAPP.Models
         private int roomId;
         private string roomName = "";
         private string roomType = "2D";
-        private int numRows = 10;
+        private int numRows = 9;
         private int seatsPerRow = 12;
-        private string roomStatus = "Sẵn sàng"; // Đang chiếu, Sẵn sàng, Bảo trì
+        private string roomStatus = "Sẵn sàng";
         private string currentSchedule = "Chưa có lịch chiếu";
+        private int todaySoldSeats;
+        private int todayShowtimeCount;
+        private int? activeShowtimeId;
 
         // ---- Cột của bảng ROOM trong CSDL ----
         public int RoomID
@@ -30,15 +32,7 @@ namespace CinemaAPP.Models
         public string RoomType
         {
             get => roomType;
-            set
-            {
-                if (SetProperty(ref roomType, value))
-                {
-                    OnPropertyChanged(nameof(RoomTypeBg));
-                    OnPropertyChanged(nameof(RoomTypeFg));
-                    OnPropertyChanged(nameof(RoomTypeBorder));
-                }
-            }
+            set => SetProperty(ref roomType, value);
         }
 
         public int NumRows
@@ -49,6 +43,7 @@ namespace CinemaAPP.Models
                 if (SetProperty(ref numRows, value))
                 {
                     OnPropertyChanged(nameof(TotalSeats));
+                    OnPropertyChanged(nameof(TotalSeatsBadge));
                     OnPropertyChanged(nameof(SeatConfigText));
                 }
             }
@@ -62,6 +57,7 @@ namespace CinemaAPP.Models
                 if (SetProperty(ref seatsPerRow, value))
                 {
                     OnPropertyChanged(nameof(TotalSeats));
+                    OnPropertyChanged(nameof(TotalSeatsBadge));
                     OnPropertyChanged(nameof(SeatConfigText));
                 }
             }
@@ -69,9 +65,7 @@ namespace CinemaAPP.Models
 
         // ---- Thuộc tính tính toán & hiển thị ----
         public int TotalSeats => NumRows * SeatsPerRow;
-
         public string TotalSeatsBadge => $"{TotalSeats} ghế";
-
         public string SeatConfigText => $"{NumRows} hàng × {SeatsPerRow} ghế";
 
         public string RoomStatus
@@ -80,11 +74,7 @@ namespace CinemaAPP.Models
             set
             {
                 if (SetProperty(ref roomStatus, value))
-                {
-                    OnPropertyChanged(nameof(StatusBg));
-                    OnPropertyChanged(nameof(StatusFg));
                     OnPropertyChanged(nameof(IsNowShowing));
-                }
             }
         }
 
@@ -96,67 +86,66 @@ namespace CinemaAPP.Models
             set => SetProperty(ref currentSchedule, value);
         }
 
-        // Màu sắc huy hiệu công nghệ (2D, 3D, IMAX, VIP/PREMIUM)
-        public string RoomTypeBg => RoomType?.ToUpperInvariant() switch
+        public int TodaySoldSeats
         {
-            "2D" => "#DBEAFE",
-            "3D" => "#FFEDD5",
-            "IMAX" or "IMAX 3D" or "IMAX LASER" => "#EDE9FE",
-            "VIP" or "PREMIUM" => "#FEF3C7",
-            _ => "#E2E8F0"
-        };
+            get => todaySoldSeats;
+            set
+            {
+                if (SetProperty(ref todaySoldSeats, value))
+                {
+                    OnPropertyChanged(nameof(TodaySoldText));
+                    OnPropertyChanged(nameof(HasTodaySold));
+                }
+            }
+        }
 
-        public string RoomTypeFg => RoomType?.ToUpperInvariant() switch
+        public int TodayShowtimeCount
         {
-            "2D" => "#1D4ED8",
-            "3D" => "#C2410C",
-            "IMAX" or "IMAX 3D" or "IMAX LASER" => "#6D28D9",
-            "VIP" or "PREMIUM" => "#B45309",
-            _ => "#475569"
-        };
+            get => todayShowtimeCount;
+            set
+            {
+                if (SetProperty(ref todayShowtimeCount, value))
+                    OnPropertyChanged(nameof(TodayShowtimeText));
+            }
+        }
 
-        public string RoomTypeBorder => RoomType?.ToUpperInvariant() switch
+        public int? ActiveShowtimeID
         {
-            "2D" => "#BFDBFE",
-            "3D" => "#FED7AA",
-            "IMAX" or "IMAX 3D" or "IMAX LASER" => "#DDD6FE",
-            "VIP" or "PREMIUM" => "#FDE68A",
-            _ => "#CBD5E1"
-        };
+            get => activeShowtimeId;
+            set => SetProperty(ref activeShowtimeId, value);
+        }
 
-        // Màu sắc nhãn trạng thái vận hành
-        public string StatusBg => RoomStatus switch
-        {
-            "Đang chiếu" => "#DCFCE7",
-            "Sắp chiếu" => "#FEF3C7",
-            "Bảo trì" => "#FEE2E2",
-            _ => "#F1F5F9" // Sẵn sàng
-        };
-
-        public string StatusFg => RoomStatus switch
-        {
-            "Đang chiếu" => "#166534",
-            "Sắp chiếu" => "#B45309",
-            "Bảo trì" => "#991B1B",
-            _ => "#475569" // Sẵn sàng
-        };
+        public bool HasTodaySold => TodaySoldSeats > 0;
+        public string TodaySoldText => $"Đã bán hôm nay: {TodaySoldSeats} ghế";
+        public string TodayShowtimeText => TodayShowtimeCount > 0 ? $"{TodayShowtimeCount} suất hôm nay" : "Chưa có suất hôm nay";
     }
 
-    public class SeatMapSeat : ObservableObject
+    public class RoomShowtimeInfo
     {
-        public int SeatID { get; set; }
-        public string RowLabel { get; set; } = "A";
-        public int SeatNumber { get; set; } = 1;
-        public string SeatCode => $"{RowLabel}{SeatNumber:D2}";
-        public bool IsVip { get; set; }
-        public string SeatBg => IsVip ? "#FEF3C7" : "#FFFFFF";
-        public string SeatFg => IsVip ? "#B45309" : "#1E293B";
-        public string SeatBorder => IsVip ? "#F59E0B" : "#CBD5E1";
-    }
+        public int ShowtimeID { get; set; }
+        public int RoomID { get; set; }
+        public string MovieTitle { get; set; } = "";
+        public DateTime StartTime { get; set; }
+        public int DurationMin { get; set; }
+        public string ShowFormat { get; set; } = "";
+        public string AudioType { get; set; } = "";
+        public decimal BasePrice { get; set; }
+        public int TotalSeats { get; set; }
+        public int SoldSeats { get; set; }
 
-    public class SeatMapRow
-    {
-        public string RowLabel { get; set; } = "";
-        public List<SeatMapSeat> Seats { get; set; } = new();
+        public int FreeSeats => Math.Max(0, TotalSeats - SoldSeats);
+        public DateTime EndTime => StartTime.AddMinutes(DurationMin);
+        public string TimeRange => $"{StartTime:HH:mm} – {EndTime:HH:mm}";
+        public string StatusTag
+        {
+            get
+            {
+                var now = DateTime.Now;
+                if (now >= StartTime && now <= EndTime) return "Đang chiếu";
+                if (now < StartTime) return "Sắp chiếu";
+                return "Đã chiếu";
+            }
+        }
+        public string DisplayText => $"{TimeRange} · {MovieTitle} ({ShowFormat}) [{StatusTag}] — Đã bán {SoldSeats}/{TotalSeats}";
     }
 }

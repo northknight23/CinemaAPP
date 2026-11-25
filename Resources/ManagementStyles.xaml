@@ -1238,4 +1238,166 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
+
+    <!-- ===== Ô ghế xem trước trong Quản lý phòng (đồng bộ màu & kích thước với màn Bán vé) ===== -->
+    <Style x:Key="MgmtSeatCell" TargetType="Border">
+        <Setter Property="Width" Value="36"/>
+        <Setter Property="Height" Value="28"/>
+        <Setter Property="Margin" Value="3"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="BorderThickness" Value="1.5"/>
+        <Setter Property="Background" Value="{DynamicResource SeatStdBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SeatStdBorderBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource TextBrush}"/>
+        <Setter Property="TextElement.FontSize" Value="10"/>
+        <Setter Property="TextElement.FontWeight" Value="SemiBold"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Type}" Value="Vip">
+                <Setter Property="Background" Value="{DynamicResource SeatVipBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SeatVipBorderBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Type}" Value="Couple">
+                <Setter Property="Width" Value="78"/>
+                <Setter Property="Background" Value="{DynamicResource SeatCoupleBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SeatCoupleBorderBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsSold}" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SeatSoldBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SeatSoldBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource IconBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding IsAisle}" Value="True">
+                <Setter Property="Width" Value="20"/>
+                <Setter Property="Visibility" Value="Hidden"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Thẻ phòng chiếu có phản hồi khi di chuột để nhấn xem sơ đồ ghế -->
+    <Style x:Key="MgmtInteractiveCard" TargetType="Border" BasedOn="{StaticResource MgmtCard}">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{DynamicResource InputHoverBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MgmtSeatRowLabel" TargetType="TextBlock">
+        <Setter Property="Width" Value="22"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="TextAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
+    </Style>
+
+    <!-- ===== Nhãn phân loại & trạng thái Phim / Phòng (tập trung hóa màu từ Styles.xaml) ===== -->
+    <Style x:Key="MgmtMovieAgeBadge" TargetType="Border">
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="6,2"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding AgeRating}" Value="K">
+                <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource InfoBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AgeRating}" Value="T13">
+                <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource InfoBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AgeRating}" Value="T16">
+                <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SeatVipBorderBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AgeRating}" Value="T18">
+                <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AgeRating}" Value="C">
+                <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MgmtMovieStatusBadge" TargetType="Border">
+        <Setter Property="CornerRadius" Value="11"/>
+        <Setter Property="Padding" Value="10,3"/>
+        <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource TextMutedBrush}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding MovieStatus}" Value="Đang chiếu">
+                <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding MovieStatus}" Value="Sắp chiếu">
+                <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MgmtRoomTypeBadge" TargetType="Border">
+        <Setter Property="CornerRadius" Value="6"/>
+        <Setter Property="Padding" Value="8,3"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource InputBorderBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource InfoBrush}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RoomType}" Value="3D">
+                <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SeatVipBorderBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RoomType}" Value="IMAX">
+                <Setter Property="Background" Value="{DynamicResource SeatCoupleBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SeatCoupleBorderBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource NavyBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RoomType}" Value="VIP">
+                <Setter Property="Background" Value="{DynamicResource SeatVipBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SeatVipBorderBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MgmtRoomStatusBadge" TargetType="Border">
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="8,2"/>
+        <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource TextMutedBrush}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding RoomStatus}" Value="Đang chiếu">
+                <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RoomStatus}" Value="Bảo trì">
+                <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="MgmtRoomSoldPill" TargetType="Border">
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Background" Value="{DynamicResource SubtleBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource TextMutedBrush}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding HasTodaySold}" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
 </ResourceDictionary>
