@@ -22,10 +22,13 @@ namespace CinemaAPP.ViewModels
 
     // Màn HÓA ĐƠN CA (chỉ Nhân viên): hóa đơn của chính mình trong ca hôm nay, hỗ trợ khách hủy vé, nộp chốt ca.
     // Quản trị viên xem và xác nhận bàn giao ở màn Giao dịch & Đối soát.
-    // Hóa đơn đọc từ SQL Server; báo cáo chốt ca vẫn ở bộ nhớ cho tới khi có bảng ca.
+    // Hóa đơn và báo cáo chốt ca đều đọc / ghi trực tiếp trên SQL Server.
     public class MyShiftViewModel : ObservableObject
     {
         private readonly BookingService bookingService = new();
+        private readonly ShiftService shiftService = new();
+        private ShiftReport? currentReport;
+        private Handover? currentHandover;
         public const string AllMethods = "Tất cả thanh toán";
         private static readonly CultureInfo Vi = new CultureInfo("vi-VN");
 
@@ -33,14 +36,13 @@ namespace CinemaAPP.ViewModels
         public string StaffName { get; } = AppSession.CurrentUser?.FullName ?? "Quản trị viên";
         public string StaffUsername { get; } = AppSession.CurrentUser?.Username ?? "admin";
         public DateTime ShiftDay { get; } = DateTime.Today;
-        private (DateTime, string) ShiftKey => (ShiftDay, StaffUsername);
 
         public string ShiftTitle => $"Ca hôm nay · {ShiftDay:dd/MM/yyyy}";
         public string ShiftSubText => $"{StaffName} · {StaffUsername}";
 
         // Trạng thái ca: Open = đang bán; Pending = đã nộp chốt ca, chờ Quản trị viên; Done = đã bàn giao
-        public string ShiftStatusKind => SalesDemoStore.Handovers.ContainsKey(ShiftKey) ? "Done"
-            : SalesDemoStore.ShiftReports.ContainsKey(ShiftKey) ? "Pending" : "Open";
+        public string ShiftStatusKind => currentHandover != null ? "Done"
+            : currentReport != null ? "Pending" : "Open";
         public string ShiftStatusText => ShiftStatusKind switch
         {
             "Done" => "Đã bàn giao",
@@ -146,17 +148,14 @@ namespace CinemaAPP.ViewModels
             }
         }
 
-        public string CancelImpactText
-        {
-            get
-            {
-                if (SelectedSale == null) return "";
-                SaleRecord s = SelectedSale;
-                string refund = s.Method == PaymentMethod.Cash ? "tiền mặt từ két" : s.Method == PaymentMethod.Transfer ? "qua chuyển khoản" : "về thẻ";
-                string points = s.Points > 0 ? $" · trừ lại {s.Points} điểm của khách" : "";
-                return $"{s.TicketCount} ghế được mở bán lại · hoàn {s.AmountText} {refund}{points}";
-            }
-        }
+        public string CancelImpactText => SelectedSale?.BuildCancelImpact(includeCashDrawer: true) ?? "";
+        public string CancelSeatsText => SelectedSale?.CancelSeatsText ?? "";
+        public string CancelRefundAmountText => SelectedSale?.AmountText ?? "";
+        public string CancelRefundPrefix => SelectedSale?.CancelRefundPrefix ?? "";
+        public string CancelRefundMethodText => SelectedSale?.GetCancelMethodLabel(includeCashDrawer: true) ?? "";
+        public PaymentMethod SelectedCancelMethod => SelectedSale?.Method ?? PaymentMethod.Cash;
+        public string CancelPointsImpactText => SelectedSale?.CancelPointsImpactText ?? "";
+        public bool HasCancelPointsImpact => SelectedSale?.HasCancelPointsImpact ?? false;
 
         // ================= Tab 2: Chốt ca =================
         public ObservableCollection<ShowSummary> ShowRows { get; } = new ObservableCollection<ShowSummary>();
@@ -188,9 +187,9 @@ namespace CinemaAPP.ViewModels
         public string DiffLabel { get => diffLabel; private set => SetProperty(ref diffLabel, value); }
         public string DiffKind { get => diffKind; private set => SetProperty(ref diffKind, value); }   // "", Even, Short, Over
 
-        public string CloseStatusText => SalesDemoStore.Handovers.TryGetValue(ShiftKey, out Handover? h)
+        public string CloseStatusText => currentHandover is Handover h
             ? $"Đã bàn giao lúc {h.At:HH:mm} · xác nhận bởi {h.By}"
-            : SalesDemoStore.ShiftReports.TryGetValue(ShiftKey, out ShiftReport? r)
+            : currentReport is ShiftReport r
                 ? $"Đã nộp chốt ca lúc {r.At:HH:mm}. Chờ Quản trị viên đếm két và xác nhận."
                 : "";
 
@@ -213,12 +212,6 @@ namespace CinemaAPP.ViewModels
             BackCommand = new RelayCommand(_ => IsConfirmingCancel = false);
             SubmitShiftCommand = new RelayCommand(_ => SubmitShift(), _ => IsShiftOpen && ParseMoney(CountedCashText) != null);
 
-            if (SalesDemoStore.ShiftReports.TryGetValue(ShiftKey, out ShiftReport? report))
-            {
-                countedCashText = report.CountedCash.ToString("N0", Vi);
-                shiftNote = report.Note;
-            }
-
             Refresh();
             SelectedSale = Invoices.FirstOrDefault();
         }
@@ -227,12 +220,25 @@ namespace CinemaAPP.ViewModels
         {
             int? keepSale = SelectedSale?.BookingID;
             List<SaleRecord> stored;
-            try { stored = bookingService.GetSales(ShiftDay, ShiftDay.AddDays(1)); }
+            try
+            {
+                stored = bookingService.GetSales(ShiftDay, ShiftDay.AddDays(1));
+                (currentReport, currentHandover) = shiftService.GetForStaff(ShiftDay, StaffUsername);
+            }
             catch (Exception ex)
             {
                 Invoices.Clear(); SelectedSale = null; IsEmpty = true;
-                IsMessageError = true; Message = "Không tải được hóa đơn SQL Server: " + ex.Message;
+                IsMessageError = true; Message = "Không tải được dữ liệu ca từ SQL Server: " + ex.Message;
                 return;
+            }
+            if (currentHandover != null || currentReport != null)
+            {
+                decimal savedCash = currentHandover?.CountedCash ?? currentReport!.CountedCash;
+                string savedNote = currentHandover?.Note ?? currentReport!.Note;
+                countedCashText = savedCash.ToString("N0", Vi);
+                shiftNote = savedNote;
+                OnPropertyChanged(nameof(CountedCashText));
+                OnPropertyChanged(nameof(ShiftNote));
             }
             var mine = stored
                 .Where(s => s.StaffUsername == StaffUsername && s.CreatedAt.Date == ShiftDay)
@@ -293,6 +299,13 @@ namespace CinemaAPP.ViewModels
             OnPropertyChanged(nameof(CanCancel));
             OnPropertyChanged(nameof(CancelBlockedText));
             OnPropertyChanged(nameof(CancelImpactText));
+            OnPropertyChanged(nameof(CancelSeatsText));
+            OnPropertyChanged(nameof(CancelRefundAmountText));
+            OnPropertyChanged(nameof(CancelRefundPrefix));
+            OnPropertyChanged(nameof(CancelRefundMethodText));
+            OnPropertyChanged(nameof(SelectedCancelMethod));
+            OnPropertyChanged(nameof(CancelPointsImpactText));
+            OnPropertyChanged(nameof(HasCancelPointsImpact));
             CommandManager.InvalidateRequerySuggested();
         }
 
@@ -315,13 +328,29 @@ namespace CinemaAPP.ViewModels
 
             Refresh();
             IsMessageError = false;
-            Message = $"Đã hủy đơn {sale.Code} cho khách: {sale.TicketCount} ghế được mở bán lại, hoàn {sale.AmountText}.";
+            string pointsRefund = sale.PointsUsed > 0 ? $", hoàn lại {sale.PointsUsed.ToString("N0", Vi)} điểm đã dùng" : "";
+            Message = $"Đã hủy đơn {sale.Code} cho khách: {sale.TicketCount} ghế được mở bán lại, hoàn {sale.AmountText}{pointsRefund}.";
         }
 
         private void SubmitShift()
         {
+            if (AppSession.CurrentUser is not { IsAdmin: false } user)
+            {
+                IsMessageError = true;
+                Message = "Cần đăng nhập tài khoản nhân viên để nộp báo cáo chốt ca.";
+                return;
+            }
             decimal counted = ParseMoney(CountedCashText)!.Value;
-            SalesDemoStore.ShiftReports[ShiftKey] = new ShiftReport(counted, ShiftNote.Trim(), DateTime.Now);
+            try
+            {
+                shiftService.SubmitShiftReport(ShiftDay, user.AccountID, counted, ShiftNote.Trim());
+            }
+            catch (Exception ex)
+            {
+                IsMessageError = true;
+                Message = "Chưa nộp chốt ca: " + ex.Message;
+                return;
+            }
 
             decimal diff = counted - systemCash;
             Refresh();

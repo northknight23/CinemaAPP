@@ -60,4 +60,33 @@
     <SolidColorBrush x:Key="TicketPaperBrush" Color="#F4DEDC"/>
     <SolidColorBrush x:Key="TicketWatermarkBrush" Color="#FFF5F1"/>
     <SolidColorBrush x:Key="TicketRuleBrush" Color="#A37575"/>
+
+    <!-- ===== Khung hủy vé / hoàn tiền (dùng chung Hóa đơn ca & Giao dịch) ===== -->
+    <LinearGradientBrush x:Key="CancelCardBgBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FFF0F3" Offset="0"/>
+        <GradientStop Color="#FFF8F9" Offset="0.5"/>
+        <GradientStop Color="#FFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="CancelCardBorderBrush"         Color="#F4C7D0"/>
+    <SolidColorBrush x:Key="CancelTitleBrush"              Color="#881337"/>
+    <SolidColorBrush x:Key="CancelChipBorderBrush"         Color="#CBD5E1"/>
+    <SolidColorBrush x:Key="CancelChipSelectedBgBrush"     Color="#FFE4E8"/>
+    <SolidColorBrush x:Key="CancelChipSelectedBorderBrush" Color="#C2415E"/>
+    <LinearGradientBrush x:Key="CancelImpactBgBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#FFF5D6" Offset="0"/>
+        <GradientStop Color="#FFF4E6" Offset="0.5"/>
+        <GradientStop Color="#FFF0F3" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="CancelImpactBorderBrush"       Color="#F2CEB0"/>
+    <SolidColorBrush x:Key="CancelImpactIconBrush"         Color="#A16207"/>
+    <SolidColorBrush x:Key="CancelAmountBrush"             Color="#C81E1E"/>
+    <SolidColorBrush x:Key="CancelMethodBrush"             Color="#B45309"/>
+    <LinearGradientBrush x:Key="CancelButtonBgBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#E1385A" Offset="0"/>
+        <GradientStop Color="#BD173D" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="CancelButtonHoverBgBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#EB4566" Offset="0"/>
+        <GradientStop Color="#A81335" Offset="1"/>
+    </LinearGradientBrush>
 </ResourceDictionary>

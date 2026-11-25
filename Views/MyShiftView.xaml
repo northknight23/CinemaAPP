@@ -263,11 +263,16 @@
                         </Border>
 
                         <!-- Hỗ trợ khách hủy vé -->
-                        <Border DockPanel.Dock="Bottom" Background="{DynamicResource ErrorBgBrush}" CornerRadius="10" Padding="12"
+                        <Border DockPanel.Dock="Bottom" Style="{StaticResource CancelCard}"
                                 DataContext="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                 Visibility="{Binding CanCancel, Converter={StaticResource BoolToVis}}">
                             <StackPanel>
-                                <TextBlock Text="Hỗ trợ khách hủy vé" FontWeight="SemiBold" FontSize="13" Foreground="{DynamicResource ErrorBrush}"/>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Path Data="{StaticResource IcTicketCancel}" Fill="{DynamicResource CancelTitleBrush}"
+                                          Width="18" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,7,0"/>
+                                    <TextBlock Text="Hỗ trợ khách hủy vé" FontWeight="Bold" FontSize="13.5"
+                                               Foreground="{DynamicResource CancelTitleBrush}" VerticalAlignment="Center"/>
+                                </StackPanel>
                                 <StackPanel>
                                     <StackPanel.Style>
                                         <Style TargetType="StackPanel">
@@ -278,7 +283,7 @@
                                             </Style.Triggers>
                                         </Style>
                                     </StackPanel.Style>
-                                    <ListBox ItemsSource="{Binding CancelReasons}" SelectedItem="{Binding SelectedReason}" Margin="0,8,0,0"
+                                    <ListBox ItemsSource="{Binding CancelReasons}" SelectedItem="{Binding SelectedReason}" Margin="0,9,0,0"
                                              BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource ReasonItem}"
                                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                         <ListBox.ItemsPanel>
@@ -301,14 +306,14 @@
                                         </TextBox.Style>
                                     </TextBox>
                                 </StackPanel>
-                                <TextBlock Text="{Binding CancelImpactText}" TextWrapping="Wrap" FontSize="11.5"
-                                           Foreground="{DynamicResource TextBrush}" Margin="0,2,0,10"/>
+                                <Border Style="{StaticResource CancelImpactBox}">
+                                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource CancelImpactContent}"/>
+                                </Border>
 
                                 <!-- Bước 1: chọn lý do rồi bấm -->
-                                <Button Content="HỦY VÉ &amp; HOÀN TIỀN" Background="{DynamicResource ErrorBrush}"
-                                        Command="{Binding AskCancelCommand}">
+                                <Button Content="HỦY VÉ &amp; HOÀN TIỀN" Command="{Binding AskCancelCommand}">
                                     <Button.Style>
-                                        <Style TargetType="Button" BasedOn="{StaticResource SolidButton}">
+                                        <Style TargetType="Button" BasedOn="{StaticResource CancelActionButton}">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsConfirmingCancel}" Value="True">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -321,7 +326,7 @@
                                 <!-- Bước 2: xác nhận (không hoàn tác được) -->
                                 <StackPanel Visibility="{Binding IsConfirmingCancel, Converter={StaticResource BoolToVis}}">
                                     <TextBlock FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap"
-                                               Foreground="{DynamicResource ErrorBrush}" Margin="0,0,0,8">
+                                               Foreground="{DynamicResource CancelTitleBrush}" Margin="0,0,0,8">
                                         <Run Text="Hủy vé với lý do"/> <Run Text="{Binding SelectedReason, Mode=OneWay}"/><Run Text="? Thao tác không hoàn tác được."/>
                                     </TextBlock>
                                     <Grid>
@@ -332,7 +337,7 @@
                                         </Grid.ColumnDefinitions>
                                         <Button Content="Không" Style="{StaticResource OutlineButton}" Command="{Binding BackCommand}"/>
                                         <Button Grid.Column="2" Content="Xác nhận hủy" Style="{StaticResource SolidButton}"
-                                                Background="{DynamicResource ErrorBrush}" Command="{Binding ConfirmCancelCommand}"/>
+                                                Background="{DynamicResource CancelButtonBgBrush}" Command="{Binding ConfirmCancelCommand}"/>
                                     </Grid>
                                 </StackPanel>
                             </StackPanel>
@@ -397,6 +402,24 @@
                                 <TextBlock Text="{Binding PaymentDetail}" Style="{StaticResource Cell}" HorizontalAlignment="Right"/>
                             </Grid>
                             <Border Height="1" Background="{DynamicResource CardBorderBrush}" Margin="0,2,0,10"/>
+                            <Grid Style="{StaticResource DetailRow}" Visibility="{Binding HasPointsUsed, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Tiền vé gốc" Style="{StaticResource Muted}" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="1" Text="{Binding SubtotalText}" Style="{StaticResource Cell}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Grid Style="{StaticResource DetailRow}" Visibility="{Binding HasPointsUsed, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Điểm đã dùng" Style="{StaticResource Muted}" Margin="0,0,8,0"/>
+                                <TextBlock Grid.Column="1" Text="{Binding PointsUsedText}" Style="{StaticResource Cell}"
+                                           Foreground="{DynamicResource WarningBrush}" FontWeight="SemiBold"
+                                           HorizontalAlignment="Right" TextAlignment="Right" TextWrapping="Wrap"/>
+                            </Grid>
                             <Grid>
                                 <TextBlock Text="Tổng tiền" Style="{StaticResource Title}" VerticalAlignment="Center"/>
                                 <TextBlock Text="{Binding AmountText}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Right"/>

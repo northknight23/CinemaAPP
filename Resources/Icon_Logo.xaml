@@ -121,4 +121,20 @@ StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
     <!--icon -->
     <!-- d-icon/star: banner "Điểm nổi bật" ở màn Thống kê doanh thu -->
     <Geometry x:Key="IcStar">M8 1.33333L10.06 5.50667L14.6667 6.18L11.3333 9.42667L12.12 14.0133L8 11.8467L3.88 14.0133L4.66667 9.42667L1.33333 6.18L5.94 5.50667L8 1.33333Z</Geometry>
+
+    <!-- ===== Icon khung Hủy vé & Hoàn tiền (tọa độ 24×24, dùng chung Hóa đơn ca & Giao dịch) ===== -->
+    <!-- Vé có huy hiệu dấu X (Fill, EvenOdd) -->
+    <Geometry x:Key="IcTicketCancel">F0 M3,5 H19 A1.5,1.5 0 0 1 20.5,6.5 V8.6 A1.8,1.8 0 0 0 20.5,12.2 V13.1 A5.3,5.3 0 0 0 13.4,17 H3 A1.5,1.5 0 0 1 1.5,15.5 V12.2 A1.8,1.8 0 0 0 1.5,8.6 V6.5 A1.5,1.5 0 0 1 3,5 Z M11.8,7.3 H13.2 V9.2 H11.8 Z M11.8,10.8 H13.2 V12.7 H11.8 Z M18.5,13 A4.5,4.5 0 1 1 18.49,13 Z M16.7,15.7 L18.5,16.8 L20.3,15.7 L20.9,16.3 L19.4,17.5 L20.9,18.7 L20.3,19.3 L18.5,18.2 L16.7,19.3 L16.1,18.7 L17.6,17.5 L16.1,16.3 Z</Geometry>
+    <!-- Ghế rạp chiếu phim (Fill) -->
+    <Geometry x:Key="IcSeatArmchair">M5.5,4 H18.5 A2,2 0 0 1 20.5,6 V10.5 H19 A2,2 0 0 0 17,12.5 V14 H7 V12.5 A2,2 0 0 0 5,10.5 H3.5 V6 A2,2 0 0 1 5.5,4 Z M2,12 A1.5,1.5 0 0 1 3.5,10.5 H5 A1.5,1.5 0 0 1 6.5,12 V15 H17.5 V12 A1.5,1.5 0 0 1 19,10.5 H20.5 A1.5,1.5 0 0 1 22,12 V17.5 A1.5,1.5 0 0 1 20.5,19 H19 V21 H17 V19 H7 V21 H5 V19 H3.5 A1.5,1.5 0 0 1 2,17.5 Z</Geometry>
+    <!-- Ngân hàng / chuyển khoản (Fill) -->
+    <Geometry x:Key="IcBank">M12,2.5 L2,7.5 V9.2 H22 V7.5 Z M4.8,11 H7.3 V17.8 H4.8 Z M10.75,11 H13.25 V17.8 H10.75 Z M16.7,11 H19.2 V17.8 H16.7 Z M2,19.3 H22 V21.3 H2 Z</Geometry>
+    <!-- Tiền mặt (Fill, EvenOdd) -->
+    <Geometry x:Key="IcCash">F0 M3.5,5.5 H20.5 A2,2 0 0 1 22.5,7.5 V16.5 A2,2 0 0 1 20.5,18.5 H3.5 A2,2 0 0 1 1.5,16.5 V7.5 A2,2 0 0 1 3.5,5.5 Z M12,8.8 A3.2,3.2 0 1 0 12.01,8.8 Z M5.2,10.8 A1.2,1.2 0 1 0 5.21,10.8 Z M18.8,10.8 A1.2,1.2 0 1 0 18.81,10.8 Z</Geometry>
+    <!-- Thẻ ngân hàng (Fill, EvenOdd) -->
+    <Geometry x:Key="IcCard">F0 M3.5,5 H20.5 A2,2 0 0 1 22.5,7 V17 A2,2 0 0 1 20.5,19 H3.5 A2,2 0 0 1 1.5,17 V7 A2,2 0 0 1 3.5,5 Z M3,8.5 H21 V11 H3 Z M4.5,14 H10.5 V16 H4.5 Z</Geometry>
+    <!-- Mũi tên hoàn tác (Stroke) -->
+    <Geometry x:Key="IcUndo">M9,14 L4,9 L9,4 M4,9 H14.5 A4.5,4.5 0 0 1 14.5,18 H11.5</Geometry>
+    <!-- Hoàn tiền mũi tên xoay quanh dấu $ (Stroke) -->
+    <Geometry x:Key="IcRefund">M4,12 A8,8 0 1 0 6.4,6.2 L4,8.5 M4,4.5 V8.5 H8 M12,7.8 V16.2 M14,10 C14,9.1 13.1,8.6 12,8.6 C10.9,8.6 10,9.1 10,10 C10,10.9 10.9,11.4 12,11.8 C13.1,12.2 14,12.7 14,13.7 C14,14.6 13.1,15.2 12,15.2 C10.9,15.2 10,14.6 10,13.7</Geometry>
 </ResourceDictionary>

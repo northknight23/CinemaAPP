@@ -42,7 +42,7 @@ namespace CinemaAPP.ViewModels
 
         public decimal GrossTotal => SelectedSeats.Sum(s => s.Price);
         public int MemberBalance => IsMemberFound ? currentMember?.Points ?? 0 : 0;
-        public int MaxRedeemPoints => Math.Max(0, Math.Min(MemberBalance, (int)decimal.Floor(GrossTotal * 0.20m / 1000m)));
+        public int MaxRedeemPoints => Math.Max(0, Math.Min(MemberBalance, (int)decimal.Floor(GrossTotal / 1000m)));
         private string redeemPointsText = "0";
         public string RedeemPointsText
         {
@@ -57,7 +57,7 @@ namespace CinemaAPP.ViewModels
         public int PointsUsed => IsMemberFound && IsRedemptionValid ? int.Parse(RedeemPointsText) : 0;
         public decimal DiscountAmount => PointsUsed * 1000m;
         public string RedemptionHint => IsRedemptionValid
-            ? $"Có {MemberBalance} điểm · Tối đa {MaxRedeemPoints} điểm (20% đơn)"
+            ? $"Có {MemberBalance} điểm · Dùng tối đa {MaxRedeemPoints} điểm (không vượt tiền vé)"
             : $"Nhập số nguyên từ 0 đến {MaxRedeemPoints} điểm.";
 
         // Chỉ cộng điểm cho khách thành viên; quy tắc theo loại ghế nằm ở TicketRewards.
@@ -208,7 +208,7 @@ namespace CinemaAPP.ViewModels
             {
                 decimal amount = p as string == "exact" ? Total : decimal.Parse((string)p!, CultureInfo.InvariantCulture);
                 CashText = amount.ToString("N0", Vi);
-            }, p => p as string != "exact" || Total > 0);
+            }, p => p as string != "exact" || SelectedCount > 0);
 
             // Tiền mặt phải đưa đủ; chuyển khoản / thẻ thì nhân viên bấm sau khi đã nhận tiền
             PayCommand = new RelayCommand(_ => Pay(), _ => CanPay);

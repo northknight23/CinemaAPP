@@ -221,8 +221,8 @@ namespace CinemaAPP.Services
                     if (!reader.Read()) throw new InvalidOperationException("Khách hàng không còn tồn tại.");
                     customerName = reader.GetString(0); phone = reader.GetString(1); balance = reader.GetInt32(2);
                 }
-                if (pointsUsed > balance || pointsUsed * 1000m > gross * 0.20m)
-                    throw new InvalidOperationException("Điểm sử dụng vượt số dư hoặc 20% tiền vé. Hãy tìm lại khách và kiểm tra đơn.");
+                if (pointsUsed > balance || pointsUsed * 1000m > gross)
+                    throw new InvalidOperationException("Điểm sử dụng vượt số dư hoặc tổng tiền vé. Hãy tìm lại khách và kiểm tra đơn.");
                 decimal total = gross - pointsUsed * 1000m;
                 if (method == PaymentMethod.Cash && cashGiven < total)
                     throw new InvalidOperationException("Tiền khách đưa chưa đủ thanh toán.");
@@ -350,18 +350,33 @@ namespace CinemaAPP.Services
                   GROUP BY b.CustomerID,b.PointsEarned,b.PointsUsed,b.BookingStatus,b.AccountID,b.CreatedAt,a.AccountRole", conn, tx);
             command.Parameters.Add("@Account", SqlDbType.Int).Value = accountId;
             command.Parameters.Add("@Booking", SqlDbType.Int).Value = bookingId;
-            int? customerId; int earned, used;
+            int? customerId; int earned, used; bool isStaffCancel; DateTime cancelDate;
             using (var reader = command.ExecuteReader())
             {
                 if (!reader.Read()) throw new InvalidOperationException("Đơn hoặc tài khoản không còn hợp lệ.");
                 if (reader.GetString(3) == BookingStatus.Cancelled) return;
                 bool admin = reader.GetString(6) == "Admin";
+                DateTime now = reader.GetDateTime(8);
                 if (!admin && (reader.GetInt32(4) != accountId
-                    || reader.GetDateTime(5).Date != reader.GetDateTime(8).Date
-                    || reader.GetDateTime(7) <= reader.GetDateTime(8)))
+                    || reader.GetDateTime(5).Date != now.Date
+                    || reader.GetDateTime(7) <= now))
                     throw new InvalidOperationException("Nhân viên chỉ hủy đơn của mình trong hôm nay trước giờ chiếu.");
                 customerId = reader.IsDBNull(0) ? null : reader.GetInt32(0);
                 earned = reader.GetInt32(1); used = reader.GetInt32(2);
+                isStaffCancel = !admin;
+                cancelDate = now.Date;
+            }
+            if (isStaffCancel)
+            {
+                using var shiftCheck = new SqlCommand(
+                    @"IF OBJECT_ID('dbo.SHIFT_HANDOVER', 'U') IS NOT NULL
+                          SELECT COUNT(*) FROM SHIFT_HANDOVER WITH (HOLDLOCK)
+                          WHERE ShiftDate = @Date AND AccountID = @Account
+                      ELSE SELECT 0", conn, tx);
+                shiftCheck.Parameters.Add("@Date", SqlDbType.Date).Value = cancelDate;
+                shiftCheck.Parameters.Add("@Account", SqlDbType.Int).Value = accountId;
+                if (Convert.ToInt32(shiftCheck.ExecuteScalar()) > 0)
+                    throw new InvalidOperationException("Ca đã chốt hoặc đã bàn giao nên nhân viên không thể hủy đơn. Hãy báo Quản trị viên.");
             }
             if (customerId.HasValue)
             {

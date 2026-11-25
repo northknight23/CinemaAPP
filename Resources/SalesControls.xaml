@@ -321,24 +321,25 @@
         <Setter Property="ItemContainerStyle" Value="{StaticResource RowItem}"/>
     </Style>
 
-    <!-- Chip lý do hủy (ListBoxItem) -->
+    <!-- Chip lý do hủy (ListBoxItem): viền xám nhạt, khi chọn nền hồng nhạt + viền đỏ đậm theo mẫu mới -->
     <Style x:Key="ReasonItem" TargetType="ListBoxItem">
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
-                    <Border x:Name="chip" CornerRadius="12" Padding="10,4" Margin="0,0,6,6" BorderThickness="1"
-                            Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource InputBorderBrush}">
+                    <Border x:Name="chip" CornerRadius="15" Padding="11,5" Margin="0,0,6,6" BorderThickness="1"
+                            Background="{DynamicResource CardBrush}" BorderBrush="{DynamicResource CancelChipBorderBrush}">
                         <TextBlock x:Name="txt" Text="{Binding}" FontSize="11.5" Foreground="{DynamicResource TextBrush}"/>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource ErrorBrush}"/>
+                            <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource CancelChipSelectedBorderBrush}"/>
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource ErrorBrush}"/>
-                            <Setter TargetName="chip" Property="BorderThickness" Value="1.5"/>
-                            <Setter TargetName="txt" Property="Foreground" Value="{DynamicResource ErrorBrush}"/>
+                            <Setter TargetName="chip" Property="Background" Value="{DynamicResource CancelChipSelectedBgBrush}"/>
+                            <Setter TargetName="chip" Property="BorderBrush" Value="{DynamicResource CancelChipSelectedBorderBrush}"/>
+                            <Setter TargetName="chip" Property="BorderThickness" Value="1.2"/>
+                            <Setter TargetName="txt" Property="Foreground" Value="{DynamicResource CancelTitleBrush}"/>
                             <Setter TargetName="txt" Property="FontWeight" Value="SemiBold"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -346,6 +347,120 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+    <!-- Khung Hủy vé & Hoàn tiền: nền chuyển sắc hồng nhạt → trắng, viền hồng dịu -->
+    <Style x:Key="CancelCard" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CancelCardBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CancelCardBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="12,10"/>
+    </Style>
+
+    <!-- Khung tóm tắt ảnh hưởng hủy vé (ghế mở bán lại, số tiền hoàn, điểm): nền vàng ấm → hồng nhạt -->
+    <Style x:Key="CancelImpactBox" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CancelImpactBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource CancelImpactBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="9"/>
+        <Setter Property="Padding" Value="9,7"/>
+        <Setter Property="Margin" Value="0,3,0,8"/>
+    </Style>
+
+    <!-- Nút HỦY VÉ / HỦY ĐƠN & HOÀN TIỀN: chuyển sắc đỏ ruby + icon hoàn tác trái & hoàn tiền phải -->
+    <Style x:Key="CancelActionButton" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource OnNavyBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource CancelButtonBgBrush}"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Height" Value="40"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="bg" CornerRadius="10" Background="{TemplateBinding Background}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Path Data="{StaticResource IcUndo}" Stroke="{TemplateBinding Foreground}" StrokeThickness="2"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="15" Height="15" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ContentPresenter VerticalAlignment="Center"/>
+                            <Path Data="{StaticResource IcRefund}" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  Width="16" Height="16" Stretch="Uniform" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Background" Value="{DynamicResource CancelButtonHoverBgBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.88"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="bg" Property="Opacity" Value="0.48"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Khối nội dung bên trong CancelImpactBox (dùng chung cho MyShiftView và TransactionsView) -->
+    <DataTemplate x:Key="CancelImpactContent">
+        <StackPanel>
+            <!-- Dòng 1: ghế mở bán lại + số tiền hoàn -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Path Data="{StaticResource IcSeatArmchair}" Fill="{DynamicResource CancelImpactIconBrush}"
+                      Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Top" Margin="0,1.5,7,0"/>
+                <TextBlock Grid.Column="1" FontSize="11.5" TextWrapping="Wrap" Foreground="{DynamicResource TextBrush}">
+                    <Run Text="{Binding CancelSeatsText, Mode=OneWay}"/>
+                    <Run Text=" · hoàn "/>
+                    <Run Text="{Binding CancelRefundAmountText, Mode=OneWay}" FontWeight="Bold" Foreground="{DynamicResource CancelAmountBrush}"/>
+                    <Run Text="{Binding CancelRefundPrefix, Mode=OneWay}"/>
+                </TextBlock>
+            </Grid>
+            <!-- Dòng 2: phương thức hoàn tiền (đổi icon tự động theo Tiền mặt / Chuyển khoản / Thẻ) -->
+            <Grid Margin="0,3,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Path Width="14" Height="14" Stretch="Uniform" VerticalAlignment="Center" Margin="0,0,7,0"
+                      Fill="{DynamicResource CancelImpactIconBrush}">
+                    <Path.Style>
+                        <Style TargetType="Path">
+                            <Setter Property="Data" Value="{StaticResource IcCash}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedCancelMethod}" Value="{x:Static vm:PaymentMethod.Transfer}">
+                                    <Setter Property="Data" Value="{StaticResource IcBank}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding SelectedCancelMethod}" Value="{x:Static vm:PaymentMethod.Card}">
+                                    <Setter Property="Data" Value="{StaticResource IcCard}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Path.Style>
+                </Path>
+                <TextBlock Grid.Column="1" Text="{Binding CancelRefundMethodText}" FontSize="11.5" FontWeight="Bold"
+                           TextWrapping="Wrap" Foreground="{DynamicResource CancelMethodBrush}"/>
+            </Grid>
+            <!-- Dòng 3 (ẩn nếu đơn không có điểm thưởng/điểm dùng): điểm hoàn & trừ -->
+            <Grid Margin="0,3,0,0" Visibility="{Binding HasCancelPointsImpact, Converter={StaticResource BoolToVis}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Path Data="{StaticResource IcStar}" Fill="{DynamicResource CancelImpactIconBrush}"
+                      Width="13" Height="13" Stretch="Uniform" VerticalAlignment="Top" Margin="0.5,1.5,7.5,0"/>
+                <TextBlock Grid.Column="1" Text="{Binding CancelPointsImpactText}" FontSize="11.5"
+                           TextWrapping="Wrap" Foreground="{DynamicResource TextBrush}"/>
+            </Grid>
+        </StackPanel>
+    </DataTemplate>
 
     <!-- Chip phương thức thanh toán: tiền mặt xanh lá, chuyển khoản xanh dương, thẻ tím -->
     <DataTemplate x:Key="MethodChip">
