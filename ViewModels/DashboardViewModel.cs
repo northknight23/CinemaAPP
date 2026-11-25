@@ -325,12 +325,10 @@ namespace CinemaAPP.ViewModels
                     TipTickets = $"{Format.Number(d.SoldSeats)} vé",
                     TipPrevious = $"Cùng kỳ trước ({p.Day:dd'/'MM}): {Format.Number(p.SoldSeats)} vé",
                     TipOccupancy = $"Lấp đầy: {Format.Number((int)Math.Round(occupancy[i]))}%",
-                    PointMargin = new Thickness(0, 0, 0, heights[i] - 6),   // điểm cao 12 (vùng rê chuột) → tâm ở đúng heights[i]
-                    PointOffset = offsets[i],
+                    PointMargin = PointAt(heights[i] - 6, offsets[i]),
                     HasPrevOccupancy = p.Seats > 0,
                     TipPrevOccupancy = $"Lấp đầy: {Format.Number((int)Math.Round(prevOccupancy[i]))}%",
-                    PrevPointMargin = new Thickness(0, 0, 0, double.IsNaN(prevHeights[i]) ? 0 : prevHeights[i] - 6),
-                    PrevPointOffset = prevOffset,
+                    PrevPointMargin = PointAt(double.IsNaN(prevHeights[i]) ? 0 : prevHeights[i] - 6, prevOffset),
                 });
             }
 
@@ -342,6 +340,9 @@ namespace CinemaAPP.ViewModels
             PrevTrendHeights = prevHeights;
             ShowPrevTrend = showPrev;
         }
+        // Điểm 12x12 đang căn giữa ô: muốn dịch ngang `offset` px thì chêm margin một bên = 2 × offset
+        private static Thickness PointAt(double bottom, double offset) =>
+            new Thickness(Math.Max(0, 2 * offset), 0, Math.Max(0, -2 * offset), bottom);
 
         // Bước chia trục đẹp: 1, 2, 2.5, 3, 4, 5 × 10^k (tối thiểu 25 vé / vạch)
         private static double NiceStep(double raw)
@@ -472,13 +473,7 @@ namespace CinemaAPP.ViewModels
     public record DeltaInfo(string Text, bool IsUp)
     {
         public static DeltaInfo Percent(decimal now, decimal before, string suffix)
-        {
-            if (before == 0)
-                return new DeltaInfo(now == 0 ? "0%" + suffix : "Mới" + suffix, true);
-            decimal pct = (now - before) / before * 100;
-            string sign = pct > 0 ? "+" : "";
-            return new DeltaInfo(sign + Math.Round(pct, 1).ToString("0.#", Format.Vi) + "%" + suffix, pct >= 0);
-        }
+                => new DeltaInfo(Format.Change(now, before, signed: true) + suffix, now >= before);
 
         // Chênh lệch điểm phần trăm (tỷ lệ lấp đầy)
         public static DeltaInfo Points(double now, double before)
@@ -505,13 +500,13 @@ namespace CinemaAPP.ViewModels
 
         // Điểm "TB 3 ngày" của ngày này (phần tử riêng để rê chuột hiện chú thích)
         public Thickness PointMargin { get; init; }
-        public double PointOffset { get; init; }
+      
 
         // Điểm "Lấp đầy kỳ trước": nằm đúng tâm cột kỳ trước
         public bool HasPrevOccupancy { get; init; }   // kỳ trước ngày này có suất chiếu → mới hiện điểm
         public string TipPrevOccupancy { get; init; } = "";
         public Thickness PrevPointMargin { get; init; }
-        public double PrevPointOffset { get; init; }
+       
     }
 
     // Một dòng ở cột "Giao dịch mới nhất". Kind: sale | member | cancel (View chọn icon theo Kind).

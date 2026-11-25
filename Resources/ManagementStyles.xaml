@@ -698,7 +698,46 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
+    
+    <DataTemplate x:Key="MgmtProfileAvatar">
+        <Border Style="{StaticResource MgmtToneAvatar}"
+            Width="64" Height="64" CornerRadius="32" TextElement.FontSize="21">
+            <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+    </DataTemplate>
 
+    <!-- ===== Nhãn hạng: Thường / Bạc / Vàng (theo Customer.Tier) ===== -->
+    <Style x:Key="MgmtTierBadge" TargetType="Border">
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="10,2,10,3"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Background" Value="{StaticResource CardBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{StaticResource TextMutedBrush}"/>
+        <Setter Property="TextElement.FontWeight" Value="Bold"/>
+        <Setter Property="TextElement.FontSize" Value="12"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tier}" Value="gold">
+                <Setter Property="Background" Value="#FFF4DF"/>
+                <Setter Property="BorderBrush" Value="#F5C46A"/>
+                <Setter Property="TextElement.Foreground" Value="#8A5A00"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tier}" Value="silver">
+                <Setter Property="Background" Value="#EEF1F5"/>
+                <Setter Property="BorderBrush" Value="#C7D0DC"/>
+                <Setter Property="TextElement.Foreground" Value="#44546A"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <DataTemplate x:Key="MgmtTierBadgeTemplate">
+        <Border Style="{StaticResource MgmtTierBadge}">
+            <TextBlock Text="{Binding TierText, StringFormat='Hạng {0}'}"/>
+        </Border>
+    </DataTemplate>
+    
     <!-- Icon nét mảnh đặt trong nút: tự lấy màu chữ của nút -->
     <Style x:Key="MgmtButtonIcon" TargetType="Path">
         <Setter Property="Width" Value="15"/>
@@ -804,7 +843,12 @@
             </DataTrigger>
         </Style.Triggers>
     </Style>
-
+    <!-- Mẫu viên thuốc: dùng với ContentControl Content="{Binding XxxDelta}" -->
+    <DataTemplate x:Key="DeltaPillTemplate">
+        <Border Style="{StaticResource DeltaPill}" ToolTip="{Binding Text}">
+            <TextBlock Text="{Binding Text}" TextTrimming="CharacterEllipsis"/>
+        </Border>
+    </DataTemplate>
     <!-- Nút chọn tab (D/SegmentTab) -->
     <Style x:Key="DashSegment" TargetType="RadioButton">
         <Setter Property="Height" Value="30"/>

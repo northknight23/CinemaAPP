@@ -95,11 +95,9 @@
                                 <StackPanel Margin="0,14,0,0">
                          
                                         <TextBlock Text="{Binding RevenueTodayText}" FontSize="30" FontWeight="Bold"/>
-                                    
-                                    <Border Style="{StaticResource DeltaPill}" Margin="0,6,0,0" DataContext="{Binding RevenueDelta}"
-                                                ToolTip="{Binding Text}">
-                                        <TextBlock Text="{Binding Text}" TextTrimming="CharacterEllipsis"/>
-                                    </Border>
+
+                                    <ContentControl Content="{Binding RevenueDelta}" ContentTemplate="{StaticResource DeltaPillTemplate}"
+                                     Margin="0,6,0,0" Focusable="False"/>
                                     <!-- Cùng cách tính với màn Thống kê doanh thu (RevenueService) -->
                                     <TextBlock Text="Theo đơn lập trong ngày" Margin="0,6,0,0" FontSize="12.5"
                                                Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis"/>
@@ -124,9 +122,8 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
                                         <TextBlock Text="{Binding TicketsTodayText}" FontSize="30" FontWeight="Bold" Height="40"/>
-                                        <Border Style="{StaticResource DeltaPill}" Margin="0,6,0,0" DataContext="{Binding TicketsDelta}">
-                                            <TextBlock Text="{Binding Text}"/>
-                                        </Border>
+                                        <ContentControl Content="{Binding TicketsDelta}" ContentTemplate="{StaticResource DeltaPillTemplate}"
+                                                     Margin="0,6,0,0" Focusable="False"/>
                                     </StackPanel>
                                     <v:SparkLine Grid.Column="1" MaxWidth="110" Height="52" Margin="8,0,0,0" VerticalAlignment="Bottom"
                                                  Values="{Binding TicketsSpark}" Style="{StaticResource TrendSpark}" Tag="{Binding TicketsDelta}"
@@ -152,9 +149,8 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
                                         <TextBlock Text="{Binding OccupancyTodayText}" FontSize="30" FontWeight="Bold" Height="40"/>
-                                        <Border Style="{StaticResource DeltaPill}" Margin="0,6,0,0" DataContext="{Binding OccupancyDelta}">
-                                            <TextBlock Text="{Binding Text}"/>
-                                        </Border>
+                                        <ContentControl Content="{Binding OccupancyDelta}" ContentTemplate="{StaticResource DeltaPillTemplate}"
+                                                     Margin="0,6,0,0" Focusable="False"/>
                                     </StackPanel>
                                     <v:SparkLine Grid.Column="1" MaxWidth="110" Height="52" Margin="8,0,0,0" VerticalAlignment="Bottom"
                                                  Values="{Binding OccupancySpark}" Style="{StaticResource TrendSpark}" Tag="{Binding OccupancyDelta}"/>
@@ -213,10 +209,7 @@
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{Binding TotalTicketsText}" FontSize="34" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    <Border Style="{StaticResource DeltaPill}" Margin="10,0" VerticalAlignment="Center"
-                                            DataContext="{Binding TotalDelta}">
-                                        <TextBlock Text="{Binding Text}"/>
-                                    </Border>
+                                    <ContentControl Content="{Binding TotalDelta}" ContentTemplate="{StaticResource DeltaPillTemplate}" Margin="10,0" Focusable="False"/>
                                     <TextBlock Text="{Binding CompareText}" VerticalAlignment="Center"
                                                Foreground="{StaticResource TextMutedBrush}"/>
                                 </StackPanel>
@@ -331,9 +324,7 @@
                                                           Margin="{Binding PrevPointMargin}"
                                                           Visibility="{Binding HasPrevOccupancy, Converter={StaticResource BoolToVis}}"
                                                           ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="60000">
-                                                        <Grid.RenderTransform>
-                                                            <TranslateTransform X="{Binding PrevPointOffset}"/>
-                                                        </Grid.RenderTransform>
+                                                        
                                                         <Grid.ToolTip>
                                                             <ToolTip Style="{StaticResource NavyTip}">
                                                                 <StackPanel TextElement.FontSize="12.5">
@@ -353,9 +344,6 @@
                                                           HorizontalAlignment="Center" VerticalAlignment="Bottom"
                                                           Margin="{Binding PointMargin}"
                                                           ToolTipService.InitialShowDelay="0" ToolTipService.ShowDuration="60000">
-                                                        <Grid.RenderTransform>
-                                                            <TranslateTransform X="{Binding PointOffset}"/>
-                                                        </Grid.RenderTransform>
                                                         <Grid.ToolTip>
                                                             <ToolTip Style="{StaticResource NavyTip}">
                                                                 <StackPanel TextElement.FontSize="12.5">
