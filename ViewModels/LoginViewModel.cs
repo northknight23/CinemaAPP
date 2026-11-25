@@ -1,4 +1,4 @@
-using System.Windows;
+
 using System.Windows.Input;
 using System.Windows.Threading;
 using CinemaAPP.Helpers;
@@ -66,16 +66,10 @@ namespace CinemaAPP.ViewModels
         public event EventHandler? PasswordCleared;   // xóa ô mật khẩu, con trỏ về ô mật khẩu
         public event EventHandler? FormCleared;       // xóa cả form, con trỏ về ô tên
         public event EventHandler? LoginSucceeded;    // mở màn chính
+        public event EventHandler? ExitRequested;  // thoát app
 
         public LoginViewModel()
         {
-            LoginCommand = new RelayCommand(_ => Login());
-            ClearCommand = new RelayCommand(_ => Clear());
-            ExitCommand = new RelayCommand(_ => Application.Current.Shutdown());
-
-            string? saved = RememberedLogin.Load();
-            if (saved != null) { username = saved; rememberMe = true; }
-
             clock = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             clock.Tick += (s, e) =>
             {
@@ -84,14 +78,30 @@ namespace CinemaAPP.ViewModels
                 OnPropertyChanged(nameof(DateText));
             };
             clock.Start();
-
-            CheckDatabaseAsync();
+            LoginCommand = new RelayCommand(_ => Login());
+            ClearCommand = new RelayCommand(_ => Clear());
+            ExitCommand = new RelayCommand(_ => 
+            {
+                clock.Stop();
+                ExitRequested?.Invoke(this, EventArgs.Empty);
+            });
+            string? saved = RememberedLogin.Load();
+            if (saved != null) { username = saved; rememberMe = true; }
+            _=CheckDatabaseAsync();
         }
 
         // Kiểm tra kết nối ở luồng nền để cửa sổ không bị đơ
-        private async void CheckDatabaseAsync()
+        private async Task CheckDatabaseAsync()
         {
-            bool ok = await Task.Run(() => accountService.CanConnect());
+            bool ok;
+            try
+            {
+                ok = await Task.Run(() => accountService.CanConnect());
+            }
+            catch (Exception)
+            {
+                ok = false;
+            }
             dbConnected = ok;
             OnPropertyChanged(nameof(IsDbChecking));
             OnPropertyChanged(nameof(IsDbConnected));

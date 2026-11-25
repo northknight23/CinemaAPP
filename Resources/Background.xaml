@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ImageBrush x:Key="LoginBackgroundBrush"
-        ImageSource ="/Assets/Login/login.jpg" 
+        ImageSource ="/Assets/Login/login_background.jpg" 
         Stretch="UniformToFill"
         AlignmentX="Center"
         AlignmentY="Center"/>

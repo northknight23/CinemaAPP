@@ -4,7 +4,7 @@
         Title="UIT Cinema – Đăng nhập"
         WindowState="Maximized"
         MinWidth="1100" MinHeight="720"
-        FontFamily="Segoe UI" Background="White">
+        FontFamily="Segoe UI" Background="{StaticResource CardBrush}">
 
     <!-- Esc = xóa trắng form (Enter = Đăng nhập nhờ IsDefault ở nút) -->
     <Window.InputBindings>
@@ -19,15 +19,15 @@
             <Setter Property="Height" Value="50"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#D5E3F3"/>
-            <Setter Property="Background" Value="#F7FAFE"/>
+            <Setter Property="BorderBrush" Value="{StaticResource OnNavyBrush}"/>
+            <Setter Property="Background" Value="{StaticResource InputBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="BorderBrush" Value="#A9C9EC"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource InputHoverBrush}"/>
                 </Trigger>
                 <Trigger Property="IsKeyboardFocusWithin" Value="True">
                     <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
-                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="Background" Value="{StaticResource CardBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -65,19 +65,91 @@
             <Setter Property="StrokeEndLineCap" Value="Round"/>
             <Setter Property="StrokeLineJoin" Value="Round"/>
         </Style>
-        <!-- Icon trong dải phim -->
-        <Style x:Key="FilmIcon" TargetType="Shape">
-            <Setter Property="Stroke" Value="#6EA8E6"/>
-            <Setter Property="StrokeThickness" Value="1.5"/>
-            <Setter Property="StrokeStartLineCap" Value="Round"/>
-            <Setter Property="StrokeEndLineCap" Value="Round"/>
-            <Setter Property="StrokeLineJoin" Value="Round"/>
+        <!-- Lỗ răng cưa của phim: một ô 24x20, lặp ngang -->
+        <DrawingBrush x:Key="FilmHoles" TileMode="Tile" Stretch="None"
+              Viewport="0,0,24,20" ViewportUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="Transparent">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0,0,24,20"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="{StaticResource OnNavyBrush}">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="7,6,10,8" RadiusX="2" RadiusY="2"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <!-- Một khung hình: 108 + 6 + 6 = 120px -->
+        <Style x:Key="FilmFrame" TargetType="Border">
+            <Setter Property="Width" Value="132"/>
+            <Setter Property="Margin" Value="6"/>
+            <Setter Property="CornerRadius" Value="4"/>
         </Style>
+
+        <!-- Một đoạn phim: 8 khung x 120 = 960px (bội số của 24 để lỗ răng cưa khớp) -->
+        <ControlTemplate x:Key="FilmSegment" TargetType="ContentControl">
+            <Grid Width="1152" Height="220" Background="{StaticResource NavyDarkBrush}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="20"/>
+                </Grid.RowDefinitions>
+                <Rectangle Fill="{StaticResource FilmHoles}" Opacity="0.35"/>
+                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                    <Border Style="{StaticResource FilmFrame}">
+                        <Border.Background>
+                            <ImageBrush ImageSource="/Assets/Posters/dune-2.jpg" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                    <Border Style="{StaticResource FilmFrame}">
+                        <Border.Background>
+                            <ImageBrush ImageSource="/Assets/Posters/godzilla-minus-zero.jpg" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                    <Border Style="{StaticResource FilmFrame}">
+                        <Border.Background>
+                            <ImageBrush ImageSource="/Assets/Posters/trai-buon-nguoi.jpg" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                    <Border Style="{StaticResource FilmFrame}">
+                        <Border.Background>
+                            <ImageBrush ImageSource="/Assets/Posters/the-hunger-games-sunrise-on-the-reaping.jpg" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                    <Border Style="{StaticResource FilmFrame}">
+                        <Border.Background>
+                            <ImageBrush ImageSource="/Assets/Posters/me-min.jpg" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                    <Border Style="{StaticResource FilmFrame}">
+                        <Border.Background>
+                            <ImageBrush ImageSource="/Assets/Posters/clayface.jpg" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                    <Border Style="{StaticResource FilmFrame}">
+                        <Border.Background>
+                            <ImageBrush ImageSource="/Assets/Posters/chi-chi-em-em-3.jpg" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                    <Border Style="{StaticResource FilmFrame}">
+                        <Border.Background>
+                            <ImageBrush ImageSource="/Assets/Posters/the-cat-in-the-hat.jpg" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                </StackPanel>
+                <Rectangle Grid.Row="2" Fill="{StaticResource FilmHoles}" Opacity="0.35"/>
+            </Grid>
+        </ControlTemplate>
         <!-- Nút Đăng nhập: ControlTemplate riêng để màu khi di chuột hoạt động đúng -->
         <Style x:Key="PrimaryButton" TargetType="Button">
             <Setter Property="Height" Value="52"/>
             <Setter Property="Background" Value="{StaticResource AccentBrush}"/>
-            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Foreground" Value="{StaticResource CardBrush}"/>
             <Setter Property="FontSize" Value="16"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -92,7 +164,7 @@
                                 <Setter TargetName="bd" Property="Background" Value="{StaticResource PrimaryHoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#134B87"/>
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource PrimaryPressBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -116,7 +188,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="#F1F5FA"/>
+                                <Setter TargetName="bd" Property="Background" Value="{StaticResource HoverBgBrush}"/>
                                 <Setter Property="Foreground" Value="{StaticResource NavyBrush}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -127,13 +199,13 @@
 
         <!-- Nhãn trạng thái kết nối: đổi màu theo dữ liệu (DataTrigger) -->
         <Style x:Key="StatusPill" TargetType="Border">
-            <Setter Property="Background" Value="#F1F5FA"/>
+            <Setter Property="Background" Value="{StaticResource HoverBgBrush}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsDbConnected}" Value="True">
-                    <Setter Property="Background" Value="#EEF7F0"/>
+                    <Setter Property="Background" Value="{StaticResource SuccessBgBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsDbFailed}" Value="True">
-                    <Setter Property="Background" Value="#FDECEC"/>
+                    <Setter Property="Background" Value="{StaticResource ErrorBgBrush}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -141,21 +213,21 @@
             <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsDbConnected}" Value="True">
-                    <Setter Property="Foreground" Value="#166534"/>
+                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsDbFailed}" Value="True">
-                    <Setter Property="Foreground" Value="#B91C1C"/>
+                    <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
         <Style x:Key="StatusDot" TargetType="Ellipse">
-            <Setter Property="Fill" Value="#9AA6B2"/>
+            <Setter Property="Fill" Value="{StaticResource NeutralDotBrush}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsDbConnected}" Value="True">
-                    <Setter Property="Fill" Value="#22A35A"/>
+                    <Setter Property="Fill" Value="{StaticResource SuccessDotBrush}"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsDbFailed}" Value="True">
-                    <Setter Property="Fill" Value="#DC2626"/>
+                    <Setter Property="Fill" Value="{StaticResource DangerBrush}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -188,23 +260,48 @@
                 <!-- Tiêu đề + mô tả -->
                 <Viewbox Grid.Row="1" Stretch="Uniform" StretchDirection="UpOnly" MaxWidth="680"
                          HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,24">
-                    <StackPanel Width="380">
+                    <StackPanel  Width="380">
                         <TextBlock Text="Hệ thống quản lý rạp chiếu phim" FontSize="40" FontWeight="Bold"
-                                   Foreground="White" TextWrapping="Wrap" LineHeight="48"/>
+                                   Foreground="{StaticResource CardBrush}" TextWrapping="Wrap" LineHeight="48"/>
                         <TextBlock Margin="0,16,0,0" FontSize="16" Foreground="{StaticResource OnNavyMutedBrush}"
                                    TextWrapping="Wrap" LineHeight="26"
                                    Text="Bán vé, quản lý suất chiếu và phòng chiếu — dành cho nhân viên quầy vé và quản trị viên."/>
                     </StackPanel>
                 </Viewbox>
-               
+                <!-- Dải phim chạy ngang -->
+                <Canvas Grid.Row="2" Height="220" Margin="-56,0" VerticalAlignment="Center"
+        ClipToBounds="True" Opacity="0.9" RenderTransformOrigin="0.5,0.5">
+                    <Canvas.RenderTransform>
+                        <RotateTransform Angle="-6.5"/>
+                    </Canvas.RenderTransform>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel.RenderTransform>
+                            <TranslateTransform/>
+                        </StackPanel.RenderTransform>
+                        <StackPanel.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <!-- To = -(độ rộng 1 đoạn) ; Duration càng lớn chạy càng chậm -->
+                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                         From="0" To="-1152" Duration="0:0:24" RepeatBehavior="Forever"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </StackPanel.Triggers>
+                        <ContentControl Template="{StaticResource FilmSegment}"/>
+                        <ContentControl Template="{StaticResource FilmSegment}"/>
+                        <ContentControl Template="{StaticResource FilmSegment}"/>
+                    </StackPanel>
+                </Canvas>
                 <!-- Đồng hồ (trái) + phiên bản (phải) -->
                 <DockPanel Grid.Row="3" LastChildFill="False">
                     <StackPanel DockPanel.Dock="Left">
-                        <TextBlock Text="{Binding TimeText}" FontSize="44" FontWeight="Light" Foreground="White"/>
+                        <TextBlock Text="{Binding TimeText}" FontSize="44" FontWeight="Light" Foreground="{StaticResource CardBrush}"/>
                         <TextBlock Text="{Binding DateText}" Margin="0,6,0,0" FontSize="14" FontWeight="Medium"
                                    Foreground="{StaticResource OnNavyMutedBrush}"/>
                     </StackPanel>
-                    <TextBlock DockPanel.Dock="Right" VerticalAlignment="Bottom" FontSize="12" Foreground="#8FB0D4"
+                    <TextBlock DockPanel.Dock="Right" VerticalAlignment="Bottom" FontSize="12" Foreground="{StaticResource OnNavyFaintBrush}"
                                Text="Phiên bản 1.0 · Đồ án Lập Trình Trực Quan"/>
                 </DockPanel>
             </Grid>
@@ -227,15 +324,19 @@
                         <TextBlock Text="Nhập tài khoản được cấp để tiếp tục." Margin="0,8,0,24" FontSize="15" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
 
                         <!-- Thông báo lỗi: chỉ hiện khi HasMessage = true -->
-                        <Border Background="#FDECEC" CornerRadius="12" Padding="14,12" Margin="0,0,0,20"
+                        <Border Background="{StaticResource ErrorBgBrush}" CornerRadius="12" Padding="14,12" Margin="0,0,0,20"
             Visibility="{Binding HasMessage, Converter={StaticResource BoolToVisibility}}">
-                            <StackPanel Orientation="Horizontal">
-                                <Viewbox Width="18" Height="18" VerticalAlignment="Center">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Width="18" Height="18" VerticalAlignment="Center" Grid.Column="0">
                                     <ContentControl Content="{StaticResource IconAlert }"/>
                                 </Viewbox>
-                                <TextBlock Text="{Binding Message}" Margin="10,0,0,0" FontSize="14" FontWeight="Medium"
-                       Foreground="#B91C1C" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                            </StackPanel>
+                                <TextBlock Grid.Column="1" Text="{Binding Message}" Margin="10,0,0,0" FontSize="14" FontWeight="Medium" 
+                                           Foreground="#B91C1C" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            </Grid>
                         </Border>
 
                         <!-- Ô tên đăng nhập -->
@@ -294,7 +395,7 @@
                         </Border>
 
                         <CheckBox Content="Ghi nhớ tên đăng nhập" IsChecked="{Binding RememberMe}" Margin="0,16,0,20"
-              FontSize="14" Foreground="#33475E" VerticalContentAlignment="Center" Cursor="Hand"/>
+              FontSize="14" Foreground="{StaticResource TextMutedBrush}" VerticalContentAlignment="Center" Cursor="Hand"/>
 
                         <Button Content="Đăng nhập" Style="{StaticResource PrimaryButton}" IsDefault="True"
             Command="{Binding LoginCommand}"/>
