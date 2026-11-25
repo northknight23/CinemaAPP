@@ -1,5 +1,7 @@
 using System.Data;
+using System.Globalization;
 using CinemaAPP.Data;
+using CinemaAPP.Helpers;
 using CinemaAPP.Models;
 using CinemaAPP.ViewModels;
 using Microsoft.Data.SqlClient;
@@ -130,6 +132,32 @@ namespace CinemaAPP.Services
             return items;
         }
 
+        // Gom ghế thành từng hàng kèm lối đi và trạng thái đã bán (dùng chung cho cả Bán vé và Quản lý phòng).
+        public static List<SeatRowItem> BuildSeatRows(
+            IReadOnlyList<PhysicalSeat> seats,
+            decimal basePrice,
+            IReadOnlySet<int>? soldSeatIds = null)
+        {
+            var items = BuildSeatItems(seats, basePrice);
+            var rows = new List<SeatRowItem>();
+            foreach (var group in items.GroupBy(s => s.RowLabel))
+            {
+                var row = new SeatRowItem { RowLabel = group.Key };
+                int lastNumber = seats.Where(s => s.Row == group.Key).Max(s => s.Number);
+                foreach (var seat in group)
+                {
+                    int number = int.Parse(seat.NumberText.Split('-')[0], CultureInfo.InvariantCulture);
+                    if (lastNumber >= 6 && (number == 3 || number == lastNumber - 1))
+                        row.Seats.Add(SeatItem.Aisle());
+                    if (soldSeatIds != null)
+                        seat.IsSold = seat.SeatIDs.Any(soldSeatIds.Contains);
+                    row.Seats.Add(seat);
+                }
+                rows.Add(row);
+            }
+            return rows;
+        }
+
         public BookingResult CreateBooking(int accountId, int showtimeId, int? customerId,
             PaymentMethod method, decimal cashGiven, int pointsUsed, IReadOnlyList<SeatQuote> requestedSeats)
         {
@@ -245,6 +273,7 @@ namespace CinemaAPP.Services
                 var printable = new PrintableTicket(show, age, fullName, method, customerId.HasValue, pointsUsed,
                     selected.Select(s => new TicketSeat(s.Label, s.Type, s.Price)).ToArray(), sale);
                 tx.Commit();
+                CinemaSync.NotifyBookingsChanged();
                 return new BookingResult(sale, printable);
             }
             catch (SqlException ex) when (ex.Number is 2601 or 2627)
@@ -354,6 +383,7 @@ namespace CinemaAPP.Services
             cancel.Parameters.Add("@Booking", SqlDbType.Int).Value = bookingId;
             cancel.ExecuteNonQuery();
             tx.Commit();
+            CinemaSync.NotifyBookingsChanged();
         }
     }
 }
