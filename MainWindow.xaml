@@ -10,10 +10,6 @@
         FontFamily="Segoe UI"
         Background="{StaticResource PageBrush}">
 
-    <Window.DataContext>
-        <vm:MainViewModel />
-    </Window.DataContext>
-
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -231,7 +227,7 @@
                                                Foreground="White"
                                                FontWeight="Bold"
                                                FontSize="13"
-                                               HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10"/>
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel Margin="10,0,6,0" VerticalAlignment="Center" HorizontalAlignment="Left">
                                     <TextBlock Text="{Binding UserFullName}"
@@ -292,6 +288,31 @@
                     </ContentControl.Style>
                 </ContentControl>
             </Grid>
+        </Grid>
+
+        <!-- ================= HỘP THOẠI XÁC NHẬN ĐĂNG XUẤT ================= -->
+        <Grid Grid.ColumnSpan="2"
+              Visibility="{Binding IsLogoutConfirmOpen, Converter={StaticResource BoolToVis}}"
+              Background="#66000000">
+            <Border Width="400" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Style="{StaticResource MgmtCard}" Padding="24" Background="{StaticResource CardBrush}">
+                <StackPanel>
+                    <TextBlock Text="Xác nhận đăng xuất" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                    <TextBlock Text="Bạn có chắc muốn đăng xuất khỏi phiên làm việc hiện tại?"
+                               Style="{StaticResource MgmtHint}" Margin="0,8,0,0" FontSize="13.5"/>
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Ở lại" Style="{StaticResource MgmtGhostButton}"
+                                Command="{Binding CancelLogoutCommand}"/>
+                        <Button Grid.Column="2" Content="Đăng xuất" Style="{StaticResource MgmtDangerSolidButton}"
+                                Height="44" Command="{Binding ConfirmLogoutCommand}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </Window>
