@@ -290,10 +290,7 @@ namespace CinemaAPP.ViewModels
             foreach (Account a in all) a.IsSelf = a.AccountID == selfId;
 
             MonthOrdersValue = Format.Number(month.ThisMonth);
-            decimal pct = month.LastMonth == 0
-                ? (month.ThisMonth > 0 ? 100 : 0)
-                : (month.ThisMonth - month.LastMonth) * 100m / month.LastMonth;
-            MonthOrdersTrendText = Math.Abs(pct).ToString("N2", Format.Vi) + "%";
+            MonthOrdersTrendText = Format.Change(month.ThisMonth, month.LastMonth);
             MonthOrdersTrendUp = month.ThisMonth >= month.LastMonth;
 
             foreach (string p in new[]

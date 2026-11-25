@@ -86,76 +86,21 @@
                 <Setter Property="Stroke" Value="{Binding Path=(TextElement.Foreground), RelativeSource={RelativeSource Self}}"/>
                 <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
                 <Setter Property="RenderTransform">
-                    <Setter.Value><RotateTransform Angle="180"/></Setter.Value>
+                    <Setter.Value>
+                        <RotateTransform Angle="180"/>
+                    </Setter.Value>
                 </Setter>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource AncestorType=StackPanel}}" Value="True">
                         <Setter Property="RenderTransform">
-                            <Setter.Value><RotateTransform Angle="0"/></Setter.Value>
+                            <Setter.Value>
+                                <RotateTransform Angle="0"/>
+                            </Setter.Value>
                         </Setter>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-
-            <!-- ===== Avatar nhiều màu: màu chọn theo Customer.AvatarTone (0–5) ===== -->
-            <Style x:Key="ToneAvatar" TargetType="Border">
-                <Setter Property="Width" Value="40"/>
-                <Setter Property="Height" Value="40"/>
-                <Setter Property="CornerRadius" Value="20"/>
-                <Setter Property="Background" Value="#EAF2FC"/>
-                <Setter Property="TextElement.Foreground" Value="#164F8F"/>
-                <Setter Property="TextElement.FontWeight" Value="Bold"/>
-                <Setter Property="TextElement.FontSize" Value="13.5"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding AvatarTone}" Value="1">
-                        <Setter Property="Background" Value="#FFF4DF"/>
-                        <Setter Property="TextElement.Foreground" Value="#9A3412"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding AvatarTone}" Value="2">
-                        <Setter Property="Background" Value="#EEF7F0"/>
-                        <Setter Property="TextElement.Foreground" Value="#166534"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding AvatarTone}" Value="3">
-                        <Setter Property="Background" Value="#F1ECFC"/>
-                        <Setter Property="TextElement.Foreground" Value="#5B3FB0"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding AvatarTone}" Value="4">
-                        <Setter Property="Background" Value="#FDECEC"/>
-                        <Setter Property="TextElement.Foreground" Value="#B91C1C"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding AvatarTone}" Value="5">
-                        <Setter Property="Background" Value="#E6F6F8"/>
-                        <Setter Property="TextElement.Foreground" Value="#0E6773"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
-            <!-- ===== Nhãn hạng: Thường / Bạc / Vàng (theo Customer.Tier) ===== -->
-            <Style x:Key="TierBadge" TargetType="Border">
-                <Setter Property="CornerRadius" Value="12"/>
-                <Setter Property="Padding" Value="10,2,10,3"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="HorizontalAlignment" Value="Left"/>
-                <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="Background" Value="{StaticResource CardBrush}"/>
-                <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
-                <Setter Property="TextElement.Foreground" Value="{StaticResource TextMutedBrush}"/>
-                <Setter Property="TextElement.FontWeight" Value="Bold"/>
-                <Setter Property="TextElement.FontSize" Value="12"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding Tier}" Value="gold">
-                        <Setter Property="Background" Value="#FFF4DF"/>
-                        <Setter Property="BorderBrush" Value="#F5C46A"/>
-                        <Setter Property="TextElement.Foreground" Value="#8A5A00"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding Tier}" Value="silver">
-                        <Setter Property="Background" Value="#EEF1F5"/>
-                        <Setter Property="BorderBrush" Value="#C7D0DC"/>
-                        <Setter Property="TextElement.Foreground" Value="#44546A"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
+            
             <!-- Điểm: có điểm → nhãn vàng; 0 điểm → chữ xám -->
             <Style x:Key="PointsPill" TargetType="Border">
                 <Setter Property="CornerRadius" Value="8"/>
@@ -205,7 +150,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Margin="28,22,28,24">
+    <Grid Margin="0,8,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -215,17 +160,9 @@
 
         <!-- ===================== TIÊU ĐỀ + TÌM KIẾM ===================== -->
         <Grid Margin="0,0,0,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel VerticalAlignment="Bottom">
-                <TextBlock Style="{StaticResource MgmtBreadcrumb}" Text="Bán hàng › Khách hàng"/>
-                <TextBlock Style="{StaticResource MgmtPageTitle}" Text="Khách hàng thành viên"/>
-                <TextBlock Style="{StaticResource MgmtHint}" Margin="0,2,0,0"
-                           Text="1 điểm cho mỗi 10.000 đ · hạng tính theo tổng chi tiêu"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="16,0,0,0">
+            
+   
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" >
                 <TextBox Style="{StaticResource MgmtSearchBox}" Width="420" Height="48" FontSize="15"
                          Tag="Nhập số điện thoại hoặc tên khách…"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
@@ -401,14 +338,14 @@
                                         <ColumnDefinition Width="110"/>
                                         <ColumnDefinition Width="112"/>
                                     </Grid.ColumnDefinitions>
-                                    <Border Style="{StaticResource ToneAvatar}" HorizontalAlignment="Left">
-                                        <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Border Style="{StaticResource MgmtToneAvatar}" HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="17" FontWeight="Bold"/>
                                     </Border>
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
                                         <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
                                         <TextBlock Text="{Binding PhoneText}" FontSize="12.5" Foreground="{StaticResource TextMutedBrush}"/>
                                     </StackPanel>
-                                    <Border Grid.Column="2" Style="{StaticResource TierBadge}">
+                                    <Border Grid.Column="2" Style="{StaticResource MgmtTierBadge}">
                                         <TextBlock Text="{Binding TierText}"/>
                                     </Border>
                                     <Border Grid.Column="3" Style="{StaticResource PointsPill}">
@@ -457,17 +394,14 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Border DataContext="{Binding Current}" Style="{StaticResource ToneAvatar}"
-                                        Width="64" Height="64" CornerRadius="32" TextElement.FontSize="21">
-                                    <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
+                                <ContentControl Content="{Binding Current}" ContentTemplate="{StaticResource MgmtProfileAvatar}" Focusable="False"/>
+                               
                                 <StackPanel Grid.Column="1" Margin="14,0,8,0" VerticalAlignment="Center">
                                     <WrapPanel>
                                         <TextBlock Text="{Binding Current.FullName}" FontSize="20" FontWeight="Bold"
                                                    Margin="0,0,8,2" TextWrapping="Wrap"/>
-                                        <Border DataContext="{Binding Current}" Style="{StaticResource TierBadge}" Margin="0,0,0,2">
-                                            <TextBlock Text="{Binding TierText, StringFormat='Hạng {0}'}"/>
-                                        </Border>
+                                        <ContentControl Content="{Binding Current}" ContentTemplate="{StaticResource MgmtTierBadgeTemplate}"
+                                            Margin="0,0,0,2" Focusable="False"/>
                                     </WrapPanel>
                                     <TextBlock Text="{Binding Current.PhoneText}" Foreground="{StaticResource TextMutedBrush}"/>
                                 </StackPanel>

@@ -26,10 +26,14 @@
     <SolidColorBrush x:Key="IconBrush"         Color="#5F6B7A"/>
     <SolidColorBrush x:Key="OnNavyBrush"       Color="#FFFFFF"/>
     <SolidColorBrush x:Key="OnNavyMutedBrush"  Color="#A9C3E0"/>
+    <SolidColorBrush x:Key="OnNavyFaintBrush"  Color="#8FB0D4"/>
+    <SolidColorBrush x:Key="HoverBgBrush"      Color="#F1F5FA"/>
 
     <!-- ===== Trạng thái ===== -->
     <SolidColorBrush x:Key="SuccessBgBrush"    Color="#EEF7F0"/>
     <SolidColorBrush x:Key="SuccessBrush"      Color="#166534"/>
+    <SolidColorBrush x:Key="SuccessDotBrush"   Color="#22A35A"/>
+    <SolidColorBrush x:Key="NeutralDotBrush"   Color="#9AA6B2"/>    
     <SolidColorBrush x:Key="ErrorBgBrush"      Color="#FDECEC"/>
     <SolidColorBrush x:Key="ErrorBrush"        Color="#B91C1C"/>
     <SolidColorBrush x:Key="DangerBrush"       Color="#DC2626"/>

@@ -23,6 +23,7 @@ namespace CinemaAPP.Views
                 main.Show();
                 Close();
             };
+            vm.ExitRequested += (s, e) => Application.Current.Shutdown();
 
             // Mở lên: đã nhớ tên thì con trỏ ở ô mật khẩu, chưa thì ở ô tên
             Loaded += (s, e) =>

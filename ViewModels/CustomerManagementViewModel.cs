@@ -321,12 +321,10 @@ namespace CinemaAPP.ViewModels
                 OnPropertyChanged(p);
         }
 
-        // "25,00%" + tăng/giảm. Kỳ trước = 0 mà nay có số → coi như tăng 100%.
+    
+        // Chữ % + tăng/giảm. Kỳ trước = 0 → "Mới" (xem Format.Change)
         private static (string Text, bool Up) Trend(decimal now, decimal before)
-        {
-            decimal pct = before == 0 ? (now > 0 ? 100 : 0) : (now - before) * 100m / before;
-            return (Math.Abs(pct).ToString("N2", Format.Vi) + "%", now >= before);
-        }
+            => (Format.Change(now, before), now >= before);
 
         private static decimal? NextTierAt(Customer c) => c.Tier switch
         {

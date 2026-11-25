@@ -13,5 +13,18 @@ namespace CinemaAPP.Models
 
         // 19.850.000 → "19,9" (đơn vị triệu, dùng trên cột biểu đồ)
         public static string Million(decimal amount) => (amount / 1_000_000m).ToString("0.0", Vi);
+
+        // Tỷ lệ thay đổi so với kỳ trước — dùng chung cho Tổng quan, Khách hàng, Tài khoản.
+        // Kỳ trước = 0: không chia được → nay có số thì "Mới", nay cũng 0 thì "0%".
+        // signed = true  → "+12,5%" / "-3%"      (Tổng quan: không có mũi tên nên cần dấu)
+        // signed = false → "12,5%"               (Khách hàng, Tài khoản: đã có mũi tên ↑↓)
+        public static string Change(decimal now, decimal before, bool signed = false)
+        {
+            if (before == 0) return now == 0 ? "0%" : "Mới";
+            decimal pct = Math.Round((now - before) * 100m / before, 1);
+            if (!signed) pct = Math.Abs(pct);
+            string sign = signed && pct > 0 ? "+" : "";
+            return sign + pct.ToString("0.#", Vi) + "%";
+        }
     }
 }

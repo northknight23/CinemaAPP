@@ -137,6 +137,7 @@ namespace CinemaAPP.ViewModels
             }
         }
         public bool HasMessage => message.Length > 0;
+        public bool IsMessageError => true;
 
         // ================= Lệnh =================
         public ICommand ApplyCustomCommand { get; }
