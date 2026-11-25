@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,11 +14,8 @@ namespace CinemaAPP.ViewModels
     {
         private readonly MovieService service = new();
         private List<Movie> allMovies = new();
-        private Movie? editingMovie;
+        private bool isBusy;
 
-        public ObservableCollection<Movie> FilteredMovies { get; } = new();
-
-        // ================= Tìm kiếm & Lọc =================
         private string searchText = "";
         public string SearchText
         {
@@ -30,7 +27,7 @@ namespace CinemaAPP.ViewModels
             }
         }
 
-        private string filterStatus = "All"; // All | NowShowing | ComingSoon | Ended
+        private string filterStatus = "All";
         public string FilterStatus
         {
             get => filterStatus;
@@ -57,7 +54,25 @@ namespace CinemaAPP.ViewModels
         public string CountComingSoonText => $"Sắp chiếu ({allMovies.Count(m => m.MovieStatus == "Sắp chiếu")})";
         public string CountEndedText => $"Ngừng chiếu ({allMovies.Count(m => m.MovieStatus == "Ngừng chiếu")})";
 
-        // ================= Form Thêm / Sửa =================
+        public ObservableCollection<Movie> FilteredMovies { get; } = new();
+
+        // ================= Banner thông báo (chung cho trang) =================
+        private string bannerMessage = "";
+        public string BannerMessage
+        {
+            get => bannerMessage;
+            set { if (SetProperty(ref bannerMessage, value)) OnPropertyChanged(nameof(ShowBanner)); }
+        }
+        public bool ShowBanner => !string.IsNullOrEmpty(BannerMessage);
+
+        private bool isMessageError;
+        public bool IsMessageError
+        {
+            get => isMessageError;
+            set => SetProperty(ref isMessageError, value);
+        }
+
+        // ================= Biểu mẫu Thêm / Chỉnh sửa =================
         private bool isEditorOpen;
         public bool IsEditorOpen
         {
@@ -71,6 +86,16 @@ namespace CinemaAPP.ViewModels
             get => editorTitle;
             set => SetProperty(ref editorTitle, value);
         }
+
+        private string editorError = "";
+        public string EditorError
+        {
+            get => editorError;
+            set { if (SetProperty(ref editorError, value)) OnPropertyChanged(nameof(HasEditorError)); }
+        }
+        public bool HasEditorError => editorError.Length > 0;
+
+        private Movie? editingMovie;
 
         private string formTitle = "";
         public string FormTitle
@@ -86,11 +111,11 @@ namespace CinemaAPP.ViewModels
             set => SetProperty(ref formGenre, value);
         }
 
-        private int formDuration = 100;
-        public int FormDuration
+        private string formDurationText = "100";
+        public string FormDurationText
         {
-            get => formDuration;
-            set { if (SetProperty(ref formDuration, value)) DurationError = ""; }
+            get => formDurationText;
+            set { if (SetProperty(ref formDurationText, value)) DurationError = ""; }
         }
 
         private string formAgeRating = "P";
@@ -107,8 +132,8 @@ namespace CinemaAPP.ViewModels
             set => SetProperty(ref formMovieStatus, value);
         }
 
-        private DateTime formReleaseDate = DateTime.Today;
-        public DateTime FormReleaseDate
+        private DateTime? formReleaseDate = DateTime.Today;
+        public DateTime? FormReleaseDate
         {
             get => formReleaseDate;
             set => SetProperty(ref formReleaseDate, value);
@@ -144,17 +169,36 @@ namespace CinemaAPP.ViewModels
         }
         public bool HasDurationError => durationError.Length > 0;
 
-        public List<string> AgeRatingOptions { get; } = new() { "P", "T13", "T16", "T18" };
+        // Khớp với CK_MOVIE_AGERATING và CK_MOVIE_STATUS trong CinemaDB.sql
+        public List<string> AgeRatingOptions { get; } = new() { "P", "K", "T13", "T16", "T18", "C" };
         public List<string> MovieStatusOptions { get; } = new() { "Đang chiếu", "Sắp chiếu", "Ngừng chiếu" };
+
+        // ================= Xác nhận xóa phim =================
+        private bool isDeleteConfirmOpen;
+        public bool IsDeleteConfirmOpen
+        {
+            get => isDeleteConfirmOpen;
+            set => SetProperty(ref isDeleteConfirmOpen, value);
+        }
+
+        private Movie? movieToDelete;
+        public Movie? MovieToDelete
+        {
+            get => movieToDelete;
+            set => SetProperty(ref movieToDelete, value);
+        }
 
         // ================= Lệnh =================
         public ICommand SetFilterCommand { get; }
         public ICommand NewMovieCommand { get; }
         public ICommand EditMovieCommand { get; }
         public ICommand DeleteMovieCommand { get; }
+        public ICommand ConfirmDeleteCommand { get; }
+        public ICommand CancelDeleteCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
         public ICommand ReloadCommand { get; }
+        public ICommand DismissBannerCommand { get; }
 
         public MovieManagementViewModel()
         {
@@ -175,21 +219,51 @@ namespace CinemaAPP.ViewModels
             DeleteMovieCommand = new RelayCommand(p =>
             {
                 if (p is Movie m)
-                    DeleteMovie(m);
+                {
+                    MovieToDelete = m;
+                    IsDeleteConfirmOpen = true;
+                }
             });
 
-            SaveCommand = new RelayCommand(_ => SaveMovie());
+            ConfirmDeleteCommand = new RelayCommand(async _ => await ConfirmDeleteAsync());
+            CancelDeleteCommand = new RelayCommand(_ =>
+            {
+                IsDeleteConfirmOpen = false;
+                MovieToDelete = null;
+            });
+
+            SaveCommand = new RelayCommand(async _ => await SaveMovieAsync());
             CancelCommand = new RelayCommand(_ => IsEditorOpen = false);
             ReloadCommand = new RelayCommand(async _ => await LoadDataAsync());
+            DismissBannerCommand = new RelayCommand(_ => BannerMessage = "");
 
             _ = LoadDataAsync();
         }
 
         public async Task LoadDataAsync()
         {
-            allMovies = await Task.Run(() => service.GetAll());
-            UpdateCounts();
-            ApplyFilter();
+            try
+            {
+                var loaded = await Task.Run(() => service.GetAll());
+                allMovies = loaded;
+                UpdateCounts();
+                ApplyFilter();
+                if (IsMessageError)
+                    BannerMessage = "";
+            }
+            catch (Exception ex)
+            {
+                allMovies = new List<Movie>();
+                UpdateCounts();
+                ApplyFilter();
+                ShowBannerMessage("Không tải được danh sách phim từ SQL Server: " + ex.Message, isError: true);
+            }
+        }
+
+        private void ShowBannerMessage(string text, bool isError)
+        {
+            IsMessageError = isError;
+            BannerMessage = text;
         }
 
         private void UpdateCounts()
@@ -232,7 +306,7 @@ namespace CinemaAPP.ViewModels
             EditorTitle = "Thêm phim mới";
             FormTitle = "";
             FormGenre = "Hành động";
-            FormDuration = 100;
+            FormDurationText = "100";
             FormAgeRating = "P";
             FormMovieStatus = "Đang chiếu";
             FormReleaseDate = DateTime.Today;
@@ -240,6 +314,7 @@ namespace CinemaAPP.ViewModels
             FormPosterPath = "";
             TitleError = "";
             DurationError = "";
+            EditorError = "";
             IsEditorOpen = true;
         }
 
@@ -249,74 +324,114 @@ namespace CinemaAPP.ViewModels
             EditorTitle = "Chỉnh sửa thông tin phim";
             FormTitle = m.Title;
             FormGenre = m.Genre;
-            FormDuration = m.DurationMin;
-            FormAgeRating = m.AgeRating;
-            FormMovieStatus = m.MovieStatus;
+            FormDurationText = m.DurationMin.ToString();
+            FormAgeRating = AgeRatingOptions.Contains(m.AgeRating) ? m.AgeRating : "P";
+            FormMovieStatus = MovieStatusOptions.Contains(m.MovieStatus) ? m.MovieStatus : "Đang chiếu";
             FormReleaseDate = m.ReleaseDate ?? DateTime.Today;
             FormDescription = m.MovieDescription ?? "";
             FormPosterPath = m.PosterPath ?? "";
             TitleError = "";
             DurationError = "";
+            EditorError = "";
             IsEditorOpen = true;
         }
 
-        private void SaveMovie()
+        private async Task SaveMovieAsync()
         {
+            if (isBusy) return;
+
+            TitleError = "";
+            DurationError = "";
+            EditorError = "";
+
             if (string.IsNullOrWhiteSpace(FormTitle))
             {
                 TitleError = "Vui lòng nhập tên phim.";
                 return;
             }
 
-            if (FormDuration <= 0)
+            if (!int.TryParse(FormDurationText.Trim(), out int duration) || duration <= 0)
             {
-                DurationError = "Thời lượng phim phải lớn hơn 0.";
+                DurationError = "Thời lượng phim phải là số nguyên lớn hơn 0.";
                 return;
             }
 
-            if (editingMovie == null)
+            var candidate = new Movie
             {
-                var newMovie = new Movie
+                MovieID = editingMovie?.MovieID ?? 0,
+                Title = FormTitle.Trim(),
+                Genre = FormGenre.Trim(),
+                DurationMin = duration,
+                AgeRating = FormAgeRating,
+                MovieStatus = FormMovieStatus,
+                ReleaseDate = FormReleaseDate,
+                MovieDescription = string.IsNullOrWhiteSpace(FormDescription) ? null : FormDescription.Trim(),
+                PosterPath = string.IsNullOrWhiteSpace(FormPosterPath) ? null : FormPosterPath.Trim()
+            };
+
+            isBusy = true;
+            try
+            {
+                await Task.Run(() => service.Save(candidate));
+
+                if (editingMovie == null)
                 {
-                    Title = FormTitle.Trim(),
-                    Genre = FormGenre.Trim(),
-                    DurationMin = FormDuration,
-                    AgeRating = FormAgeRating,
-                    MovieStatus = FormMovieStatus,
-                    ReleaseDate = FormReleaseDate,
-                    MovieDescription = FormDescription.Trim(),
-                    PosterPath = string.IsNullOrWhiteSpace(FormPosterPath) ? null : FormPosterPath.Trim()
-                };
+                    allMovies.Add(candidate);
+                    ShowBannerMessage($"Đã thêm phim \"{candidate.Title}\".", isError: false);
+                }
+                else
+                {
+                    editingMovie.Title = candidate.Title;
+                    editingMovie.Genre = candidate.Genre;
+                    editingMovie.DurationMin = candidate.DurationMin;
+                    editingMovie.AgeRating = candidate.AgeRating;
+                    editingMovie.MovieStatus = candidate.MovieStatus;
+                    editingMovie.ReleaseDate = candidate.ReleaseDate;
+                    editingMovie.MovieDescription = candidate.MovieDescription;
+                    editingMovie.PosterPath = candidate.PosterPath;
+                    ShowBannerMessage($"Đã cập nhật phim \"{editingMovie.Title}\".", isError: false);
+                }
 
-                service.Save(newMovie);
-                allMovies.Add(newMovie);
+                UpdateCounts();
+                ApplyFilter();
+                IsEditorOpen = false;
             }
-            else
+            catch (Exception ex)
             {
-                editingMovie.Title = FormTitle.Trim();
-                editingMovie.Genre = FormGenre.Trim();
-                editingMovie.DurationMin = FormDuration;
-                editingMovie.AgeRating = FormAgeRating;
-                editingMovie.MovieStatus = FormMovieStatus;
-                editingMovie.ReleaseDate = FormReleaseDate;
-                editingMovie.MovieDescription = FormDescription.Trim();
-                editingMovie.PosterPath = string.IsNullOrWhiteSpace(FormPosterPath) ? null : FormPosterPath.Trim();
-
-                service.Save(editingMovie);
+                EditorError = "Không lưu được phim: " + ex.Message;
             }
-
-            UpdateCounts();
-            ApplyFilter();
-            IsEditorOpen = false;
+            finally
+            {
+                isBusy = false;
+            }
         }
 
-        private void DeleteMovie(Movie m)
+        private async Task ConfirmDeleteAsync()
         {
-            service.Delete(m.MovieID);
-            allMovies.Remove(m);
-            UpdateCounts();
-            ApplyFilter();
+            if (isBusy || MovieToDelete == null) return;
+            var target = MovieToDelete;
+
+            isBusy = true;
+            try
+            {
+                await Task.Run(() => service.Delete(target.MovieID));
+                allMovies.Remove(target);
+                UpdateCounts();
+                ApplyFilter();
+                IsDeleteConfirmOpen = false;
+                MovieToDelete = null;
+                ShowBannerMessage($"Đã xóa phim \"{target.Title}\".", isError: false);
+            }
+            catch (Exception ex)
+            {
+                IsDeleteConfirmOpen = false;
+                MovieToDelete = null;
+                ShowBannerMessage(ex.Message, isError: true);
+            }
+            finally
+            {
+                isBusy = false;
+            }
         }
     }
 }
-
