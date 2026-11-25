@@ -36,7 +36,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Grid Margin="28,22,28,24">
+    <Grid Margin="0,8,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -46,17 +46,8 @@
 
         <!-- ===================== TIÊU ĐỀ + TÌM KIẾM ===================== -->
         <Grid Margin="0,0,0,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel VerticalAlignment="Bottom">
-                <TextBlock Style="{StaticResource MgmtBreadcrumb}" Text="Quản lý › Tài khoản"/>
-                <TextBlock Style="{StaticResource MgmtPageTitle}" Text="Tài khoản nhân viên"/>
-                <TextBlock Style="{StaticResource MgmtHint}" Margin="0,2,0,0"
-                           Text="Chỉ Quản trị viên mở được màn này · mật khẩu lưu dạng mã hóa"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="16,0,0,0">
+         
+            <StackPanel  Orientation="Horizontal" VerticalAlignment="Bottom" Margin="0,0,0,0">
                 <TextBox Style="{StaticResource MgmtSearchBox}" Width="420" Height="48" FontSize="15"
                          Tag="Tìm theo tên đăng nhập hoặc họ tên…"
                          Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"/>
@@ -258,10 +249,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
-                                <Border DataContext="{Binding Current}" Style="{StaticResource MgmtToneAvatar}"
-                                        Width="64" Height="64" CornerRadius="32" TextElement.FontSize="21">
-                                    <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
+                                <ContentControl Content="{Binding Current}" ContentTemplate="{StaticResource MgmtProfileAvatar}" Focusable="False"/>      
                                 <StackPanel Grid.Column="1" Margin="14,0,8,0" VerticalAlignment="Center">
                                     <WrapPanel>
                                         <TextBlock Text="{Binding Current.FullName}" FontSize="20" FontWeight="Bold"
