@@ -18,17 +18,31 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ContentControl">
                     <Border CornerRadius="5" Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                        <Border CornerRadius="4">
-                            <Border.Background>
-                                <ImageBrush Stretch="UniformToFill"
-                                            ImageSource="{Binding Content, RelativeSource={RelativeSource TemplatedParent}}"/>
-                            </Border.Background>
-                        </Border>
+                    BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter/>
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
-        </Setter>
+            </Setter>
+            <!-- Ảnh poster: DataContext = Content (PosterSource) → ImageBrush chỉ cần {Binding} -->
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                <DataTemplate>
+                    <Grid>
+                        <!-- Khuôn bo góc: phần đen = hiện ảnh, phần trong suốt = cắt bỏ. Không có binding. -->
+                        <Grid.OpacityMask>
+                            <VisualBrush>
+                                <VisualBrush.Visual>
+                                    <Border Width="38" Height="54" CornerRadius="4" Background="Black"/>
+                                </VisualBrush.Visual>
+                            </VisualBrush>
+                        </Grid.OpacityMask>
+                        <!-- Image là control thật → DataContext (PosterSource) có ngay từ đầu -->
+                        <Image Source="{Binding}" Stretch="UniformToFill"/>
+                    </Grid>
+                </DataTemplate>
+            </Setter.Value>
+            </Setter>
     </Style>
     <Style x:Key="CompactMoviePosterFrame" TargetType="ContentControl" BasedOn="{StaticResource MoviePosterFrame}">
         <Setter Property="Width" Value="28"/>
