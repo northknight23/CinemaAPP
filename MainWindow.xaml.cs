@@ -1,27 +1,39 @@
-﻿using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using CinemaAPP.ViewModels;
+using CinemaAPP.Views;
 
 namespace CinemaAPP
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
+            var vm = new MainViewModel(CreatePageView);
+            vm.LogoutRequested += (_, _) =>
+            {
+                var loginWin = new LoginWindow();
+                Application.Current.MainWindow = loginWin;
+                loginWin.Show();
+                Close();
+            };
+            DataContext = vm;
         }
 
-        
-        
+        private static object? CreatePageView(string pageId, bool isAdmin) => pageId switch
+        {
+            "Movies" => new MovieManagementView(),
+            "Rooms" => new RoomManagementView(),
+            "Tickets" => new SeatMapDemoView(),
+            "Transactions" => new TransactionsView(),
+            "MyShift" => new MyShiftView(),
+            "Showtimes" => new ShowtimeManagementView(),
+            "Customers" => new CustomerManagementView(),
+            "Accounts" => new AccountManagementView(),
+            "Revenue" => new RevenueView(),
+            "Overview" when isAdmin => new DashboardView(),
+            "Overview" => new StaffDashboardView(),
+            _ => null
+        };
     }
 }
