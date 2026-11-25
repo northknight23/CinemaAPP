@@ -200,7 +200,7 @@
         </ScrollViewer>
 
         <!-- ================= HỘP THOẠI FORM THÊM / CHỈNH SỬA PHIM ================= -->
-        <Grid Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
+        <Grid Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVis}}" Background="{StaticResource ModalOverlayBrush}">
             <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center"
                     Style="{StaticResource MgmtCard}" Padding="26" Background="{StaticResource CardBrush}">
                 <StackPanel>
@@ -314,7 +314,7 @@
         </Grid>
 
         <!-- ================= HỘP THOẠI XÁC NHẬN XÓA PHIM ================= -->
-        <Grid Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
+        <Grid Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BoolToVis}}" Background="{StaticResource ModalOverlayBrush}">
             <Border Width="420" VerticalAlignment="Center" HorizontalAlignment="Center"
                     Style="{StaticResource MgmtCard}" Padding="24" Background="{StaticResource CardBrush}">
                 <StackPanel>

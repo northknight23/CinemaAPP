@@ -1,11 +1,9 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:CinemaAPP.ViewModels">
-    <!-- Style dùng chung cho màn Giao dịch & Đối soát (Quản trị viên) và màn Hóa đơn ca (Nhân viên):
-         thẻ, chữ, tab, ô lọc, ô nhập, nút, dòng bảng, chip thanh toán / trạng thái.
-         Màu lấy từ Resources/Styles.xaml (đã nạp bởi App.xaml). -->
-
-    <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    <!-- Style dùng chung cho màn Bán vé, Giao dịch & Đối soát, Hóa đơn ca và Quản lý suất chiếu:
+         thẻ, chữ, tab, ô lọc, ô nhập, nút, dòng bảng, chip thanh toán / độ tuổi / trạng thái.
+         Màu lấy từ Resources/Styles.xaml, BoolToVis lấy từ App.xaml. -->
 
     <Style x:Key="MoviePosterFrame" TargetType="ContentControl">
         <Setter Property="Width" Value="40"/>
@@ -64,6 +62,11 @@
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
     </Style>
+    <Style x:Key="SectionTitle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13.5"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+    </Style>
     <Style x:Key="Muted" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
@@ -97,6 +100,31 @@
         <Setter Property="Padding" Value="8,2"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+    <!-- Nhãn độ tuổi dùng chung: P xanh lá, K xanh dương, T13 cam, T16/T18 đỏ -->
+    <Style x:Key="AgeChip" TargetType="Border" BasedOn="{StaticResource Chip}">
+        <Setter Property="CornerRadius" Value="4"/>
+        <Setter Property="Padding" Value="5,1"/>
+        <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding AgeRating}" Value="K">
+                <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource InfoBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AgeRating}" Value="T13">
+                <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AgeRating}" Value="T16">
+                <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding AgeRating}" Value="T18">
+                <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
     <Style x:Key="DetailRow" TargetType="Grid">
         <Setter Property="Margin" Value="0,0,0,6"/>
@@ -420,7 +448,6 @@
                     <Run Text="{Binding CancelSeatsText, Mode=OneWay}"/>
                     <Run Text=" · hoàn "/>
                     <Run Text="{Binding CancelRefundAmountText, Mode=OneWay}" FontWeight="Bold" Foreground="{DynamicResource CancelAmountBrush}"/>
-                    <Run Text="{Binding CancelRefundPrefix, Mode=OneWay}"/>
                 </TextBlock>
             </Grid>
             <!-- Dòng 2: phương thức hoàn tiền (đổi icon tự động theo Tiền mặt / Chuyển khoản / Thẻ) -->

@@ -20,23 +20,7 @@
                 <ResourceDictionary Source="/CinemaAPP;component/Resources/SalesControls.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-        <!-- Khung bo góc cho 3 cột -->
-        <Style x:Key="Card" TargetType="Border">
-            <Setter Property="Background" Value="{DynamicResource CardBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="12"/>
-            <Setter Property="Padding" Value="16"/>
-        </Style>
-        <Style x:Key="SectionTitle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
-        <Style x:Key="Muted" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}"/>
-            <Setter Property="FontSize" Value="12"/>
-        </Style>
+        <!-- Card, Muted, SectionTitle, AgeChip dùng chung từ SalesControls.xaml -->
         <Style x:Key="FieldLabel" TargetType="TextBlock" BasedOn="{StaticResource SectionTitle}">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="Margin" Value="0,12,0,6"/>
@@ -52,34 +36,6 @@
         <Style x:Key="ChipText" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
             <Setter Property="FontSize" Value="12"/>
-        </Style>
-
-        <!-- Nhãn độ tuổi: P xanh lá, K xanh dương, T13 cam, T16/T18 đỏ -->
-        <Style x:Key="AgeChip" TargetType="Border">
-            <Setter Property="CornerRadius" Value="4"/>
-            <Setter Property="Padding" Value="5,1"/>
-            <Setter Property="Margin" Value="6,0,0,0"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
-            <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding AgeRating}" Value="K">
-                    <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource InfoBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding AgeRating}" Value="T13">
-                    <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding AgeRating}" Value="T16">
-                    <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
-                </DataTrigger>
-                <DataTrigger Binding="{Binding AgeRating}" Value="T18">
-                    <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
-                    <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
-                </DataTrigger>
-            </Style.Triggers>
         </Style>
 
         <!-- Khung một phim ở cột trái; phim có suất đang chọn thì viền xanh -->
@@ -433,7 +389,7 @@
                                                 <StackPanel VerticalAlignment="Center">
                                                     <StackPanel Orientation="Horizontal">
                                                         <TextBlock Text="{Binding Title}" Style="{StaticResource SectionTitle}" FontSize="13"/>
-                                                        <Border Style="{StaticResource AgeChip}">
+                                                        <Border Style="{StaticResource AgeChip}" Margin="6,0,0,0">
                                                             <TextBlock Text="{Binding AgeRating}" FontSize="10" FontWeight="Bold"/>
                                                         </Border>
                                                     </StackPanel>
@@ -532,7 +488,7 @@
                                       Data="M 0,12 Q 50,0 100,12" Stroke="{DynamicResource InputHoverBrush}"
                                       StrokeThickness="3.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
                                     <Path.Effect>
-                                        <DropShadowEffect Color="#A9C9EC" BlurRadius="18" ShadowDepth="0" Opacity="0.9"/>
+                                        <DropShadowEffect Color="{StaticResource ScreenGlowColor}" BlurRadius="18" ShadowDepth="0" Opacity="0.9"/>
                                     </Path.Effect>
                                 </Path>
                                 <TextBlock Text="M À N   H Ì N H" Foreground="{DynamicResource TextBrush}" Opacity="0.75"

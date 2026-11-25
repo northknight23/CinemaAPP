@@ -23,7 +23,7 @@
                 <Setter Property="CornerRadius" Value="8"/>
                 <Setter Property="Effect">
                     <Setter.Value>
-                        <DropShadowEffect Color="#0F2A4A" Direction="270" ShadowDepth="1" BlurRadius="10" Opacity="0.10"/>
+                        <DropShadowEffect Color="{StaticResource ShadowNavyColor}" Direction="270" ShadowDepth="1" BlurRadius="10" Opacity="0.10"/>
                     </Setter.Value>
                 </Setter>
             </Style>
@@ -31,7 +31,7 @@
                 <Setter Property="Width" Value="46"/>
                 <Setter Property="Height" Value="46"/>
                 <Setter Property="CornerRadius" Value="23"/>
-                <Setter Property="Background" Value="#EFF4FB"/>
+                <Setter Property="Background" Value="{StaticResource KpiIconBgBrush}"/>
                 <Setter Property="HorizontalAlignment" Value="Left"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
             </Style>
@@ -68,7 +68,7 @@
                 <Style.Triggers>
                     <Trigger Property="Tag">
                         <Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value>
-                        <Setter Property="TextElement.Foreground" Value="#15803D"/>
+                        <Setter Property="TextElement.Foreground" Value="{StaticResource TrendUpBrush}"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>
@@ -108,12 +108,12 @@
                 <Setter Property="HorizontalAlignment" Value="Right"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
                 <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="TextElement.Foreground" Value="#6B7889"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource TextSoftBrush}"/>
                 <Setter Property="TextElement.FontSize" Value="13"/>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding HasPoints}" Value="True">
-                        <Setter Property="Background" Value="#FFF4DF"/>
-                        <Setter Property="TextElement.Foreground" Value="#7A4A00"/>
+                        <Setter Property="Background" Value="{StaticResource WarningBgBrush}"/>
+                        <Setter Property="TextElement.Foreground" Value="{StaticResource PointsTextBrush}"/>
                         <Setter Property="TextElement.FontWeight" Value="Bold"/>
                     </DataTrigger>
                 </Style.Triggers>
@@ -144,7 +144,7 @@
             <Style x:Key="InputHint" TargetType="TextBlock">
                 <Setter Property="Margin" Value="12,0,0,0"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="Foreground" Value="#8A97A8"/>
+                <Setter Property="Foreground" Value="{StaticResource TextSubtleBrush}"/>
                 <Setter Property="IsHitTestVisible" Value="False"/>
             </Style>
         </ResourceDictionary>
@@ -288,7 +288,7 @@
 
                     <!-- Lọc theo hạng + sắp xếp -->
                     <DockPanel Margin="16,14">
-                        <Border DockPanel.Dock="Right" Background="#F1F5FA" CornerRadius="10" Padding="3" VerticalAlignment="Center">
+                        <Border DockPanel.Dock="Right" Background="{StaticResource SegmentBgBrush}" CornerRadius="10" Padding="3" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <RadioButton Style="{StaticResource MgmtSegment}" Height="32" Padding="12,0" GroupName="sort"
                                              IsChecked="{Binding SortRecent}" Content="Gần đây"/>
@@ -416,8 +416,8 @@
                             <UniformGrid Columns="3" Margin="0,18,0,0">
                                 <Border Style="{StaticResource StatTile}" Background="{StaticResource WarningBgBrush}" Margin="0,0,5,0">
                                     <StackPanel>
-                                        <TextBlock Text="Điểm tích lũy" FontSize="12" Foreground="#7A4A00"/>
-                                        <TextBlock Text="{Binding CurrentPointsText}" FontSize="19" FontWeight="Bold" Foreground="#7A4A00"/>
+                                        <TextBlock Text="Điểm tích lũy" FontSize="12" Foreground="{StaticResource PointsTextBrush}"/>
+                                        <TextBlock Text="{Binding CurrentPointsText}" FontSize="19" FontWeight="Bold" Foreground="{StaticResource PointsTextBrush}"/>
                                     </StackPanel>
                                 </Border>
                                 <Border Style="{StaticResource StatTile}" Margin="5,0">
@@ -456,7 +456,7 @@
                             <ItemsControl ItemsSource="{Binding RecentPurchases}">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border BorderBrush="#EDF2F8" BorderThickness="0,1,0,0" Padding="0,9">
+                                        <Border BorderBrush="{StaticResource RowDividerBrush}" BorderThickness="0,1,0,0" Padding="0,9">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="52"/>

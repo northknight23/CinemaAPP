@@ -89,4 +89,28 @@
         <GradientStop Color="#EB4566" Offset="0"/>
         <GradientStop Color="#A81335" Offset="1"/>
     </LinearGradientBrush>
+
+    <!-- ===== Màu phụ, lớp phủ modal & bóng dùng chung toàn app ===== -->
+    <Color x:Key="ShadowNavyColor">#0F2A4A</Color>
+    <Color x:Key="ScreenGlowColor">#A9C9EC</Color>
+    <SolidColorBrush x:Key="ModalOverlayBrush"     Color="#66000000"/>
+    <SolidColorBrush x:Key="NavyOverlayBrush"      Color="#660F2A4A"/>
+    <SolidColorBrush x:Key="NavyHoverBrush"        Color="#183B61"/>
+    <SolidColorBrush x:Key="LogoSubtextBrush"      Color="#9CC3EA"/>
+    <SolidColorBrush x:Key="DangerBorderBrush"     Color="#F3C4C4"/>
+    <SolidColorBrush x:Key="KpiIconBgBrush"        Color="#EFF4FB"/>
+    <SolidColorBrush x:Key="TrendUpBrush"          Color="#15803D"/>
+    <SolidColorBrush x:Key="PurpleBrush"           Color="#5B3FB0"/>
+    <SolidColorBrush x:Key="TealBgBrush"           Color="#E6F6F8"/>
+    <SolidColorBrush x:Key="GoldBorderBrush"       Color="#F5C46A"/>
+    <SolidColorBrush x:Key="GoldTextBrush"         Color="#8A5A00"/>
+    <SolidColorBrush x:Key="PointsTextBrush"       Color="#7A4A00"/>
+    <SolidColorBrush x:Key="MutedBgBrush"          Color="#EEF1F5"/>
+    <SolidColorBrush x:Key="MutedBorderBrush"      Color="#C7D0DC"/>
+    <SolidColorBrush x:Key="MutedTextDarkBrush"    Color="#44546A"/>
+    <SolidColorBrush x:Key="TextSubtleBrush"       Color="#8A97A8"/>
+    <SolidColorBrush x:Key="TextSoftBrush"         Color="#6B7889"/>
+    <SolidColorBrush x:Key="SegmentBgBrush"        Color="#F1F5FA"/>
+    <SolidColorBrush x:Key="RowDividerBrush"       Color="#EDF2F8"/>
+    <SolidColorBrush x:Key="InputFocusBorderBrush" Color="#C9DCF2"/>
 </ResourceDictionary>

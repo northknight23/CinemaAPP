@@ -1,23 +1,20 @@
-using System.Globalization;
 using CinemaAPP.Helpers;
+using CinemaAPP.Models;
 
 namespace CinemaAPP.ViewModels
 {
     // Một ghế trong đơn đã bán (chỉ để hiện chip ghế ở màn Giao dịch).
     public record SoldSeat(string Label, SeatType Type, int Count = 1);
 
-    // Một nhân viên bán vé (lấy từ người bán của đơn; sau này là ACCOUNT có AccountRole = Staff).
+    // Một nhân viên bán vé (lấy từ người bán của đơn / bảng ACCOUNT).
     public record StaffInfo(string FullName, string Username, string Shift)
     {
-        public string Initials => string.Concat(FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).TakeLast(2).Select(w => char.ToUpper(w[0])));
+        public string Initials => NameHelper.Initials(FullName);
     }
 
-    // Một đơn đã bán = một dòng BOOKING + các TICKET của nó (tạm giữ trong SalesDemoStore).
-    // Khi ghép CSDL: cột hủy đơn là BOOKING.CancelReason / CancelledAt / CancelledBy (nhờ A thêm).
+    // Một đơn đã bán = một dòng BOOKING + các TICKET của nó (đọc từ SQL Server).
     public class SaleRecord : ObservableObject
     {
-        private static readonly CultureInfo Vi = new CultureInfo("vi-VN");
-
         public int BookingID { get; init; }
         public int AccountID { get; init; }
         public int? CustomerID { get; init; }
@@ -63,7 +60,7 @@ namespace CinemaAPP.ViewModels
         public string ShowLong => $"{ShowStart:HH:mm} · {RoomName} · {ShowFormat}";
         public int TicketCount => Seats.Sum(s => s.Count);
         public string SeatsText => string.Join(", ", Seats.Select(s => s.Label));
-        public string AmountText => Money(Total);
+        public string AmountText => Format.Money(Total);
         public string MethodText => MethodName(Method);
         public string StatusText => IsCancelled ? "Đã hủy" : "Đã thanh toán";
         public string CustomerShort => CustomerName ?? "Khách vãng lai";
@@ -71,12 +68,12 @@ namespace CinemaAPP.ViewModels
         public decimal DiscountAmount => PointsUsed * 1000m;
         public decimal GrossTotal => Total + DiscountAmount;
         public bool HasPointsUsed => PointsUsed > 0;
-        public string SubtotalText => Money(GrossTotal);
-        public string PointsUsedText => HasPointsUsed ? $"-{PointsUsed.ToString("N0", Vi)} điểm (-{Money(DiscountAmount)})" : "—";
-        public string PointsText => CustomerPhone == null ? "—" : $"+{Points.ToString("N0", Vi)} điểm";
+        public string SubtotalText => Format.Money(GrossTotal);
+        public string PointsUsedText => HasPointsUsed ? $"-{Format.Number(PointsUsed)} điểm (-{Format.Money(DiscountAmount)})" : "—";
+        public string PointsText => CustomerPhone == null ? "—" : $"+{Format.Number(Points)} điểm";
         public string StaffText => $"{StaffName} · {CreatedAt:HH:mm}";
         public string PaymentDetail => Method == PaymentMethod.Cash && CashGiven > Total
-            ? $"Tiền mặt (khách đưa {CashGiven.ToString("N0", Vi)})"
+            ? $"Tiền mặt (khách đưa {CashGiven.ToString("N0", Format.Vi)})"
             : MethodText;
         public string CancelInfo
         {
@@ -87,24 +84,23 @@ namespace CinemaAPP.ViewModels
                 {
                     $"Hủy lúc {CancelledAt:HH:mm dd/MM} bởi {CancelledBy}",
                     $"Lý do: {CancelReason}",
-                    $"Đã hoàn {Money(Total)}",
+                    $"Đã hoàn {Format.Money(Total)}",
                 };
-                if (PointsUsed > 0) parts.Add($"hoàn lại {PointsUsed.ToString("N0", Vi)} điểm đã dùng");
-                if (Points > 0) parts.Add($"trừ lại {Points.ToString("N0", Vi)} điểm thưởng");
+                if (PointsUsed > 0) parts.Add($"hoàn lại {Format.Number(PointsUsed)} điểm đã dùng");
+                if (Points > 0) parts.Add($"trừ lại {Format.Number(Points)} điểm thưởng");
                 return string.Join(" · ", parts);
             }
         }
 
         public string CancelSeatsText => $"{TicketCount} ghế được mở bán lại";
-        public string CancelRefundPrefix => "";
         public bool HasCancelPointsImpact => PointsUsed > 0 || Points > 0;
         public string CancelPointsImpactText
         {
             get
             {
                 var parts = new List<string>();
-                if (PointsUsed > 0) parts.Add($"Hoàn {PointsUsed.ToString("N0", Vi)} điểm đã dùng");
-                if (Points > 0) parts.Add($"{(parts.Count == 0 ? "Trừ" : "trừ")} {Points.ToString("N0", Vi)} điểm thưởng");
+                if (PointsUsed > 0) parts.Add($"Hoàn {Format.Number(PointsUsed)} điểm đã dùng");
+                if (Points > 0) parts.Add($"{(parts.Count == 0 ? "Trừ" : "trừ")} {Format.Number(Points)} điểm thưởng");
                 return string.Join(" · ", parts);
             }
         }
@@ -117,19 +113,6 @@ namespace CinemaAPP.ViewModels
             _ => "chưa rõ phương thức",
         };
 
-        public string BuildCancelImpact(bool includeCashDrawer)
-        {
-            string refund = Method == PaymentMethod.Cash
-                ? (includeCashDrawer ? "tiền mặt từ két" : "tiền mặt")
-                : Method == PaymentMethod.Transfer ? "qua chuyển khoản"
-                : Method == PaymentMethod.Card ? "về thẻ" : "";
-            string refundText = string.IsNullOrEmpty(refund) ? $"hoàn {AmountText}" : $"hoàn {AmountText} {refund}";
-            var parts = new List<string> { CancelSeatsText, refundText };
-            if (PointsUsed > 0) parts.Add($"hoàn lại {PointsUsed.ToString("N0", Vi)} điểm đã dùng");
-            if (Points > 0) parts.Add($"trừ lại {Points.ToString("N0", Vi)} điểm thưởng");
-            return string.Join(" · ", parts);
-        }
-
         public static string MethodName(PaymentMethod method) => method switch
         {
             PaymentMethod.Cash => "Tiền mặt",
@@ -137,7 +120,5 @@ namespace CinemaAPP.ViewModels
             PaymentMethod.Card => "Thẻ",
             _ => "Chưa có dữ liệu",
         };
-
-        public static string Money(decimal value) => value.ToString("N0", Vi) + " đ";
     }
 }

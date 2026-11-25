@@ -11,7 +11,6 @@ namespace CinemaAPP.ViewModels
     // POS đọc và lưu dữ liệu thật qua BookingService; chỉ cho in sau khi transaction thành công.
     public class SeatMapDemoViewModel : ObservableObject
     {
-        private static readonly CultureInfo Vi = new CultureInfo("vi-VN");
         private readonly BookingService bookingService = new();
         private readonly CustomerService customerService = new();
         private Customer? currentMember;
@@ -207,7 +206,7 @@ namespace CinemaAPP.ViewModels
             SetCashCommand = new RelayCommand(p =>
             {
                 decimal amount = p as string == "exact" ? Total : decimal.Parse((string)p!, CultureInfo.InvariantCulture);
-                CashText = amount.ToString("N0", Vi);
+                CashText = amount.ToString("N0", Format.Vi);
             }, p => p as string != "exact" || SelectedCount > 0);
 
             // Tiền mặt phải đưa đủ; chuyển khoản / thẻ thì nhân viên bấm sau khi đã nhận tiền
@@ -516,10 +515,9 @@ namespace CinemaAPP.ViewModels
         // Tiền khách đưa chỉ lấy các chữ số (gõ "200.000" hay "200000" đều được).
         private void UpdateChange()
         {
-            string digits = new string(CashText.Where(char.IsDigit).ToArray());
-            Cash = digits == "" ? 0 : decimal.Parse(digits, CultureInfo.InvariantCulture);
+            Cash = Format.TryParseMoney(CashText) ?? 0;
             IsCashShort = Cash > 0 && Cash < Total;
-            ChangeText = IsCashShort ? "Còn thiếu " + Money(Total - Cash) : Money(Math.Max(0, Cash - Total));
+            ChangeText = IsCashShort ? "Còn thiếu " + Format.Money(Total - Cash) : Format.Money(Math.Max(0, Cash - Total));
         }
 
         private void ShowMessage(string text, bool isError)
@@ -527,8 +525,5 @@ namespace CinemaAPP.ViewModels
             IsMessageError = isError;
             Message = text;
         }
-
-        private static string Money(decimal value) => value.ToString("N0", Vi) + " đ";
-
     }
 }

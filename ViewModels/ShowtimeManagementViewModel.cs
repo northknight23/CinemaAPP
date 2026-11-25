@@ -479,7 +479,7 @@ namespace CinemaAPP.ViewModels
             DateTime start = formDate.Date + time;
             if (start <= DateTime.Now) { FormError = "Giờ bắt đầu đã qua, chọn giờ muộn hơn."; return; }
 
-            decimal price = ParseMoney(formPrice);
+            decimal price = Format.TryParseMoney(formPrice) ?? 0;
             if (price <= 0) { FormError = "Giá vé cơ bản phải lớn hơn 0."; return; }
             if (price > 1_000_000) { FormError = "Giá vé cơ bản quá lớn, kiểm tra lại (tối đa 1.000.000 đ)."; return; }
             if (formFormat == "IMAX" && !formRoom.IsImax) { FormError = "Định dạng IMAX chỉ chiếu được ở phòng IMAX."; return; }
@@ -611,12 +611,6 @@ namespace CinemaAPP.ViewModels
                 && parts[1].Length == 2 && h is >= 0 and < 24 && m is >= 0 and < 60)
                 return new TimeSpan(h, m, 0);
             return null;
-        }
-
-        private static decimal ParseMoney(string text)
-        {
-            string digits = new string(text.Where(char.IsDigit).ToArray());
-            return digits.Length is > 0 and < 10 ? decimal.Parse(digits) : 0;
         }
     }
 }
