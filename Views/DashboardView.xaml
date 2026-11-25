@@ -51,24 +51,6 @@
                     <TextBlock Text="Tình hình bán vé và giao dịch mới nhất của rạp hôm nay."
                                Margin="0,4,0,0" Foreground="{StaticResource TextMutedBrush}"/>
                 </StackPanel>
-
-                <Button Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Top"
-                        Style="{StaticResource DashButton}" Click="OpenMenu">
-                    <StackPanel Orientation="Horizontal">
-                        <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcCalendar}"/>
-                        <TextBlock Text="{Binding RangeText}" Margin="8,0" VerticalAlignment="Center"/>
-                        <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcChevron}" Stroke="{StaticResource TextBrush}"/>
-                    </StackPanel>
-                    <Button.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="7 ngày qua" IsCheckable="False" IsChecked="{Binding Is7Days, Mode=OneWay}"
-                                      Command="{Binding SetRangeCommand}" CommandParameter="7"/>
-                            <MenuItem Header="14 ngày qua" IsCheckable="False" IsChecked="{Binding Is14Days, Mode=OneWay}"
-                                      Command="{Binding SetRangeCommand}" CommandParameter="14"/>
-                        </ContextMenu>
-                    </Button.ContextMenu>
-                </Button>
-
                 <Button Grid.Column="2" Margin="10,0,0,0" VerticalAlignment="Top"
                         Style="{StaticResource DashIconButton}" Click="OpenMenu" ToolTip="Tùy chọn">
                     <Path Style="{StaticResource DashIcon}" Data="{StaticResource IcMore}" Stroke="{StaticResource TextBrush}"/>
@@ -200,7 +182,7 @@
                                         </ContextMenu>
                                     </Button.ContextMenu>
                                 </Button>
-                                <TextBlock Text="Vé theo ngày chiếu" Style="{StaticResource DashCardTitle}"/>
+                                <TextBlock Text="Tổng số vé đã bán" Style="{StaticResource DashCardTitle}"/>
                             </DockPanel>
 
                             <!-- Tổng (dòng trên) + chú thích (dòng dưới, để không đè chữ so sánh) -->

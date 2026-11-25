@@ -250,7 +250,7 @@ namespace CinemaAPP.ViewModels
             TicketsTodayText = Format.Number(today.Tickets);
             OccupancyTodayText = Math.Round(today.Occupancy) + "%";
             bool hasOrderToday = today.Tickets > 0;
-            // So với hôm qua tính tới cùng giờ (ySame lấy từ RevenueService.GetSummary)
+        
             RevenueDelta = hasOrderToday ? DeltaInfo.Percent(today.Revenue, yesterday.Revenue, " so với hôm qua") : null;
             TicketsDelta = hasOrderToday ? DeltaInfo.Percent(today.Tickets, yesterday.Tickets, "") : null;
             OccupancyDelta = hasOrderToday && yesterday.Seats > 0 ? DeltaInfo.Points(today.Occupancy, yesterday.Occupancy) : null;
