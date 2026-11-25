@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CinemaAPP.Views.MovieManagementView"
+<UserControl x:Class="CinemaAPP.Views.MovieManagementView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
@@ -20,11 +20,25 @@
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
             <StackPanel Margin="0,0,0,24">
+                <!-- ================= BANNER THÔNG BÁO (LỖI / THÀNH CÔNG) ================= -->
+                <Border Style="{StaticResource MgmtBanner}" Margin="0,0,0,16"
+                        Visibility="{Binding ShowBanner, Converter={StaticResource BoolToVis}}">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Style="{StaticResource MgmtIconButton}" Width="28" Height="28"
+                                Command="{Binding DismissBannerCommand}" ToolTip="Ẩn thông báo">
+                            <TextBlock Text="✕" FontSize="13"/>
+                        </Button>
+                        <TextBlock Text="{Binding BannerMessage}" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Medium"/>
+                    </DockPanel>
+                </Border>
+
                 <!-- ================= THANH CÔNG CỤ TRÊN ================= -->
                 <Grid Margin="0,0,0,20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="10" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
@@ -57,8 +71,14 @@
                                      Command="{Binding SetFilterCommand}" CommandParameter="Ended" />
                     </StackPanel>
 
+                    <!-- NÚT TẢI LẠI -->
+                    <Button Grid.Column="2" Style="{StaticResource MgmtGhostButton}" Height="42" Padding="14,0"
+                            Command="{Binding ReloadCommand}" ToolTip="Tải lại từ SQL Server">
+                        <TextBlock Text="Tải lại" VerticalAlignment="Center"/>
+                    </Button>
+
                     <!-- NÚT THÊM PHIM MỚI -->
-                    <Button Grid.Column="2"
+                    <Button Grid.Column="4"
                             Style="{StaticResource MgmtPrimaryButton}"
                             Height="42" Padding="18,0"
                             Command="{Binding NewMovieCommand}">
@@ -71,7 +91,7 @@
                     </Button>
                 </Grid>
 
-                <!-- ================= LƯỚI THẺ PHIM (5 CỘT DỌC CHUẨN THEO MOCKUP) ================= -->
+                <!-- ================= LƯỚI THẺ PHIM (5 CỘT DỌC) ================= -->
                 <ItemsControl ItemsSource="{Binding FilteredMovies}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -95,17 +115,17 @@
                                     <!-- 1. HÌNH ẢNH POSTER VÀ BADGE ĐỘ TUỔI -->
                                     <Border Grid.Row="0" CornerRadius="10" ClipToBounds="True">
                                         <Grid>
-                                            <!-- Poster nền dự phòng dạng Gradient điện ảnh -->
+                                            <!-- Poster nền dự phòng dùng brush từ Styles.xaml -->
                                             <Border CornerRadius="10">
                                                 <Border.Background>
                                                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                                        <GradientStop Color="#0F172A" Offset="0"/>
-                                                        <GradientStop Color="#1E3A8A" Offset="1"/>
+                                                        <GradientStop Color="{Binding Source={StaticResource NavyDarkBrush}, Path=Color}" Offset="0"/>
+                                                        <GradientStop Color="{Binding Source={StaticResource PrimaryBrush}, Path=Color}" Offset="1"/>
                                                     </LinearGradientBrush>
                                                 </Border.Background>
                                                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
                                                     <Path Data="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2zM7 2v20M17 2v20M2 12h20"
-                                                          Stroke="#60A5FA" StrokeThickness="1.5" Opacity="0.4"
+                                                          Stroke="{StaticResource OnNavyMutedBrush}" StrokeThickness="1.5" Opacity="0.45"
                                                           Width="42" Height="42" Stretch="Uniform"/>
                                                 </Grid>
                                             </Border>
@@ -113,15 +133,10 @@
                                             <!-- Ảnh Poster thật (nếu có đường dẫn) -->
                                             <Image Source="{Binding PosterSource}" Stretch="UniformToFill" />
 
-                                            <!-- Nhãn phân loại độ tuổi [P], [T13], [T16], [T18] ở góc phải trên -->
-                                            <Border HorizontalAlignment="Right" VerticalAlignment="Top"
-                                                    Margin="8" CornerRadius="4" Padding="6,2"
-                                                    Background="{Binding AgeRatingBg}"
-                                                    BorderBrush="{Binding AgeRatingBorder}"
-                                                    BorderThickness="1">
-                                                <TextBlock Text="{Binding AgeRating}"
-                                                           Foreground="{Binding AgeRatingFg}"
-                                                           FontSize="11" FontWeight="Bold"/>
+                                            <!-- Nhãn phân loại độ tuổi [P], [K], [T13], [T16], [T18], [C] -->
+                                            <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                                                    Style="{StaticResource MgmtMovieAgeBadge}">
+                                                <TextBlock Text="{Binding AgeRating}" FontSize="11" FontWeight="Bold"/>
                                             </Border>
                                         </Grid>
                                     </Border>
@@ -139,11 +154,8 @@
 
                                     <!-- 3. NHÃN TRẠNG THÁI (DUY NHẤT 1 TRẠNG THÁI) -->
                                     <Border Grid.Row="2" HorizontalAlignment="Left" Margin="2,8,0,0"
-                                            CornerRadius="11" Padding="10,3"
-                                            Background="{Binding StatusBg}">
-                                        <TextBlock Text="{Binding MovieStatus}"
-                                                   Foreground="{Binding StatusFg}"
-                                                   FontSize="11.5" FontWeight="SemiBold"/>
+                                            Style="{StaticResource MgmtMovieStatusBadge}">
+                                        <TextBlock Text="{Binding MovieStatus}" FontSize="11.5" FontWeight="SemiBold"/>
                                     </Border>
 
                                     <!-- 4. CẶP NÚT THAO TÁC [SỬA] [XÓA] -->
@@ -189,10 +201,25 @@
 
         <!-- ================= HỘP THOẠI FORM THÊM / CHỈNH SỬA PHIM ================= -->
         <Grid Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
-            <Border Width="480" VerticalAlignment="Center" HorizontalAlignment="Center"
-                    Style="{StaticResource MgmtCard}" Padding="28" Background="White">
+            <Border Width="520" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Style="{StaticResource MgmtCard}" Padding="26" Background="{StaticResource CardBrush}">
                 <StackPanel>
-                    <TextBlock Text="{Binding EditorTitle}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" Margin="0,0,0,18"/>
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{Binding EditorTitle}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" Style="{StaticResource MgmtIconButton}" Command="{Binding CancelCommand}">
+                            <TextBlock Text="✕" FontSize="16"/>
+                        </Button>
+                    </Grid>
+
+                    <!-- Lỗi lưu CSDL ngay trong form -->
+                    <Border Background="{StaticResource ErrorBgBrush}" CornerRadius="8" Padding="12,8" Margin="0,0,0,12"
+                            Visibility="{Binding HasEditorError, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="{Binding EditorError}" Foreground="{StaticResource ErrorBrush}" TextWrapping="Wrap" FontSize="13"/>
+                    </Border>
 
                     <!-- Tên phim -->
                     <TextBlock Text="Tên phim *" Style="{StaticResource MgmtLabel}"/>
@@ -217,17 +244,21 @@
 
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Thời lượng (phút) *" Style="{StaticResource MgmtLabel}"/>
-                            <TextBox Text="{Binding FormDuration, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox Text="{Binding FormDurationText, UpdateSourceTrigger=PropertyChanged}"
                                      Tag="{Binding HasDurationError}"
                                      Style="{StaticResource MgmtTextBox}"/>
+                            <TextBlock Text="{Binding DurationError}" Style="{StaticResource MgmtError}"
+                                       Visibility="{Binding HasDurationError, Converter={StaticResource BoolToVis}}"/>
                         </StackPanel>
                     </Grid>
 
-                    <!-- Độ tuổi & Trạng thái -->
+                    <!-- Độ tuổi, Trạng thái & Ngày khởi chiếu -->
                     <Grid Margin="0,12,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="14" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
@@ -240,16 +271,35 @@
                             <TextBlock Text="Trạng thái" Style="{StaticResource MgmtLabel}"/>
                             <ComboBox ItemsSource="{Binding MovieStatusOptions}" SelectedItem="{Binding FormMovieStatus}" Height="42" VerticalContentAlignment="Center"/>
                         </StackPanel>
+
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="Khởi chiếu" Style="{StaticResource MgmtLabel}"/>
+                            <DatePicker SelectedDate="{Binding FormReleaseDate}" Height="42" VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Ảnh Poster -->
+                    <TextBlock Text="Ảnh poster (tên file trong Assets/Posters hoặc đường dẫn)" Style="{StaticResource MgmtLabel}" Margin="0,12,0,6"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding FormPosterPath, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource MgmtTextBox}"/>
+                        <Button Grid.Column="2" Content="Chọn ảnh..." Style="{StaticResource MgmtGhostButton}"
+                                Height="44" Click="PickPoster_Click"/>
                     </Grid>
 
                     <!-- Mô tả -->
                     <TextBlock Text="Mô tả phim" Style="{StaticResource MgmtLabel}" Margin="0,12,0,6"/>
                     <TextBox Text="{Binding FormDescription, UpdateSourceTrigger=PropertyChanged}"
-                             Height="70" TextWrapping="Wrap" AcceptsReturn="True"
+                             Height="68" TextWrapping="Wrap" AcceptsReturn="True"
                              Style="{StaticResource MgmtTextBox}"/>
 
                     <!-- Nút thao tác Form -->
-                    <Grid Margin="0,22,0,0">
+                    <Grid Margin="0,20,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="14" />
@@ -262,6 +312,31 @@
                 </StackPanel>
             </Border>
         </Grid>
+
+        <!-- ================= HỘP THOẠI XÁC NHẬN XÓA PHIM ================= -->
+        <Grid Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
+            <Border Width="420" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Style="{StaticResource MgmtCard}" Padding="24" Background="{StaticResource CardBrush}">
+                <StackPanel>
+                    <TextBlock Text="Xác nhận xóa phim" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                    <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" Foreground="{StaticResource TextMutedBrush}" FontSize="13.5">
+                        <Run Text="Bạn có chắc muốn xóa phim "/>
+                        <Run Text="{Binding MovieToDelete.Title, Mode=OneWay}" FontWeight="Bold" Foreground="{StaticResource TextBrush}"/>
+                        <Run Text="? Thao tác này không thể hoàn tác."/>
+                    </TextBlock>
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Hủy" Style="{StaticResource MgmtGhostButton}"
+                                Command="{Binding CancelDeleteCommand}"/>
+                        <Button Grid.Column="2" Content="Xóa phim" Style="{StaticResource MgmtDangerSolidButton}"
+                                Height="44" Command="{Binding ConfirmDeleteCommand}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
-
