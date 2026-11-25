@@ -168,24 +168,24 @@
         </Grid.ColumnDefinitions>
 
         <!-- ===================== CỘT TRÁI ===================== -->
-        <Border Grid.Column="0" Background="{StaticResource NavyBrush}" Padding="56" ClipToBounds="True">
+        <Border Grid.Column="0" Background="{StaticResource LoginBackgroundBrush}" Padding="56" ClipToBounds="True">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <!-- logo -->
-                    <RowDefinition Height="*"/>
-                    <!-- tiêu đề -->
                     <RowDefinition Height="Auto"/>
+                    <!-- tiêu đề -->
+                    <RowDefinition Height="*"/>
                     <!-- dải phim -->
                     <RowDefinition Height="Auto"/>
                     <!-- đồng hồ -->
                 </Grid.RowDefinitions>
 
                 <!-- logo-->
-                <Grid>
-                    <ContentControl Template ="{StaticResource LogoUITFull}" HorizontalAlignment="Left"/>
-                </Grid>
-                    <!-- Tiêu đề + mô tả -->
+   
+                <ContentControl Template ="{StaticResource LogoUITFull}" HorizontalAlignment="Left"/>
+        
+                <!-- Tiêu đề + mô tả -->
                 <Viewbox Grid.Row="1" Stretch="Uniform" StretchDirection="UpOnly" MaxWidth="680"
                          HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,24">
                     <StackPanel Width="380">
@@ -196,102 +196,7 @@
                                    Text="Bán vé, quản lý suất chiếu và phòng chiếu — dành cho nhân viên quầy vé và quản trị viên."/>
                     </StackPanel>
                 </Viewbox>
-                <!-- Dải phim nghiêng: kéo rộng ra 2 bên (Margin âm), xoay -4 độ; Border cha có ClipToBounds cắt phần thừa -->
-                <Grid Grid.Row="2" Height="150" Margin="-140,0,-140,40" RenderTransformOrigin="0.5,0.5">
-                    <Grid.RenderTransform>
-                        <RotateTransform Angle="-4"/>
-                    </Grid.RenderTransform>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="28"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="28"/>
-                    </Grid.RowDefinitions>
-                    <Rectangle Grid.RowSpan="3" Fill="#0A2240"/>
-
-                    <!-- Lỗ phim: 1 hình chữ nhật, tô bằng họa tiết lặp lại mỗi 40px -->
-                    <Rectangle Grid.Row="0" Height="13" Margin="10,0,0,0">
-                        <Rectangle.Fill>
-                            <DrawingBrush TileMode="Tile" Viewport="0,0,40,13" ViewportUnits="Absolute">
-                                <DrawingBrush.Drawing>
-                                    <DrawingGroup>
-                                        <!-- ô 40x13 trong suốt, bên trong 1 lỗ 20x13 bo góc -->
-                                        <GeometryDrawing Brush="Transparent" Geometry="M0,0 H40 V13 H0 Z"/>
-                                        <GeometryDrawing Brush="#1E4672">
-                                            <GeometryDrawing.Geometry>
-                                                <RectangleGeometry Rect="0,0,20,13" RadiusX="3" RadiusY="3"/>
-                                            </GeometryDrawing.Geometry>
-                                        </GeometryDrawing>
-                                    </DrawingGroup>
-                                </DrawingBrush.Drawing>
-                            </DrawingBrush>
-                        </Rectangle.Fill>
-                    </Rectangle>
-                    <Rectangle Grid.Row="2" Height="13" Margin="10,0,0,0">
-                        <Rectangle.Fill>
-                            <DrawingBrush TileMode="Tile" Viewport="0,0,40,13" ViewportUnits="Absolute">
-                                <DrawingBrush.Drawing>
-                                    <DrawingGroup>
-                                        <GeometryDrawing Brush="Transparent" Geometry="M0,0 H40 V13 H0 Z"/>
-                                        <GeometryDrawing Brush="#1E4672">
-                                            <GeometryDrawing.Geometry>
-                                                <RectangleGeometry Rect="0,0,20,13" RadiusX="3" RadiusY="3"/>
-                                            </GeometryDrawing.Geometry>
-                                        </GeometryDrawing>
-                                    </DrawingGroup>
-                                </DrawingBrush.Drawing>
-                            </DrawingBrush>
-                        </Rectangle.Fill>
-                    </Rectangle>
-
-                    <!-- 5 khung hình, mỗi khung 1 biểu tượng -->
-                    <UniformGrid Grid.Row="1" Rows="1" Columns="5" Margin="20,0">
-                        <!-- vé -->
-                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
-                            <Viewbox Width="44" Height="44">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M3,7 H21 V10 A2,2 0 0 0 21,14 V17 H3 V14 A2,2 0 0 0 3,10 Z" Style="{StaticResource FilmIcon}"/>
-                                    <Path Data="M9,7 V17" StrokeDashArray="1 1.3" Style="{StaticResource FilmIcon}"/>
-                                </Canvas>
-                            </Viewbox>
-                        </Border>
-                        <!-- clapper -->
-                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
-                            <Viewbox Width="44" Height="44">
-                                <Canvas Width="24" Height="24">
-                                    <Rectangle Canvas.Left="3" Canvas.Top="10" Width="18" Height="10" RadiusX="1.5" RadiusY="1.5" Style="{StaticResource FilmIcon}"/>
-                                    <Path Data="M3,10 L4.2,5.4 L20.2,3.2 L21,8.2 Z M8.5,4.7 L10,9.4 M14,4 L15.6,8.8" Style="{StaticResource FilmIcon}"/>
-                                </Canvas>
-                            </Viewbox>
-                        </Border>
-                        <!-- nút play (vàng) -->
-                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
-                            <Viewbox Width="44" Height="44">
-                                <Canvas Width="24" Height="24">
-                                    <Ellipse Canvas.Left="3" Canvas.Top="3" Width="18" Height="18" Style="{StaticResource FilmIcon}" Stroke="{StaticResource GoldBrush}"/>
-                                    <Path Data="M10,8.5 V15.5 L16,12 Z" Fill="{StaticResource GoldBrush}" Style="{StaticResource FilmIcon}" Stroke="{StaticResource GoldBrush}"/>
-                                </Canvas>
-                            </Viewbox>
-                        </Border>
-                        <!-- ghế -->
-                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
-                            <Viewbox Width="44" Height="44">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M6,11 V6 A2,2 0 0 1 8,4 H16 A2,2 0 0 1 18,6 V11 M6,16 V20 M18,16 V20" Style="{StaticResource FilmIcon}"/>
-                                    <Rectangle Canvas.Left="4" Canvas.Top="11" Width="16" Height="5" RadiusX="1.5" RadiusY="1.5" Style="{StaticResource FilmIcon}"/>
-                                </Canvas>
-                            </Viewbox>
-                        </Border>
-                        <!-- ngôi sao -->
-                        <Border Background="#15365E" CornerRadius="8" Margin="11,4">
-                            <Viewbox Width="44" Height="44">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M12,3 L14.7,8.6 L20.8,9.5 L16.4,13.8 L17.4,19.9 L12,17 L6.6,19.9 L7.6,13.8 L3.2,9.5 L9.3,8.6 Z" Style="{StaticResource FilmIcon}"/>
-                                </Canvas>
-                            </Viewbox>
-                        </Border>
-                    </UniformGrid>
-                </Grid>
-
+               
                 <!-- Đồng hồ (trái) + phiên bản (phải) -->
                 <DockPanel Grid.Row="3" LastChildFill="False">
                     <StackPanel DockPanel.Dock="Left">
@@ -306,98 +211,108 @@
         </Border>
 
         <!-- ===================== CỘT PHẢI ===================== -->
-        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel MaxWidth="400" Margin="24,56" VerticalAlignment="Center">
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Background="{StaticResource PageBrush}">
 
-                <TextBlock Text="Đăng nhập" FontSize="30" FontWeight="Bold" Foreground="{StaticResource NavyBrush}"/>
-                <TextBlock Text="Nhập tài khoản được cấp để tiếp tục." Margin="0,8,0,24" FontSize="15"
-                           Foreground="{StaticResource TextMutedBrush}"/>
 
-                <!-- Thông báo lỗi: chỉ hiện khi HasMessage = true -->
-                <Border Background="#FDECEC" CornerRadius="12" Padding="14,12" Margin="0,0,0,20"
-                        Visibility="{Binding HasMessage, Converter={StaticResource BoolToVisibility}}">
-                    <StackPanel Orientation="Horizontal">
-                        <Viewbox Width="18" Height="18" VerticalAlignment="Center">
-                            <ContentControl Content="{StaticResource IconAlert }"/>
-                        </Viewbox>
-                        <TextBlock Text="{Binding Message}" Margin="10,0,0,0" FontSize="14" FontWeight="Medium"
-                                   Foreground="#B91C1C" TextWrapping="Wrap" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Border>
 
-                <!-- Ô tên đăng nhập -->
-                <Label Content="Tên đăng nhập" Target="{Binding ElementName=txtUser}" Style="{StaticResource FieldLabel}"/>
-                <Border Style="{StaticResource FieldBox}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="44"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Viewbox Width="18" Height="18">
-                            <Canvas Width="24" Height="24">
-                                <Ellipse Canvas.Left="8" Canvas.Top="4" Width="8" Height="8" Style="{StaticResource IconStroke}"/>
-                                <Path Data="M4,21 C4,16.8 7.6,14 12,14 C16.4,14 20,16.8 20,21" Style="{StaticResource IconStroke}"/>
-                            </Canvas>
-                        </Viewbox>
-                        <TextBox x:Name="txtUser" Grid.Column="1" Margin="0,0,12,0" Style="{StaticResource FieldText}"
-                                 Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
-                    </Grid>
-                </Border>
+            <Grid MaxWidth="480" Margin="24,40" VerticalAlignment="Center">
 
-                <!-- Ô mật khẩu + con mắt -->
-                <Label Content="Mật khẩu" Target="{Binding ElementName=pwdBox}" Margin="0,20,0,8" Style="{StaticResource FieldLabel}"/>
-                <Border Style="{StaticResource FieldBox}">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="44"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="44"/>
-                        </Grid.ColumnDefinitions>
-                        <Viewbox Width="18" Height="18">
-                            <Canvas Width="24" Height="24">
-                                <Rectangle Canvas.Left="4" Canvas.Top="11" Width="16" Height="10" RadiusX="2" RadiusY="2" Style="{StaticResource IconStroke}"/>
-                                <Path Data="M8,11 V7 A4,4 0 0 1 16,7 V11" Style="{StaticResource IconStroke}"/>
-                            </Canvas>
-                        </Viewbox>
-                        <!-- PasswordBox (ẩn chữ) và TextBox (hiện chữ) chồng cùng một chỗ -->
-                        <PasswordBox x:Name="pwdBox" Grid.Column="1" Style="{StaticResource FieldPassword}"
-                                     PasswordChanged="PwdBox_PasswordChanged"/>
-                        <TextBox x:Name="txtPassReveal" Grid.Column="1" Style="{StaticResource FieldText}"
-                                 IsReadOnly="True" IsHitTestVisible="False" Visibility="Collapsed"/>
-                        <!-- Con mắt: giữ chuột để xem -->
-                        <Border Grid.Column="2" Background="Transparent" Cursor="Hand" ToolTip="Giữ để xem mật khẩu"
-                                MouseLeftButtonDown="Eye_MouseDown"
-                                MouseLeftButtonUp="Eye_Release"
-                                MouseLeave="Eye_Release">
-                            <Viewbox Width="20" Height="20">
-                                <Canvas Width="24" Height="24">
-                                    <Path Data="M2,12 C2,12 5.5,5 12,5 C18.5,5 22,12 22,12 C22,12 18.5,19 12,19 C5.5,19 2,12 2,12 Z"
-                                          Style="{StaticResource IconStroke}"/>
-                                    <Ellipse Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" Style="{StaticResource IconStroke}"/>
-                                </Canvas>
-                            </Viewbox>
+               
+                <!-- thẻ chứa form -->
+                <Border CornerRadius="30" Background="{StaticResource CardBrush}"
+                BorderBrush="{StaticResource CardBorderBrush}" BorderThickness="2"
+                Padding="40,36">
+                    <StackPanel>
+                        <TextBlock Text="Đăng nhập" FontSize="30" FontWeight="Bold" Foreground="{StaticResource NavyBrush}" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Nhập tài khoản được cấp để tiếp tục." Margin="0,8,0,24" FontSize="15" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center"/>
+
+                        <!-- Thông báo lỗi: chỉ hiện khi HasMessage = true -->
+                        <Border Background="#FDECEC" CornerRadius="12" Padding="14,12" Margin="0,0,0,20"
+            Visibility="{Binding HasMessage, Converter={StaticResource BoolToVisibility}}">
+                            <StackPanel Orientation="Horizontal">
+                                <Viewbox Width="18" Height="18" VerticalAlignment="Center">
+                                    <ContentControl Content="{StaticResource IconAlert }"/>
+                                </Viewbox>
+                                <TextBlock Text="{Binding Message}" Margin="10,0,0,0" FontSize="14" FontWeight="Medium"
+                       Foreground="#B91C1C" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            </StackPanel>
                         </Border>
-                    </Grid>
-                </Border>
 
-                <CheckBox Content="Ghi nhớ tên đăng nhập" IsChecked="{Binding RememberMe}" Margin="0,16,0,20"
-                          FontSize="14" Foreground="#33475E" VerticalContentAlignment="Center" Cursor="Hand"/>
+                        <!-- Ô tên đăng nhập -->
+                        <Label Content="Tên đăng nhập" Target="{Binding ElementName=txtUser}" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource FieldBox}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="44"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Width="18" Height="18">
+                                    <Canvas Width="24" Height="24">
+                                        <Ellipse Canvas.Left="8" Canvas.Top="4" Width="8" Height="8" Style="{StaticResource IconStroke}"/>
+                                        <Path Data="M4,21 C4,16.8 7.6,14 12,14 C16.4,14 20,16.8 20,21" Style="{StaticResource IconStroke}"/>
+                                    </Canvas>
+                                </Viewbox>
+                                <TextBox x:Name="txtUser" Grid.Column="1" Margin="0,0,12,0" Style="{StaticResource FieldText}"
+                     Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
+                            </Grid>
+                        </Border>
 
-                <Button Content="Đăng nhập" Style="{StaticResource PrimaryButton}" IsDefault="True"
-                        Command="{Binding LoginCommand}"/>
-                <Button Content="Thoát ứng dụng" Style="{StaticResource TextButton}" Margin="0,8,0,0"
-                        Command="{Binding ExitCommand}"/>
+                        <!-- Ô mật khẩu + con mắt -->
+                        <Label Content="Mật khẩu" Target="{Binding ElementName=pwdBox}" Margin="0,20,0,8" Style="{StaticResource FieldLabel}"/>
+                        <Border Style="{StaticResource FieldBox}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="44"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="44"/>
+                                </Grid.ColumnDefinitions>
+                                <Viewbox Width="18" Height="18">
+                                    <Canvas Width="24" Height="24">
+                                        <Rectangle Canvas.Left="4" Canvas.Top="11" Width="16" Height="10" RadiusX="2" RadiusY="2" Style="{StaticResource IconStroke}"/>
+                                        <Path Data="M8,11 V7 A4,4 0 0 1 16,7 V11" Style="{StaticResource IconStroke}"/>
+                                    </Canvas>
+                                </Viewbox>
+                                <!-- PasswordBox (ẩn chữ) và TextBox (hiện chữ) chồng cùng một chỗ -->
+                                <PasswordBox x:Name="pwdBox" Grid.Column="1" Style="{StaticResource FieldPassword}"
+                         PasswordChanged="PwdBox_PasswordChanged"/>
+                                <TextBox x:Name="txtPassReveal" Grid.Column="1" Style="{StaticResource FieldText}"
+                     IsReadOnly="True" IsHitTestVisible="False" Visibility="Collapsed"/>
+                                <!-- Con mắt: giữ chuột để xem -->
+                                <Border Grid.Column="2" Background="Transparent" Cursor="Hand" ToolTip="Giữ để xem mật khẩu"
+                    MouseLeftButtonDown="Eye_MouseDown"
+                    MouseLeftButtonUp="Eye_Release"
+                    MouseLeave="Eye_Release">
+                                    <Viewbox Width="20" Height="20">
+                                        <Canvas Width="24" Height="24">
+                                            <Path Data="M2,12 C2,12 5.5,5 12,5 C18.5,5 22,12 22,12 C22,12 18.5,19 12,19 C5.5,19 2,12 2,12 Z"
+                              Style="{StaticResource IconStroke}"/>
+                                            <Ellipse Canvas.Left="9" Canvas.Top="9" Width="6" Height="6" Style="{StaticResource IconStroke}"/>
+                                        </Canvas>
+                                    </Viewbox>
+                                </Border>
+                            </Grid>
+                        </Border>
 
-                <!-- Nhãn trạng thái kết nối CSDL -->
-                <Border Style="{StaticResource StatusPill}" CornerRadius="999" Padding="12,6" Margin="0,32,0,0"
-                        HorizontalAlignment="Center">
-                    <StackPanel Orientation="Horizontal">
-                        <Ellipse Width="8" Height="8" VerticalAlignment="Center" Style="{StaticResource StatusDot}"/>
-                        <TextBlock Text="{Binding DbStatusText}" Margin="8,0,0,0" FontSize="13" FontWeight="Medium"
-                                   Style="{StaticResource StatusText}"/>
+                        <CheckBox Content="Ghi nhớ tên đăng nhập" IsChecked="{Binding RememberMe}" Margin="0,16,0,20"
+              FontSize="14" Foreground="#33475E" VerticalContentAlignment="Center" Cursor="Hand"/>
+
+                        <Button Content="Đăng nhập" Style="{StaticResource PrimaryButton}" IsDefault="True"
+            Command="{Binding LoginCommand}"/>
+                        <Button Content="Thoát ứng dụng" Style="{StaticResource TextButton}" Margin="0,8,0,0"
+            Command="{Binding ExitCommand}"/>
+
+                        <!-- Nhãn trạng thái kết nối CSDL -->
+                        <Border Style="{StaticResource StatusPill}" CornerRadius="999" Padding="12,6" Margin="0,32,0,0"
+            HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="8" Height="8" VerticalAlignment="Center" Style="{StaticResource StatusDot}"/>
+                                <TextBlock Text="{Binding DbStatusText}" Margin="8,0,0,0" FontSize="13" FontWeight="Medium"
+                       Style="{StaticResource StatusText}"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                 </Border>
-            </StackPanel>
+            </Grid>
         </ScrollViewer>
     </Grid>
 </Window>
