@@ -27,7 +27,7 @@ namespace CinemaAPP.Services
             
             string savedHash = r.GetString(2);
             string inputHash = PasswordHasher.Hash(password);
-            if (!string.Equals(savedHash, inputHash, StringComparison.OrdinalIgnoreCase))
+            if (!PasswordHasher.Verify(password, savedHash))
                 return null;                                  // sai mật khẩu
 
             return new Account
