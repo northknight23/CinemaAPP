@@ -8,21 +8,7 @@
                     xmlns:sys="clr-namespace:System;assembly=System.Runtime"
                     xmlns:v="clr-namespace:CinemaAPP.Views">
 
-    <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
     <!-- ===== Chữ ===== -->
-    <Style x:Key="MgmtBreadcrumb" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="12"/>
-        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}"/>
-    </Style>
-
-    <Style x:Key="MgmtPageTitle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="22"/>
-        <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
-        <Setter Property="Margin" Value="0,2,0,0"/>
-    </Style>
-
     <Style x:Key="MgmtCardTitle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="17"/>
         <Setter Property="FontWeight" Value="Bold"/>
@@ -249,7 +235,7 @@
 
     <Style x:Key="MgmtDangerButton" TargetType="Button" BasedOn="{StaticResource MgmtButtonBase}">
         <Setter Property="Background" Value="{StaticResource CardBrush}"/>
-        <Setter Property="BorderBrush" Value="#F3C4C4"/>
+        <Setter Property="BorderBrush" Value="{StaticResource DangerBorderBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource ErrorBrush}"/>
         <Setter Property="FontWeight" Value="Medium"/>
         <Style.Triggers>
@@ -378,7 +364,7 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ButtonBorder"
                                     Property="Background"
-                                    Value="#183B61"/>
+                                    Value="{StaticResource NavyHoverBrush}"/>
                             <Setter Property="Foreground" Value="White"/>
                         </Trigger>
                         <Trigger Property="Tag" Value="True">
@@ -408,8 +394,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
-    <Style x:Key="MgmtMenuButton" TargetType="Button" BasedOn="{StaticResource MenuButtonStyle}"/>
 
     <!-- ===== Nút Đầu Trang (Top Bar / Đăng xuất) ===== -->
     <Style x:Key="MgmtHeaderButton" TargetType="Button">
@@ -591,7 +575,7 @@
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect Color="#0F2A4A" Direction="270" ShadowDepth="1" BlurRadius="10" Opacity="0.10"/>
+                <DropShadowEffect Color="{StaticResource ShadowNavyColor}" Direction="270" ShadowDepth="1" BlurRadius="10" Opacity="0.10"/>
             </Setter.Value>
         </Setter>
     </Style>
@@ -599,7 +583,7 @@
         <Setter Property="Width" Value="46"/>
         <Setter Property="Height" Value="46"/>
         <Setter Property="CornerRadius" Value="23"/>
-        <Setter Property="Background" Value="#EFF4FB"/>
+        <Setter Property="Background" Value="{StaticResource KpiIconBgBrush}"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
@@ -636,7 +620,7 @@
         <Style.Triggers>
             <Trigger Property="Tag">
                 <Trigger.Value><sys:Boolean>True</sys:Boolean></Trigger.Value>
-                <Setter Property="TextElement.Foreground" Value="#15803D"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource TrendUpBrush}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
@@ -671,30 +655,30 @@
         <Setter Property="Width" Value="40"/>
         <Setter Property="Height" Value="40"/>
         <Setter Property="CornerRadius" Value="20"/>
-        <Setter Property="Background" Value="#EAF2FC"/>
-        <Setter Property="TextElement.Foreground" Value="#164F8F"/>
+        <Setter Property="Background" Value="{StaticResource InfoBgBrush}"/>
+        <Setter Property="TextElement.Foreground" Value="{StaticResource InfoBrush}"/>
         <Setter Property="TextElement.FontWeight" Value="Bold"/>
         <Setter Property="TextElement.FontSize" Value="13.5"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding AvatarTone}" Value="1">
-                <Setter Property="Background" Value="#FFF4DF"/>
-                <Setter Property="TextElement.Foreground" Value="#9A3412"/>
+                <Setter Property="Background" Value="{StaticResource WarningBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource WarningBrush}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding AvatarTone}" Value="2">
-                <Setter Property="Background" Value="#EEF7F0"/>
-                <Setter Property="TextElement.Foreground" Value="#166534"/>
+                <Setter Property="Background" Value="{StaticResource SuccessBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource SuccessBrush}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding AvatarTone}" Value="3">
-                <Setter Property="Background" Value="#F1ECFC"/>
-                <Setter Property="TextElement.Foreground" Value="#5B3FB0"/>
+                <Setter Property="Background" Value="{StaticResource SeatCoupleBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource PurpleBrush}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding AvatarTone}" Value="4">
-                <Setter Property="Background" Value="#FDECEC"/>
-                <Setter Property="TextElement.Foreground" Value="#B91C1C"/>
+                <Setter Property="Background" Value="{StaticResource ErrorBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource ErrorBrush}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding AvatarTone}" Value="5">
-                <Setter Property="Background" Value="#E6F6F8"/>
-                <Setter Property="TextElement.Foreground" Value="#0E6773"/>
+                <Setter Property="Background" Value="{StaticResource TealBgBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource TealDarkBrush}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -720,14 +704,14 @@
         <Setter Property="TextElement.FontSize" Value="12"/>
         <Style.Triggers>
             <DataTrigger Binding="{Binding Tier}" Value="gold">
-                <Setter Property="Background" Value="#FFF4DF"/>
-                <Setter Property="BorderBrush" Value="#F5C46A"/>
-                <Setter Property="TextElement.Foreground" Value="#8A5A00"/>
+                <Setter Property="Background" Value="{StaticResource WarningBgBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource GoldBorderBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource GoldTextBrush}"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Tier}" Value="silver">
-                <Setter Property="Background" Value="#EEF1F5"/>
-                <Setter Property="BorderBrush" Value="#C7D0DC"/>
-                <Setter Property="TextElement.Foreground" Value="#44546A"/>
+                <Setter Property="Background" Value="{StaticResource MutedBgBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource MutedBorderBrush}"/>
+                <Setter Property="TextElement.Foreground" Value="{StaticResource MutedTextDarkBrush}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -763,7 +747,7 @@
     <Style x:Key="MgmtInputHint" TargetType="TextBlock">
         <Setter Property="Margin" Value="12,0,0,0"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Foreground" Value="#8A97A8"/>
+        <Setter Property="Foreground" Value="{StaticResource TextSubtleBrush}"/>
         <Setter Property="IsHitTestVisible" Value="False"/>
     </Style>
 

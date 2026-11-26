@@ -12,8 +12,6 @@
     </Window.InputBindings>
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
-
         <!-- Khung bao quanh mỗi ô nhập: viền sáng xanh khi đang gõ -->
         <Style x:Key="FieldBox" TargetType="Border">
             <Setter Property="Height" Value="50"/>
@@ -325,7 +323,7 @@
 
                         <!-- Thông báo lỗi: chỉ hiện khi HasMessage = true -->
                         <Border Background="{StaticResource ErrorBgBrush}" CornerRadius="12" Padding="14,12" Margin="0,0,0,20"
-            Visibility="{Binding HasMessage, Converter={StaticResource BoolToVisibility}}">
+            Visibility="{Binding HasMessage, Converter={StaticResource BoolToVis}}">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -335,7 +333,7 @@
                                     <ContentControl Content="{StaticResource IconAlert }"/>
                                 </Viewbox>
                                 <TextBlock Grid.Column="1" Text="{Binding Message}" Margin="10,0,0,0" FontSize="14" FontWeight="Medium" 
-                                           Foreground="#B91C1C" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                           Foreground="{StaticResource ErrorBrush}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                             </Grid>
                         </Border>
 

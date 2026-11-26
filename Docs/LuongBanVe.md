@@ -96,7 +96,7 @@ SELECT CustomerID, FullName, Phone, Points FROM CUSTOMER WHERE Phone = @Phone;
 ```
 
 - **Điểm tích lũy**: ghế thường tích 5%, VIP 7%, ghế đôi 10%; tính trên tiền thực trả (giảm giá phân bổ theo tỷ lệ giá từng ghế), quy đổi 1.000đ = 1 điểm và làm tròn xuống sau khi cộng cả đơn. Chỉ cộng khi có khách thành viên. Quy tắc dùng chung nằm ở `TicketRewards.Calculate`.
-- **Dùng điểm**: 1 điểm giảm 1.000đ; không vượt số dư hoặc 20% tiền vé trước giảm, chỉ dùng điểm nguyên. Thanh toán thành công mới trừ điểm đã dùng và cộng điểm mới. Bản POS hiện tại giữ số dư trong bộ nhớ, chưa cập nhật bảng CUSTOMER.
+- **Dùng điểm**: 1 điểm giảm 1.000đ; không giới hạn 20%, không vượt số dư điểm hiện có hoặc tổng tiền vé hiện đang thanh toán, chỉ dùng điểm nguyên. Thanh toán thành công mới trừ điểm đã dùng và cộng điểm mới vào bảng CUSTOMER.
 
 ### 3.3 Phương thức thanh toán
 

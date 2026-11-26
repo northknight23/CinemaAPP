@@ -42,7 +42,7 @@
                                 Tag="{Binding IsOverviewSelected}"
                                 Command="{Binding SelectPageCommand}" CommandParameter="Overview">
                             <StackPanel Orientation="Horizontal">
-                                <Path Data="M3,3 H10 V10 H3 Z M14,3 H21 V10 H14 Z M3,14 H10 V21 H3 Z M14,14 H21 V21 H14 Z"
+                                <Path Data="{StaticResource IcNavOverview}"
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Tổng quan" VerticalAlignment="Center"/>
@@ -56,7 +56,7 @@
                                 Tag="{Binding IsTicketsSelected}"
                                 Command="{Binding SelectPageCommand}" CommandParameter="Tickets">
                             <StackPanel Orientation="Horizontal">
-                                <Path Data="M2 9a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3z M9 6v12 M15 6v12"
+                                <Path Data="{StaticResource IcNavTicket}"
                                       Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6"
                                       Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Bán vé" VerticalAlignment="Center"/>
@@ -68,7 +68,7 @@
                                 Tag="{Binding IsTransactionsSelected}"
                                 Command="{Binding SelectPageCommand}" CommandParameter="Transactions">
                             <StackPanel Orientation="Horizontal">
-                                <Path Data="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z M9 8h6 M9 12h6 M9 16h4"
+                                <Path Data="{StaticResource IcNavTransaction}"
                                       Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6"
                                       StrokeLineJoin="Round" Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Giao dịch" VerticalAlignment="Center"/>
@@ -80,7 +80,7 @@
                                 Tag="{Binding IsMyShiftSelected}"
                                 Command="{Binding SelectPageCommand}" CommandParameter="MyShift">
                             <StackPanel Orientation="Horizontal">
-                                <Path Data="M9 3h6v4H9z M7 5H5v16h14V5h-2 M9 14l2 2 4-4"
+                                <Path Data="{StaticResource IcNavShift}"
                                       Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6"
                                       StrokeLineJoin="Round" Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Hóa đơn ca" VerticalAlignment="Center"/>
@@ -91,7 +91,7 @@
                                 Tag="{Binding IsCustomersSelected}"
                                 Command="{Binding SelectPageCommand}" CommandParameter="Customers">
                             <StackPanel Orientation="Horizontal">
-                                <Path Data="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75"
+                                <Path Data="{StaticResource IcNavCustomers}"
                                       Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6"
                                       Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Khách hàng" VerticalAlignment="Center"/>
@@ -106,7 +106,7 @@
                                     Tag="{Binding IsMoviesSelected}"
                                     Command="{Binding SelectPageCommand}" CommandParameter="Movies">
                                 <StackPanel Orientation="Horizontal">
-                                    <Path Data="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2zM7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 7h5M17 17h5"
+                                    <Path Data="{StaticResource IcNavMovies}"
                                           Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.5"
                                           Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Phim" VerticalAlignment="Center"/>
@@ -117,7 +117,7 @@
                                     Tag="{Binding IsRoomsSelected}"
                                     Command="{Binding SelectPageCommand}" CommandParameter="Rooms">
                                 <StackPanel Orientation="Horizontal">
-                                    <Path Data="M4 18v3 M20 18v3 M2 11a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7H2v-7z M6 9V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4"
+                                    <Path Data="{StaticResource IcNavRooms}"
                                           Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6"
                                           Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Phòng chiếu" VerticalAlignment="Center"/>
@@ -128,7 +128,7 @@
                                     Tag="{Binding IsShowtimesSelected}"
                                     Command="{Binding SelectPageCommand}" CommandParameter="Showtimes">
                                 <StackPanel Orientation="Horizontal">
-                                    <Path Data="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z M16 2v4 M8 2v4 M3 10h18"
+                                    <Path Data="{StaticResource IcNavShowtimes}"
                                           Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6"
                                           Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Suất chiếu" VerticalAlignment="Center"/>
@@ -139,7 +139,7 @@
                                     Tag="{Binding IsAccountsSelected}"
                                     Command="{Binding SelectPageCommand}" CommandParameter="Accounts">
                                 <StackPanel Orientation="Horizontal">
-                                    <Path Data="M21 2l-2 2m-1.5 1.5L14 9a5 5 0 1 0 3 3l5-5v-3h-2v-2z"
+                                    <Path Data="{StaticResource IcNavAccounts}"
                                           Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.6"
                                           Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="Tài khoản" VerticalAlignment="Center"/>
@@ -155,7 +155,7 @@
                                     Tag="{Binding IsRevenueSelected}"
                                     Command="{Binding SelectPageCommand}" CommandParameter="Revenue">
                                 <StackPanel Orientation="Horizontal">
-                                    <Path Data="M18 20V10 M12 20V4 M6 20v-6"
+                                    <Path Data="{StaticResource IcNavRevenue}"
                                           Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="2"
                                           StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                           Width="16" Height="16" Stretch="Uniform" Margin="0,0,12,0" VerticalAlignment="Center"/>
@@ -199,7 +199,7 @@
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- ĐỒNG HỒ THỜI GIAN THỰC -->
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Path Data="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 10.5V7a1 1 0 0 0-2 0v5a1 1 0 0 0 .5.86l3.5 2a1 1 0 0 0 1-1.72z"
+                            <Path Data="{StaticResource IcNavClock}"
                                   Fill="{StaticResource TextMutedBrush}"
                                   Width="20" Height="20" Stretch="Uniform"
                                   Margin="0,0,10,0" VerticalAlignment="Center"/>
@@ -246,7 +246,7 @@
                         <Button Style="{StaticResource MgmtHeaderButton}"
                                 Command="{Binding LogoutCommand}">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Path Data="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9"
+                                <Path Data="{StaticResource IcLogout}"
                                       Stroke="{StaticResource TextBrush}" StrokeThickness="1.8"
                                       StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                       Width="14" Height="14" Stretch="Uniform" Margin="0,0,8,0" VerticalAlignment="Center"/>
@@ -293,7 +293,7 @@
         <!-- ================= HỘP THOẠI XÁC NHẬN ĐĂNG XUẤT ================= -->
         <Grid Grid.ColumnSpan="2"
               Visibility="{Binding IsLogoutConfirmOpen, Converter={StaticResource BoolToVis}}"
-              Background="#66000000">
+              Background="{StaticResource ModalOverlayBrush}">
             <Border Width="400" VerticalAlignment="Center" HorizontalAlignment="Center"
                     Style="{StaticResource MgmtCard}" Padding="24" Background="{StaticResource CardBrush}">
                 <StackPanel>

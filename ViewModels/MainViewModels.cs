@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using CinemaAPP.Helpers;
+using CinemaAPP.Models;
 
 namespace CinemaAPP.ViewModels
 {
@@ -144,7 +144,6 @@ namespace CinemaAPP.ViewModels
 
         // ================= Lệnh =================
         public ICommand SelectPageCommand { get; }
-        public ICommand ToggleRoleCommand { get; }
         public ICommand LogoutCommand { get; }
         public ICommand ConfirmLogoutCommand { get; }
         public ICommand CancelLogoutCommand { get; }
@@ -170,11 +169,6 @@ namespace CinemaAPP.ViewModels
                 {
                     NavigateTo(pageId);
                 }
-            });
-
-            ToggleRoleCommand = new RelayCommand(_ =>
-            {
-                IsAdmin = !IsAdmin;
             });
 
             LogoutCommand = new RelayCommand(_ =>
@@ -244,8 +238,7 @@ namespace CinemaAPP.ViewModels
             var now = DateTime.Now;
             CurrentTime = now.ToString("HH:mm:ss");
 
-            var viCulture = new CultureInfo("vi-VN");
-            var dayOfWeek = viCulture.DateTimeFormat.GetDayName(now.DayOfWeek);
+            var dayOfWeek = Format.Vi.DateTimeFormat.GetDayName(now.DayOfWeek);
             dayOfWeek = char.ToUpper(dayOfWeek[0]) + dayOfWeek.Substring(1);
             CurrentDate = $"{dayOfWeek}, {now:dd/MM/yyyy}";
         }

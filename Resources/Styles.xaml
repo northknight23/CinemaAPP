@@ -60,4 +60,57 @@
     <SolidColorBrush x:Key="TicketPaperBrush" Color="#F4DEDC"/>
     <SolidColorBrush x:Key="TicketWatermarkBrush" Color="#FFF5F1"/>
     <SolidColorBrush x:Key="TicketRuleBrush" Color="#A37575"/>
+
+    <!-- ===== Khung hủy vé / hoàn tiền (dùng chung Hóa đơn ca & Giao dịch) ===== -->
+    <LinearGradientBrush x:Key="CancelCardBgBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#FFF0F3" Offset="0"/>
+        <GradientStop Color="#FFF8F9" Offset="0.5"/>
+        <GradientStop Color="#FFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="CancelCardBorderBrush"         Color="#F4C7D0"/>
+    <SolidColorBrush x:Key="CancelTitleBrush"              Color="#881337"/>
+    <SolidColorBrush x:Key="CancelChipBorderBrush"         Color="#CBD5E1"/>
+    <SolidColorBrush x:Key="CancelChipSelectedBgBrush"     Color="#FFE4E8"/>
+    <SolidColorBrush x:Key="CancelChipSelectedBorderBrush" Color="#C2415E"/>
+    <LinearGradientBrush x:Key="CancelImpactBgBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#FFF5D6" Offset="0"/>
+        <GradientStop Color="#FFF4E6" Offset="0.5"/>
+        <GradientStop Color="#FFF0F3" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="CancelImpactBorderBrush"       Color="#F2CEB0"/>
+    <SolidColorBrush x:Key="CancelImpactIconBrush"         Color="#A16207"/>
+    <SolidColorBrush x:Key="CancelAmountBrush"             Color="#C81E1E"/>
+    <SolidColorBrush x:Key="CancelMethodBrush"             Color="#B45309"/>
+    <LinearGradientBrush x:Key="CancelButtonBgBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#E1385A" Offset="0"/>
+        <GradientStop Color="#BD173D" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="CancelButtonHoverBgBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#EB4566" Offset="0"/>
+        <GradientStop Color="#A81335" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- ===== Màu phụ, lớp phủ modal & bóng dùng chung toàn app ===== -->
+    <Color x:Key="ShadowNavyColor">#0F2A4A</Color>
+    <Color x:Key="ScreenGlowColor">#A9C9EC</Color>
+    <SolidColorBrush x:Key="ModalOverlayBrush"     Color="#66000000"/>
+    <SolidColorBrush x:Key="NavyOverlayBrush"      Color="#660F2A4A"/>
+    <SolidColorBrush x:Key="NavyHoverBrush"        Color="#183B61"/>
+    <SolidColorBrush x:Key="LogoSubtextBrush"      Color="#9CC3EA"/>
+    <SolidColorBrush x:Key="DangerBorderBrush"     Color="#F3C4C4"/>
+    <SolidColorBrush x:Key="KpiIconBgBrush"        Color="#EFF4FB"/>
+    <SolidColorBrush x:Key="TrendUpBrush"          Color="#15803D"/>
+    <SolidColorBrush x:Key="PurpleBrush"           Color="#5B3FB0"/>
+    <SolidColorBrush x:Key="TealBgBrush"           Color="#E6F6F8"/>
+    <SolidColorBrush x:Key="GoldBorderBrush"       Color="#F5C46A"/>
+    <SolidColorBrush x:Key="GoldTextBrush"         Color="#8A5A00"/>
+    <SolidColorBrush x:Key="PointsTextBrush"       Color="#7A4A00"/>
+    <SolidColorBrush x:Key="MutedBgBrush"          Color="#EEF1F5"/>
+    <SolidColorBrush x:Key="MutedBorderBrush"      Color="#C7D0DC"/>
+    <SolidColorBrush x:Key="MutedTextDarkBrush"    Color="#44546A"/>
+    <SolidColorBrush x:Key="TextSubtleBrush"       Color="#8A97A8"/>
+    <SolidColorBrush x:Key="TextSoftBrush"         Color="#6B7889"/>
+    <SolidColorBrush x:Key="SegmentBgBrush"        Color="#F1F5FA"/>
+    <SolidColorBrush x:Key="RowDividerBrush"       Color="#EDF2F8"/>
+    <SolidColorBrush x:Key="InputFocusBorderBrush" Color="#C9DCF2"/>
 </ResourceDictionary>

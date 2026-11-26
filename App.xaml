@@ -11,6 +11,8 @@
                 <ResourceDictionary Source="Resources/Icon_Logo.xaml"/>
                 <ResourceDictionary Source="Resources/Background.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <!-- Converter dùng chung toàn app -->
+            <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

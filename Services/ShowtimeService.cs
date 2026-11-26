@@ -14,14 +14,18 @@ namespace CinemaAPP.Services
         private const string SelectSql =
             @"SELECT s.ShowtimeID, s.MovieID, s.RoomID, s.StartTime, s.ShowFormat, s.AudioType, s.BasePrice,
                      m.Title, m.DurationMin, m.Genre, m.Agerating, r.RoomName, r.RoomType,
-                     ISNULL(se.Total, r.NumRows * r.SeatsPerRow), ISNULL(t.Sold, 0), ISNULL(t.Revenue, 0), m.PosterPath
+                     ISNULL(se.Total, r.NumRows * r.SeatsPerRow), ISNULL(t.Sold, 0), ISNULL(rev.Revenue, 0), m.PosterPath
               FROM SHOWTIME s
               JOIN MOVIE m ON m.MovieID = s.MovieID
               JOIN ROOM r ON r.RoomID = s.RoomID
               OUTER APPLY (SELECT NULLIF(COUNT(*), 0) AS Total FROM SEAT WHERE SEAT.RoomID = s.RoomID) se
-              OUTER APPLY (SELECT COUNT(*) AS Sold, SUM(tk.Price) AS Revenue
+              OUTER APPLY (SELECT COUNT(*) AS Sold
                            FROM TICKET tk JOIN BOOKING b ON b.BookingID = tk.BookingID
-                           WHERE tk.ShowtimeID = s.ShowtimeID AND ISNULL(b.BookingStatus, '') <> @Cancelled) t";
+                           WHERE tk.ShowtimeID = s.ShowtimeID AND ISNULL(b.BookingStatus, '') <> @Cancelled) t
+              OUTER APPLY (SELECT SUM(b.TotalAmount) AS Revenue
+                           FROM BOOKING b
+                           WHERE ISNULL(b.BookingStatus, '') <> @Cancelled
+                             AND EXISTS (SELECT 1 FROM TICKET tk WHERE tk.BookingID = b.BookingID AND tk.ShowtimeID = s.ShowtimeID)) rev";
 
         // Suất bắt đầu trong [from, to)
         public List<Showtime> GetRange(DateTime from, DateTime to)

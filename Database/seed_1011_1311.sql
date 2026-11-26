@@ -161,7 +161,9 @@ BEGIN
         IF RAND() < 0.4
             SELECT @custId = CustomerID FROM CUSTOMER
             ORDER BY CustomerID OFFSET CAST(FLOOR(RAND() * @nCust) AS INT) ROWS FETCH NEXT 1 ROWS ONLY;
-        SET @points = CASE WHEN @custId IS NULL THEN 0 ELSE FLOOR(@total / 10000) END;
+        SELECT @points = CASE WHEN @custId IS NULL THEN 0
+            ELSE CAST(FLOOR(SUM(p.Price * CASE se.SeatType WHEN N'Vip' THEN 0.07 WHEN N'Couple' THEN 0.10 ELSE 0.05 END) / 1000.0) AS INT) END
+        FROM @pick p JOIN SEAT se ON se.SeatID = p.SeatID;
 
         -- Giong seed.sql: truoc khi nghi viec, nv04 van ban ~25% so don
         SELECT @accId = AccountID FROM ACCOUNT

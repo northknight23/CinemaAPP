@@ -1,3 +1,4 @@
+using CinemaAPP.Models;
 using CinemaAPP.Services;
 
 namespace CinemaAPP.ViewModels
@@ -24,10 +25,10 @@ namespace CinemaAPP.ViewModels
         public string Name => Staff.FullName;
         public string SubText => $"{Staff.Username} · {Staff.Shift.Split(' ')[0]} {Staff.Shift.Split(' ')[1]}";
         public string Initials => Staff.Initials;
-        public string CashText => SaleRecord.Money(Cash).Replace(" đ", "");
-        public string TransferText => SaleRecord.Money(Transfer).Replace(" đ", "");
-        public string CardText => SaleRecord.Money(Card).Replace(" đ", "");
-        public string TotalText => SaleRecord.Money(Total).Replace(" đ", "");
-        public string CancelText => CancelledCount == 0 ? "" : $"{CancelledCount} hủy · {SaleRecord.Money(CancelledAmount).Replace(" đ", "")}";
+        public string CashText => Cash.ToString("N0", Format.Vi);
+        public string TransferText => Transfer.ToString("N0", Format.Vi);
+        public string CardText => Card.ToString("N0", Format.Vi);
+        public string TotalText => Total.ToString("N0", Format.Vi);
+        public string CancelText => CancelledCount == 0 ? "" : $"{CancelledCount} hủy · {CancelledAmount.ToString("N0", Format.Vi)}";
     }
 }

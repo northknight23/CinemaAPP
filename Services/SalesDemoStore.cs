@@ -1,20 +1,32 @@
-using CinemaAPP.ViewModels;
-
 namespace CinemaAPP.Services
 {
-    // Kho đơn bán dùng chung cho màn Bán vé và màn Giao dịch khi chưa ghép CSDL.
-    // Ban đầu rỗng: chỉ có các đơn thật vừa thanh toán ở màn Bán vé trong lần chạy này. Đóng app là mất.
-    // Dữ liệu test nằm ngoài project (E:\project cinema\TestData), không thêm đơn giả vào đây.
-    // Khi ghép CSDL: thay bằng BookingService (đọc BOOKING + TICKET, hủy đơn, lưu bàn giao ca).
+    // Danh sách lý do hủy đơn dùng chung + bộ nhớ đệm đồng bộ từ bảng SHIFT_HANDOVER
+    // (để StaffDashboardViewModel hiển thị đúng trạng thái chốt ca ngay khi mở app mà không cần sửa file của A).
+    // Mọi thao tác đọc/ghi chính thức đi qua ShiftService (SQL Server).
     public static class SalesDemoStore
     {
-        public static List<SaleRecord> Sales { get; } = new List<SaleRecord>();
+        private static readonly object CacheLock = new();
+        private static readonly Dictionary<(DateTime Day, string Username), ShiftReport> shiftReports = new();
+        private static readonly Dictionary<(DateTime Day, string Username), Handover> handovers = new();
+        private static DateTime? loadedDay;
 
-        // Nhân viên nộp báo cáo chốt ca: (ngày, username) → tiền đếm được + ghi chú. Chờ Quản trị viên xác nhận.
-        public static Dictionary<(DateTime Day, string Username), ShiftReport> ShiftReports { get; } = new();
+        public static Dictionary<(DateTime Day, string Username), ShiftReport> ShiftReports
+        {
+            get
+            {
+                EnsureTodayLoaded();
+                return shiftReports;
+            }
+        }
 
-        // Bàn giao ca: (ngày, username) → kết quả Quản trị viên xác nhận. Sau này là bảng riêng (nhờ A thêm nếu nhóm làm phần này).
-        public static Dictionary<(DateTime Day, string Username), Handover> Handovers { get; } = new();
+        public static Dictionary<(DateTime Day, string Username), Handover> Handovers
+        {
+            get
+            {
+                EnsureTodayLoaded();
+                return handovers;
+            }
+        }
 
         // Lý do hủy đơn, dùng chung cho Nhân viên và Quản trị viên
         public static List<string> CancelReasons { get; } = new()
@@ -22,21 +34,70 @@ namespace CinemaAPP.Services
             "Khách đổi ý", "Nhầm suất / ghế", "Lỗi thanh toán", "Sự cố phòng chiếu",
         };
 
-        public static int NextBookingId { get; private set; } = 1001;
-
-        public static SaleRecord Add(SaleRecord draft)
+        internal static void SyncDayCache(DateTime day, IEnumerable<ShiftEntry> entries)
         {
-            var sale = new SaleRecord
+            DateTime date = day.Date;
+            lock (CacheLock)
             {
-                BookingID = NextBookingId++, CreatedAt = draft.CreatedAt, MovieTitle = draft.MovieTitle,
-                ShowStart = draft.ShowStart, RoomName = draft.RoomName, ShowFormat = draft.ShowFormat,
-                Seats = draft.Seats, StaffName = draft.StaffName, StaffUsername = draft.StaffUsername,
-                CustomerName = draft.CustomerName, CustomerPhone = draft.CustomerPhone,
-                Method = draft.Method, CashGiven = draft.CashGiven, Total = draft.Total,
-                Points = draft.Points, PointsUsed = draft.PointsUsed,
-            };
-            Sales.Add(sale);
-            return sale;
+                foreach (var key in shiftReports.Keys.Where(k => k.Day == date).ToList())
+                    shiftReports.Remove(key);
+                foreach (var key in handovers.Keys.Where(k => k.Day == date).ToList())
+                    handovers.Remove(key);
+
+                foreach (var entry in entries)
+                {
+                    var key = (date, entry.Username);
+                    if (entry.Report != null) shiftReports[key] = entry.Report;
+                    if (entry.Handover != null) handovers[key] = entry.Handover;
+                }
+                if (date == DateTime.Today)
+                    loadedDay = date;
+            }
+        }
+
+        internal static void SyncStaffCache(DateTime day, string username, ShiftReport? report, Handover? handover)
+        {
+            var key = (day.Date, username);
+            lock (CacheLock)
+            {
+                if (report != null) shiftReports[key] = report;
+                else shiftReports.Remove(key);
+
+                if (handover != null) handovers[key] = handover;
+                else handovers.Remove(key);
+            }
+        }
+
+        internal static void ClearCache()
+        {
+            lock (CacheLock)
+            {
+                shiftReports.Clear();
+                handovers.Clear();
+                loadedDay = null;
+            }
+        }
+
+        private static void EnsureTodayLoaded()
+        {
+            DateTime today = DateTime.Today;
+            lock (CacheLock)
+            {
+                if (loadedDay == today) return;
+                loadedDay = today;
+            }
+            try
+            {
+                new ShiftService().GetByDate(today);
+            }
+            catch
+            {
+                // Bỏ qua khi đang mở XAML Designer hoặc chưa kết nối SQL; các màn chính sẽ báo lỗi trực tiếp.
+                lock (CacheLock)
+                {
+                    if (loadedDay == today) loadedDay = null;
+                }
+            }
         }
     }
 

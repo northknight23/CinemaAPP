@@ -11,6 +11,15 @@ namespace CinemaAPP.Models
 
         public static string Number(int n) => n.ToString("N0", Vi);
 
+        // Chỉ lấy chữ số: "2.140.000" hay "2140000" đều được; ô trống hoặc tràn số → null.
+        public static decimal? TryParseMoney(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text)) return null;
+            string digits = new string(text.Where(char.IsDigit).ToArray());
+            return digits.Length > 0 && decimal.TryParse(digits, NumberStyles.None, CultureInfo.InvariantCulture, out decimal value)
+                ? value : null;
+        }
+
         // 19.850.000 → "19,9" (đơn vị triệu, dùng trên cột biểu đồ)
         public static string Million(decimal amount) => (amount / 1_000_000m).ToString("0.0", Vi);
 

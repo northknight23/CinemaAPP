@@ -380,7 +380,7 @@
         </ScrollViewer>
 
         <!-- ================= MODAL 1: HỘP THOẠI FORM THÊM / CHỈNH SỬA PHÒNG CHIẾU ================= -->
-        <Grid Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
+        <Grid Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVis}}" Background="{StaticResource ModalOverlayBrush}">
             <Border Width="480" VerticalAlignment="Center" HorizontalAlignment="Center"
                     Style="{StaticResource MgmtCard}" Padding="26" Background="{StaticResource CardBrush}">
                 <StackPanel>
@@ -466,7 +466,7 @@
         </Grid>
 
         <!-- ================= MODAL 2: HỘP THOẠI XEM SƠ ĐỒ GHẾ NGỒI (ĐỒNG BỘ VỚI MÀN BÁN VÉ) ================= -->
-        <Grid Visibility="{Binding IsSeatMapOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
+        <Grid Visibility="{Binding IsSeatMapOpen, Converter={StaticResource BoolToVis}}" Background="{StaticResource ModalOverlayBrush}">
             <Border Width="820" MaxHeight="700" VerticalAlignment="Center" HorizontalAlignment="Center"
                     Style="{StaticResource MgmtCard}" Padding="26" Background="{StaticResource CardBrush}">
                 <Grid>
@@ -541,7 +541,7 @@
                                           Data="M 0,12 Q 50,0 100,12" Stroke="{DynamicResource InputHoverBrush}"
                                           StrokeThickness="3.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
                                         <Path.Effect>
-                                            <DropShadowEffect Color="#A9C9EC" BlurRadius="18" ShadowDepth="0" Opacity="0.9"/>
+                                            <DropShadowEffect Color="{StaticResource ScreenGlowColor}" BlurRadius="18" ShadowDepth="0" Opacity="0.9"/>
                                         </Path.Effect>
                                     </Path>
                                     <TextBlock Text="M À N   H Ì N H" Foreground="{DynamicResource TextBrush}" Opacity="0.75"
@@ -613,7 +613,7 @@
         </Grid>
 
         <!-- ================= MODAL 3: XÁC NHẬN XÓA PHÒNG CHIẾU ================= -->
-        <Grid Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BoolToVis}}" Background="#66000000">
+        <Grid Visibility="{Binding IsDeleteConfirmOpen, Converter={StaticResource BoolToVis}}" Background="{StaticResource ModalOverlayBrush}">
             <Border Width="420" VerticalAlignment="Center" HorizontalAlignment="Center"
                     Style="{StaticResource MgmtCard}" Padding="24" Background="{StaticResource CardBrush}">
                 <StackPanel>

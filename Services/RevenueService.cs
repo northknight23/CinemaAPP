@@ -63,15 +63,19 @@ namespace CinemaAPP.Services
             return list;
         }
 
-        // Doanh thu vé (cộng Price) theo định dạng chiếu, nhiều nhất trước.
+        // Doanh thu thực thu (sau trừ điểm) theo định dạng chiếu, nhiều nhất trước.
         public List<FormatRevenue> GetByFormat(DateTime from, DateTime to)
         {
             using SqlConnection conn = Db.Open();
             using var cmd = new SqlCommand(
-                @"SELECT ISNULL(s.ShowFormat, N''), ISNULL(SUM(t.Price), 0) AS Amount
-                  FROM TICKET t
-                  JOIN BOOKING b  ON b.BookingID  = t.BookingID
-                  JOIN SHOWTIME s ON s.ShowtimeID = t.ShowtimeID
+                @"SELECT ISNULL(s.ShowFormat, N'') AS ShowFormat, ISNULL(SUM(b.TotalAmount), 0) AS Amount
+                  FROM BOOKING b
+                  CROSS APPLY (
+                      SELECT TOP 1 s2.ShowFormat
+                      FROM TICKET t2
+                      JOIN SHOWTIME s2 ON s2.ShowtimeID = t2.ShowtimeID
+                      WHERE t2.BookingID = b.BookingID
+                  ) s
                   WHERE b.BookingStatus = @Paid AND b.CreatedAt >= @From AND b.CreatedAt < @To
                   GROUP BY ISNULL(s.ShowFormat, N'')
                   ORDER BY Amount DESC", conn);
@@ -111,16 +115,20 @@ namespace CinemaAPP.Services
             return list;
         }
 
-        // Top phim theo doanh thu vé (cộng Price của từng vé).
+        // Top phim theo doanh thu thực thu (sau trừ điểm).
         public List<MovieRevenue> GetTopMovies(DateTime from, DateTime to, int top)
         {
             using SqlConnection conn = Db.Open();
             using var cmd = new SqlCommand(
-                @"SELECT TOP (@Top) m.Title, COUNT(*) AS Tickets, ISNULL(SUM(t.Price), 0) AS Amount
-                  FROM TICKET t
-                  JOIN BOOKING b  ON b.BookingID  = t.BookingID
-                  JOIN SHOWTIME s ON s.ShowtimeID = t.ShowtimeID
-                  JOIN MOVIE m    ON m.MovieID    = s.MovieID
+                @"SELECT TOP (@Top) m.Title, ISNULL(SUM(bt.Tickets), 0) AS Tickets, ISNULL(SUM(b.TotalAmount), 0) AS Amount
+                  FROM BOOKING b
+                  CROSS APPLY (
+                      SELECT COUNT(*) AS Tickets, MIN(s2.MovieID) AS MovieID
+                      FROM TICKET t2
+                      JOIN SHOWTIME s2 ON s2.ShowtimeID = t2.ShowtimeID
+                      WHERE t2.BookingID = b.BookingID
+                  ) bt
+                  JOIN MOVIE m ON m.MovieID = bt.MovieID
                   WHERE b.BookingStatus = @Paid AND b.CreatedAt >= @From AND b.CreatedAt < @To
                   GROUP BY m.MovieID, m.Title
                   ORDER BY Amount DESC", conn);

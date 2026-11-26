@@ -70,28 +70,6 @@
                 </Setter>
             </Style>
 
-            <!-- Nhãn độ tuổi: P xanh lá, T13 xanh dương, T16 cam, T18 đỏ -->
-            <Style x:Key="AgeChip" TargetType="Border" BasedOn="{StaticResource Chip}">
-                <Setter Property="CornerRadius" Value="4"/>
-                <Setter Property="Padding" Value="5,1"/>
-                <Setter Property="Background" Value="{DynamicResource SuccessBgBrush}"/>
-                <Setter Property="TextElement.Foreground" Value="{DynamicResource SuccessBrush}"/>
-                <Style.Triggers>
-                    <DataTrigger Binding="{Binding AgeRating}" Value="T13">
-                        <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
-                        <Setter Property="TextElement.Foreground" Value="{DynamicResource InfoBrush}"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding AgeRating}" Value="T16">
-                        <Setter Property="Background" Value="{DynamicResource WarningBgBrush}"/>
-                        <Setter Property="TextElement.Foreground" Value="{DynamicResource WarningBrush}"/>
-                    </DataTrigger>
-                    <DataTrigger Binding="{Binding AgeRating}" Value="T18">
-                        <Setter Property="Background" Value="{DynamicResource ErrorBgBrush}"/>
-                        <Setter Property="TextElement.Foreground" Value="{DynamicResource ErrorBrush}"/>
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
             <!-- Chip trạng thái suất -->
             <Style x:Key="ShowStatusChip" TargetType="Border" BasedOn="{StaticResource Chip}">
                 <Setter Property="Background" Value="{DynamicResource InfoBgBrush}"/>
@@ -495,7 +473,7 @@
         </Grid>
 
         <!-- ================= HỘP THOẠI THÊM / SỬA SUẤT ================= -->
-        <Grid Background="#660F2A4A" Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVis}}">
+        <Grid Background="{StaticResource NavyOverlayBrush}" Visibility="{Binding IsEditorOpen, Converter={StaticResource BoolToVis}}">
             <Border Style="{StaticResource Card}" Width="840" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel>
                     <DockPanel>
@@ -662,7 +640,7 @@
         </Grid>
 
         <!-- ================= HỘP THOẠI HỦY SUẤT ================= -->
-        <Grid Background="#660F2A4A" Visibility="{Binding IsDeleteOpen, Converter={StaticResource BoolToVis}}">
+        <Grid Background="{StaticResource NavyOverlayBrush}" Visibility="{Binding IsDeleteOpen, Converter={StaticResource BoolToVis}}">
             <Border Style="{StaticResource Card}" Width="440" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <StackPanel DataContext="{Binding DeleteTarget}">
                     <TextBlock FontSize="17" FontWeight="Bold" Foreground="{DynamicResource TextBrush}">

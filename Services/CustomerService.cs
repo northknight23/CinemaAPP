@@ -92,6 +92,7 @@ namespace CinemaAPP.Services
             using SqlConnection conn = Db.Open();
             using var cmd = new SqlCommand(
                 @"SELECT TOP (@Top) b.BookingID, b.CreatedAt, b.TotalAmount,
+                         b.PointsEarned, b.PointsUsed,
                          COUNT(t.TicketID) AS Tickets,
                          MIN(m.Title) AS Title,
                          MIN(s.StartTime) AS ShowStart
@@ -100,7 +101,7 @@ namespace CinemaAPP.Services
                   LEFT JOIN SHOWTIME s ON s.ShowtimeID = t.ShowtimeID
                   LEFT JOIN MOVIE m    ON m.MovieID = s.MovieID
                   WHERE b.CustomerID = @CustomerID AND b.BookingStatus = @Paid
-                  GROUP BY b.BookingID, b.CreatedAt, b.TotalAmount
+                  GROUP BY b.BookingID, b.CreatedAt, b.TotalAmount, b.PointsEarned, b.PointsUsed
                   ORDER BY b.CreatedAt DESC", conn);
             cmd.Parameters.Add("@Top", SqlDbType.Int).Value = top;
             cmd.Parameters.Add("@CustomerID", SqlDbType.Int).Value = customerId;
@@ -115,9 +116,11 @@ namespace CinemaAPP.Services
                     BookingID = r.GetInt32(0),
                     CreatedAt = r.IsDBNull(1) ? DateTime.MinValue : r.GetDateTime(1),
                     Amount = r.GetDecimal(2),
-                    Tickets = r.GetInt32(3),
-                    MovieTitle = r.IsDBNull(4) ? "(không rõ phim)" : r.GetString(4),
-                    ShowStart = r.IsDBNull(5) ? null : r.GetDateTime(5)
+                    PointsEarned = r.GetInt32(3),
+                    PointsUsed = r.GetInt32(4),
+                    Tickets = r.GetInt32(5),
+                    MovieTitle = r.IsDBNull(6) ? "(không rõ phim)" : r.GetString(6),
+                    ShowStart = r.IsDBNull(7) ? null : r.GetDateTime(7)
                 });
             }
             return list;

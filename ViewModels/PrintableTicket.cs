@@ -1,3 +1,4 @@
+using CinemaAPP.Models;
 using CinemaAPP.Services;
 
 namespace CinemaAPP.ViewModels
@@ -10,9 +11,9 @@ namespace CinemaAPP.ViewModels
         public string ShowtimeText => $"{Show.StartTime:dd/MM/yyyy} · {Show.TimeRange}";
         public string MethodText => SaleRecord.MethodName(Method);
         public decimal DiscountAmount => PointsUsed * 1000m;
-        public string SubtotalText => SaleRecord.Money(Seats.Sum(s => s.Price));
-        public string DiscountText => $"-{SaleRecord.Money(DiscountAmount)} ({PointsUsed} điểm)";
-        public string TotalText => SaleRecord.Money(Seats.Sum(s => s.Price) - DiscountAmount);
+        public string SubtotalText => Format.Money(Seats.Sum(s => s.Price));
+        public string DiscountText => $"-{Format.Money(DiscountAmount)} ({PointsUsed} điểm)";
+        public string TotalText => Format.Money(Seats.Sum(s => s.Price) - DiscountAmount);
         public int Points => Sale?.Points ?? (HasMember ? TicketRewards.Calculate(Seats.Select(s => (s.Type, s.Price)), DiscountAmount) : 0);
         public string PointsText => HasMember ? $"+{Points} điểm" : "0 điểm · Khách vãng lai";
         public string StatusText => Sale == null ? "Xem trước · Chưa thanh toán" : $"Đã thanh toán · {Sale.CreatedAt:HH:mm dd/MM/yyyy}";
@@ -20,7 +21,7 @@ namespace CinemaAPP.ViewModels
 
     public sealed record TicketSeat(string Label, SeatType Type, decimal Price)
     {
-        public string PriceText => SaleRecord.Money(Price);
+        public string PriceText => Format.Money(Price);
         public string TypeText => Type switch
         {
             SeatType.Vip => "Vé VIP",
