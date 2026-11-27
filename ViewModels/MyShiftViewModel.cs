@@ -13,7 +13,7 @@ namespace CinemaAPP.ViewModels
     }
 
     // Một dòng "Theo phương thức thanh toán" (có Method + MethodText nên dùng lại chip MethodChip)
-    public record MethodSummary(PaymentMethod Method, int Orders, decimal Amount)
+    public record MethodSummary(PaymentMethod? Method, int Orders, decimal Amount)
     {
         public string MethodText => SaleRecord.MethodName(Method);
         public string OrdersText => $"{Orders} đơn";
@@ -267,7 +267,7 @@ namespace CinemaAPP.ViewModels
                 ShowRows.Add(new ShowSummary(g.Key.MovieTitle, g.First().ShowLong, g.Sum(s => s.TicketCount), g.Sum(s => s.Total)));
 
             MethodRows.Clear();
-            foreach (PaymentMethod m in new[] { PaymentMethod.Cash, PaymentMethod.Transfer, PaymentMethod.Card, PaymentMethod.Unknown })
+            foreach (PaymentMethod? m in new PaymentMethod?[] { PaymentMethod.Cash, PaymentMethod.Transfer, PaymentMethod.Card, null})
             {
                 var byMethod = paid.Where(s => s.Method == m).ToList();
                 MethodRows.Add(new MethodSummary(m, byMethod.Count, byMethod.Sum(s => s.Total)));

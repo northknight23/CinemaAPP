@@ -64,7 +64,7 @@ namespace CinemaAPP.Services
                 @"SELECT COUNT(*) FROM TICKET tk JOIN BOOKING b ON b.BookingID = tk.BookingID
                   WHERE tk.ShowtimeID = @ID AND ISNULL(b.BookingStatus, '') <> @Cancelled", conn);
             cmd.Parameters.Add("@ID", SqlDbType.Int).Value = showtimeId;
-            cmd.Parameters.Add("@Cancelled", SqlDbType.NVarChar, 20).Value = BookingStatus.Cancelled;
+            cmd.Parameters.Add("@Cancelled", SqlDbType.NVarChar, 20).Value = BookingStatus.Cancelled.ToString();
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
@@ -127,7 +127,7 @@ namespace CinemaAPP.Services
 
         private static List<Showtime> Read(SqlCommand cmd)
         {
-            cmd.Parameters.Add("@Cancelled", SqlDbType.NVarChar, 20).Value = BookingStatus.Cancelled;
+            cmd.Parameters.Add("@Cancelled", SqlDbType.NVarChar, 20).Value = BookingStatus.Cancelled.ToString();
             var list = new List<Showtime>();
             using SqlDataReader r = cmd.ExecuteReader();
             while (r.Read())

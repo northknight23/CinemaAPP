@@ -1,9 +1,7 @@
 using CinemaAPP.Helpers;
-
+using CinemaAPP.Models;
 namespace CinemaAPP.ViewModels
-{
-    // Loại ghế: quyết định màu trên sơ đồ và giá vé.
-    public enum SeatType { Standard, Vip, Couple }
+{  
 
     // Một ô ghế trên sơ đồ.
     public class SeatItem : ObservableObject

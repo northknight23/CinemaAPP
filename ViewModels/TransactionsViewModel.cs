@@ -306,7 +306,7 @@ namespace CinemaAPP.ViewModels
                     Cash = ok.Where(s => s.Method == PaymentMethod.Cash).Sum(s => s.Total),
                     Transfer = ok.Where(s => s.Method == PaymentMethod.Transfer).Sum(s => s.Total),
                     Card = ok.Where(s => s.Method == PaymentMethod.Card).Sum(s => s.Total),
-                    UnknownAmount = ok.Where(s => s.Method == PaymentMethod.Unknown).Sum(s => s.Total),
+                    UnknownAmount = ok.Where(s => s.Method == null).Sum(s => s.Total),
                     CancelledCount = mine.Count(s => s.IsCancelled),
                     CancelledAmount = mine.Where(s => s.IsCancelled).Sum(s => s.Total),
                     Handover = SelectedDate.IsSingleDay ? shiftEntry?.Handover : null,
