@@ -180,8 +180,8 @@ namespace CinemaAPP.Services
         {
             cmd.Parameters.Add("@From", SqlDbType.DateTime2).Value = from;
             cmd.Parameters.Add("@To", SqlDbType.DateTime2).Value = to;
-            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid;
-            cmd.Parameters.Add("@Cancelled", SqlDbType.NVarChar, 20).Value = BookingStatus.Cancelled;
+            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid.ToString();
+            cmd.Parameters.Add("@Cancelled", SqlDbType.NVarChar, 20).Value = BookingStatus.Cancelled.ToString();
         }
     }
 }

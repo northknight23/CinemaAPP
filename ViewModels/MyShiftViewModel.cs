@@ -13,7 +13,7 @@ namespace CinemaAPP.ViewModels
     }
 
     // Một dòng "Theo phương thức thanh toán" (có Method + MethodText nên dùng lại chip MethodChip)
-    public record MethodSummary(PaymentMethod Method, int Orders, decimal Amount)
+    public record MethodSummary(PaymentMethod? Method, int Orders, decimal Amount)
     {
         public string MethodText => SaleRecord.MethodName(Method);
         public string OrdersText => $"{Orders} đơn";
@@ -27,8 +27,8 @@ namespace CinemaAPP.ViewModels
     {
         private readonly BookingService bookingService = new();
         private readonly ShiftService shiftService = new();
-        private ShiftReport? currentReport;
-        private Handover? currentHandover;
+     
+        private ShiftHandover? currentShift; //null = ca dang mo
         public const string AllMethods = "Tất cả thanh toán";
 
         // Người đang đăng nhập (cùng cách lấy với màn Bán vé để thấy đúng đơn mình vừa bán)
@@ -40,8 +40,7 @@ namespace CinemaAPP.ViewModels
         public string ShiftSubText => $"{StaffName} · {StaffUsername}";
 
         // Trạng thái ca: Open = đang bán; Pending = đã nộp chốt ca, chờ Quản trị viên; Done = đã bàn giao
-        public string ShiftStatusKind => currentHandover != null ? "Done"
-            : currentReport != null ? "Pending" : "Open";
+        public string ShiftStatusKind => currentShift?.IsConfirmed == true ? "Done" : currentShift?.IsReported == true ? "Pending" : "Open";
         public string ShiftStatusText => ShiftStatusKind switch
         {
             "Done" => "Đã bàn giao",
@@ -107,7 +106,7 @@ namespace CinemaAPP.ViewModels
         public bool HasSelection => SelectedSale != null;
 
         // Hủy vé hỗ trợ khách: chọn lý do (+ ghi chú) → bấm Hủy → xác nhận lần nữa
-        public List<string> CancelReasons => SalesDemoStore.CancelReasons;
+        public IReadOnlyList<string> CancelReasons => Booking.CancelReasons;
 
         private string? selectedReason;
         public string? SelectedReason
@@ -184,11 +183,10 @@ namespace CinemaAPP.ViewModels
         public string DiffLabel { get => diffLabel; private set => SetProperty(ref diffLabel, value); }
         public string DiffKind { get => diffKind; private set => SetProperty(ref diffKind, value); }   // "", Even, Short, Over
 
-        public string CloseStatusText => currentHandover is Handover h
-            ? $"Đã bàn giao lúc {h.At:HH:mm} · xác nhận bởi {h.By}"
-            : currentReport is ShiftReport r
-                ? $"Đã nộp chốt ca lúc {r.At:HH:mm}. Chờ Quản trị viên đếm két và xác nhận."
-                : "";
+        public string CloseStatusText => currentShift is { IsConfirmed: true } s
+            ? $"Đã bàn giao lúc {s.ConfirmedAt:HH:mm} · xác nhận bởi {s.ConfirmedByName}"
+            : currentShift is { IsReported: true } r
+            ? $"Đã nộp chốt ca lúc {r.ReportedAt:HH:mm}. Chờ Quản trị viên đếm két và xác nhận.": "";
 
         // ================= Thông báo =================
         private string message = "";
@@ -220,7 +218,7 @@ namespace CinemaAPP.ViewModels
             try
             {
                 stored = bookingService.GetSales(ShiftDay, ShiftDay.AddDays(1));
-                (currentReport, currentHandover) = shiftService.GetForStaff(ShiftDay, StaffUsername);
+                currentShift = shiftService.GetForStaff(ShiftDay, StaffUsername);
             }
             catch (Exception ex)
             {
@@ -228,10 +226,11 @@ namespace CinemaAPP.ViewModels
                 IsMessageError = true; Message = "Không tải được dữ liệu ca từ SQL Server: " + ex.Message;
                 return;
             }
-            if (currentHandover != null || currentReport != null)
+            if (currentShift != null)
             {
-                decimal savedCash = currentHandover?.CountedCash ?? currentReport!.CountedCash;
-                string savedNote = currentHandover?.Note ?? currentReport!.Note;
+                // Đã bàn giao thì lấy số Quản trị viên xác nhận, chưa thì lấy số nhân viên báo
+                decimal savedCash = currentShift.ConfirmedCash ?? currentShift.ReportedCash ?? 0;
+                string savedNote = currentShift.ConfirmNote ?? currentShift.ReportNote ?? "";
                 countedCashText = savedCash.ToString("N0", Format.Vi);
                 shiftNote = savedNote;
                 OnPropertyChanged(nameof(CountedCashText));
@@ -267,7 +266,7 @@ namespace CinemaAPP.ViewModels
                 ShowRows.Add(new ShowSummary(g.Key.MovieTitle, g.First().ShowLong, g.Sum(s => s.TicketCount), g.Sum(s => s.Total)));
 
             MethodRows.Clear();
-            foreach (PaymentMethod m in new[] { PaymentMethod.Cash, PaymentMethod.Transfer, PaymentMethod.Card, PaymentMethod.Unknown })
+            foreach (PaymentMethod? m in new PaymentMethod?[] { PaymentMethod.Cash, PaymentMethod.Transfer, PaymentMethod.Card, null})
             {
                 var byMethod = paid.Where(s => s.Method == m).ToList();
                 MethodRows.Add(new MethodSummary(m, byMethod.Count, byMethod.Sum(s => s.Total)));

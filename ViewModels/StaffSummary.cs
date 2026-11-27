@@ -15,12 +15,11 @@ namespace CinemaAPP.ViewModels
         public decimal UnknownAmount { get; init; }
         public int CancelledCount { get; init; }
         public decimal CancelledAmount { get; init; }
-        public Handover? Handover { get; init; }   // null = chưa bàn giao (hoặc đang xem nhiều ngày)
-        public ShiftReport? Report { get; init; }  // nhân viên đã tự nộp chốt ca, chờ xác nhận
+        public ShiftHandover? Shift { get; init; }   // null = chưa nộp chốt ca (hoặc đang xem nhiều ngày)
 
         public decimal Total => Cash + Transfer + Card + UnknownAmount;
-        public bool IsHandedOver => Handover != null;
-        public bool IsPending => Handover == null && Report != null;
+        public bool IsHandedOver => Shift?.IsConfirmed == true;
+        public bool IsPending => Shift is { IsReported: true, IsConfirmed: false };
 
         public string Name => Staff.FullName;
         public string SubText => $"{Staff.Username} · {Staff.Shift.Split(' ')[0]} {Staff.Shift.Split(' ')[1]}";

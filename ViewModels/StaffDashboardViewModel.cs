@@ -24,6 +24,8 @@ namespace CinemaAPP.ViewModels
         private readonly ShowtimeService dashboard = new();
         private readonly BookingService booking = new();
         private readonly CustomerService customers = new();
+        private readonly ShiftService shifts = new();
+        private ShiftHandover? currentShift;   // null = ca đang mở
         // Tự tải lại mỗi 1 phút khi màn đang mở (View gọi Start/Stop lúc hiện/ẩn)
         private readonly DispatcherTimer autoRefresh = new() { Interval = TimeSpan.FromMinutes(1) };
         private bool isBusy;   // đang tải → bỏ qua lần gọi trùng (hẹn giờ + bấm nút cùng lúc)
@@ -33,14 +35,13 @@ namespace CinemaAPP.ViewModels
         public string StaffName { get; } = AppSession.CurrentUser?.FullName ?? "Quản trị viên";
         public string StaffUsername { get; } = AppSession.CurrentUser?.Username ?? "admin";
         public DateTime ShiftDay { get; } = DateTime.Today;
-        private (DateTime, string) ShiftKey => (ShiftDay, StaffUsername);
 
         public string Greeting => "Xin chào, " + StaffName;
         public string DateText => $"{DayLong[(int)ShiftDay.DayOfWeek]}, {ShiftDay:dd'/'MM'/'yyyy} · Ca hôm nay";
 
         // Open = đang bán; Pending = đã nộp chốt ca, chờ Quản trị viên; Done = đã bàn giao
-        public string ShiftStatusKind => SalesDemoStore.Handovers.ContainsKey(ShiftKey) ? "Done"
-            : SalesDemoStore.ShiftReports.ContainsKey(ShiftKey) ? "Pending" : "Open";
+        public string ShiftStatusKind => currentShift?.IsConfirmed == true ? "Done"
+            : currentShift?.IsReported == true ? "Pending" : "Open";
         public string ShiftStatusText => ShiftStatusKind switch
         {
             "Done" => "Đã bàn giao",
@@ -147,9 +148,15 @@ namespace CinemaAPP.ViewModels
             {
                 var result = await Task.Run(() => (
                     shows: dashboard.GetRange(from, to),
-                    sales: booking.GetSales(from, to)));
+                    sales: booking.GetSales(from, to),
+                    shift: shifts.GetForStaff(from, StaffUsername)));
                 Fill(result.shows, result.sales, DateTime.Now);
-     
+                currentShift = result.shift;
+                OnPropertyChanged(nameof(ShiftStatusKind));
+                OnPropertyChanged(nameof(ShiftStatusText));
+                OnPropertyChanged(nameof(ShiftStatusTone));
+                OnPropertyChanged(nameof(CloseButtonText));
+
                 Message = "";
             }
             catch (Exception)

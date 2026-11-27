@@ -96,7 +96,7 @@ namespace CinemaAPP.ViewModels
 
         // Hủy đơn: chọn lý do → bấm Hủy → xác nhận lần nữa (thao tác không hoàn tác được)
         public bool IsAdmin => AppSession.CurrentUser == null || AppSession.IsAdmin;
-        public List<string> CancelReasons => SalesDemoStore.CancelReasons;
+        public IReadOnlyList<string> CancelReasons => Booking.CancelReasons;
 
         private string? selectedReason;
         public string? SelectedReason
@@ -141,8 +141,8 @@ namespace CinemaAPP.ViewModels
                 if (SetProperty(ref selectedStaffRow, value))
                 {
                     // Chưa bàn giao mà nhân viên đã nộp chốt ca thì điền sẵn số tiền nhân viên báo
-                    CountedCashText = (value?.Handover?.CountedCash ?? value?.Report?.CountedCash)?.ToString("N0", Format.Vi) ?? "";
-                    HandoverNote = value?.Handover?.Note ?? value?.Report?.Note ?? "";
+                    CountedCashText = (value?.Shift?.ConfirmedCash ?? value?.Shift?.ReportedCash)?.ToString("N0", Format.Vi) ?? "";
+                    HandoverNote = value?.Shift?.ConfirmNote ?? value?.Shift?.ReportNote ?? "";
                     OnPropertyChanged(nameof(HasStaffSelection));
                     OnPropertyChanged(nameof(HandoverDoneText));
                     OnPropertyChanged(nameof(CanEditHandover));
@@ -191,11 +191,11 @@ namespace CinemaAPP.ViewModels
         public string DiffKind { get => diffKind; private set => SetProperty(ref diffKind, value); }   // "", Even, Short, Over
 
         public bool CanEditHandover => SelectedStaffRow != null && !SelectedStaffRow.IsHandedOver && SelectedDate.IsSingleDay;
-        public string HandoverDoneText => SelectedStaffRow?.Handover is Handover h
-            ? $"Đã bàn giao lúc {h.At:HH:mm} · xác nhận bởi {h.By}"
-            : SelectedStaffRow?.Report is ShiftReport r
-                ? $"Nhân viên đã nộp chốt ca lúc {r.At:HH:mm}. Đếm lại két rồi bấm xác nhận."
-                : SelectedDate.IsSingleDay ? "" : "Chọn một ngày cụ thể để bàn giao ca.";
+        public string HandoverDoneText => SelectedStaffRow?.Shift is { IsConfirmed: true } s
+            ? $"Đã bàn giao lúc {s.ConfirmedAt:HH:mm} · xác nhận bởi {s.ConfirmedByName}"
+            : SelectedStaffRow?.Shift is { IsReported: true } r
+            ? $"Nhân viên đã nộp chốt ca lúc {r.ReportedAt:HH:mm}. Đếm lại két rồi bấm xác nhận."
+            : SelectedDate.IsSingleDay ? "" : "Chọn một ngày cụ thể để bàn giao ca.";
 
         // ================= Thông báo =================
         private string message = "";
@@ -241,14 +241,14 @@ namespace CinemaAPP.ViewModels
 
             // Đơn trong khoảng ngày + nhân viên đang lọc
             List<SaleRecord> stored;
-            Dictionary<string, ShiftEntry> shiftMap = new(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, ShiftHandover> shiftMap = new(StringComparer.OrdinalIgnoreCase);
             try
             {
                 stored = bookingService.GetSales(SelectedDate.From, SelectedDate.To);
                 if (SelectedDate.IsSingleDay)
                 {
-                    foreach (var entry in shiftService.GetByDate(SelectedDate.From))
-                        shiftMap[entry.Username] = entry;
+                    foreach (var shift in shiftService.GetByDate(SelectedDate.From))
+                        shiftMap[shift.Username] = shift;
                 }
             }
             catch (Exception ex)
@@ -258,7 +258,7 @@ namespace CinemaAPP.ViewModels
                 return;
             }
             var names = stored.Select(s => s.StaffName)
-                .Concat(shiftMap.Values.Select(e => e.FullName))
+                .Concat(shiftMap.Values.Select(s => s.FullName))
                 .Distinct().ToList();
             StaffOptions.Clear(); StaffOptions.Add(AllStaff); StaffOptions.AddRange(names);
             OnPropertyChanged(nameof(StaffOptions));
@@ -297,7 +297,7 @@ namespace CinemaAPP.ViewModels
             {
                 var mine = inRange.Where(s => s.StaffUsername == staff.Username).ToList();
                 var ok = mine.Where(s => !s.IsCancelled).ToList();
-                shiftMap.TryGetValue(staff.Username, out ShiftEntry? shiftEntry);
+                shiftMap.TryGetValue(staff.Username, out ShiftHandover? staffShift);
                 StaffRows.Add(new StaffSummary
                 {
                     Staff = staff,
@@ -306,11 +306,10 @@ namespace CinemaAPP.ViewModels
                     Cash = ok.Where(s => s.Method == PaymentMethod.Cash).Sum(s => s.Total),
                     Transfer = ok.Where(s => s.Method == PaymentMethod.Transfer).Sum(s => s.Total),
                     Card = ok.Where(s => s.Method == PaymentMethod.Card).Sum(s => s.Total),
-                    UnknownAmount = ok.Where(s => s.Method == PaymentMethod.Unknown).Sum(s => s.Total),
+                    UnknownAmount = ok.Where(s => s.Method == null).Sum(s => s.Total),
                     CancelledCount = mine.Count(s => s.IsCancelled),
                     CancelledAmount = mine.Where(s => s.IsCancelled).Sum(s => s.Total),
-                    Handover = SelectedDate.IsSingleDay ? shiftEntry?.Handover : null,
-                    Report = SelectedDate.IsSingleDay ? shiftEntry?.Report : null,
+                    Shift = SelectedDate.IsSingleDay ? staffShift : null,
                 });
             }
 

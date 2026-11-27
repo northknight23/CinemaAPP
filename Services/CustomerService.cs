@@ -34,7 +34,7 @@ namespace CinemaAPP.Services
                   LEFT JOIN BOOKING b ON b.CustomerID = c.CustomerID
                   GROUP BY c.CustomerID, c.FullName, c.Phone, c.Points
                   ORDER BY c.CustomerID", conn);
-            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid;
+            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid.ToString();
             cmd.Parameters.Add("@MonthStart", SqlDbType.DateTime2).Value = MonthStart;
 
             var list = new List<Customer>();
@@ -75,7 +75,7 @@ namespace CinemaAPP.Services
                          ISNULL(SUM(CASE WHEN CreatedAt >= @LastStart AND CreatedAt < @LastEnd THEN TotalAmount END), 0)
                   FROM BOOKING
                   WHERE CustomerID IS NOT NULL AND BookingStatus = @Paid AND CreatedAt >= @LastStart", conn);
-            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid;
+            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid.ToString();
             cmd.Parameters.Add("@ThisStart", SqlDbType.DateTime2).Value = thisStart;
             cmd.Parameters.Add("@Now", SqlDbType.DateTime2).Value = now;
             cmd.Parameters.Add("@LastStart", SqlDbType.DateTime2).Value = lastStart;
@@ -105,7 +105,7 @@ namespace CinemaAPP.Services
                   ORDER BY b.CreatedAt DESC", conn);
             cmd.Parameters.Add("@Top", SqlDbType.Int).Value = top;
             cmd.Parameters.Add("@CustomerID", SqlDbType.Int).Value = customerId;
-            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid;
+            cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid.ToString();
 
             var list = new List<CustomerPurchase>();
             using SqlDataReader r = cmd.ExecuteReader();

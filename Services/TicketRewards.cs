@@ -1,4 +1,4 @@
-using CinemaAPP.ViewModels;
+using CinemaAPP.Models;
 
 namespace CinemaAPP.Services
 {

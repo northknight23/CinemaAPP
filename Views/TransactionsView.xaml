@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:CinemaAPP.ViewModels"
+             xmlns:m="clr-namespace:CinemaAPP.Models"
              mc:Ignorable="d" d:DesignWidth="1086" d:DesignHeight="640"
              Language="vi-VN">
     <!-- Màn GIAO DỊCH & ĐỐI SOÁT (chỉ Quản trị viên). Hai tab: Lịch sử giao dịch | Đối soát cuối ca.
@@ -311,11 +312,11 @@
                                                 <TextBlock Text="{Binding Label}" FontSize="11" Foreground="{DynamicResource TextBrush}"/>
                                             </Border>
                                             <DataTemplate.Triggers>
-                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static vm:SeatType.Vip}">
+                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static m:SeatType.Vip}">
                                                     <Setter TargetName="seat" Property="Background" Value="{DynamicResource SeatVipBrush}"/>
                                                     <Setter TargetName="seat" Property="BorderBrush" Value="{DynamicResource SeatVipBorderBrush}"/>
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static vm:SeatType.Couple}">
+                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static m:SeatType.Couple}">
                                                     <Setter TargetName="seat" Property="Background" Value="{DynamicResource SeatCoupleBrush}"/>
                                                     <Setter TargetName="seat" Property="BorderBrush" Value="{DynamicResource SeatCoupleBorderBrush}"/>
                                                 </DataTrigger>

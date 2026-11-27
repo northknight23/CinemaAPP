@@ -28,7 +28,7 @@ namespace CinemaAPP.ViewModels
         public string StaffUsername { get; init; } = "";
         public string? CustomerName { get; init; }
         public string? CustomerPhone { get; init; }
-        public PaymentMethod Method { get; init; }
+        public PaymentMethod? Method { get; init; }
         public decimal CashGiven { get; init; }         // chỉ có khi trả tiền mặt
         public decimal Total { get; init; }
 
@@ -113,7 +113,7 @@ namespace CinemaAPP.ViewModels
             _ => "chưa rõ phương thức",
         };
 
-        public static string MethodName(PaymentMethod method) => method switch
+        public static string MethodName(PaymentMethod? method) => method switch
         {
             PaymentMethod.Cash => "Tiền mặt",
             PaymentMethod.Transfer => "Chuyển khoản",

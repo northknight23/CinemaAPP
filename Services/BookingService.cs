@@ -161,7 +161,7 @@ namespace CinemaAPP.Services
         public BookingResult CreateBooking(int accountId, int showtimeId, int? customerId,
             PaymentMethod method, decimal cashGiven, int pointsUsed, IReadOnlyList<SeatQuote> requestedSeats)
         {
-            if (!Enum.IsDefined(method) || method == PaymentMethod.Unknown || pointsUsed < 0 || requestedSeats.Count == 0
+            if (!Enum.IsDefined(method) || pointsUsed < 0 || requestedSeats.Count == 0
                 || requestedSeats.Select(s => s.SeatID).Distinct().Count() != requestedSeats.Count)
                 throw new InvalidOperationException("Danh sách ghế hoặc thông tin thanh toán không hợp lệ.");
             using var conn = Db.Open();
@@ -308,8 +308,10 @@ namespace CinemaAPP.Services
                 int id = reader.GetInt32(0);
                 if (!sales.TryGetValue(id, out var sale))
                 {
-                    if (!Enum.TryParse<PaymentMethod>(reader.IsDBNull(5) ? "" : reader.GetString(5), out var method))
-                        method = PaymentMethod.Unknown;
+                    PaymentMethod? method;
+                    if (!Enum.TryParse<PaymentMethod>(reader.IsDBNull(5) ? "" : reader.GetString(5), out var m)) method = null;
+                    else method = m;
+
                     sale = new SaleRecord
                     {
                         BookingID = id, AccountID = reader.GetInt32(1),
@@ -317,7 +319,7 @@ namespace CinemaAPP.Services
                         CreatedAt = reader.GetDateTime(3), Total = reader.GetDecimal(4), Method = method,
                         CashGiven = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
                         Points = reader.GetInt32(7), PointsUsed = reader.GetInt32(8),
-                        IsCancelled = !reader.IsDBNull(9) && reader.GetString(9) == BookingStatus.Cancelled,
+                        IsCancelled = !reader.IsDBNull(9) && reader.GetString(9) == BookingStatus.Cancelled.ToString(),
                         CancelReason = reader.IsDBNull(10) ? "" : reader.GetString(10),
                         CancelledAt = reader.IsDBNull(11) ? null : reader.GetDateTime(11),
                         CancelledBy = reader.GetString(12), StaffUsername = reader.GetString(13), StaffName = reader.GetString(14),
@@ -354,7 +356,7 @@ namespace CinemaAPP.Services
             using (var reader = command.ExecuteReader())
             {
                 if (!reader.Read()) throw new InvalidOperationException("Đơn hoặc tài khoản không còn hợp lệ.");
-                if (reader.GetString(3) == BookingStatus.Cancelled) return;
+                if (reader.GetString(3) == BookingStatus.Cancelled.ToString()) return;
                 bool admin = reader.GetString(6) == "Admin";
                 DateTime now = reader.GetDateTime(8);
                 if (!admin && (reader.GetInt32(4) != accountId
