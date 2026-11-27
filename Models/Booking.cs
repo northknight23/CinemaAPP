@@ -5,10 +5,15 @@ using System.Text;
 
 namespace CinemaAPP.Models
 {
+
     public enum BookingStatus { Paid, Cancelled }
     public enum PaymentMethod { Cash, Transfer, Card}
     public class Booking
     {
+        public static IReadOnlyList<string> CancelReasons { get; } = new[]
+    {
+            "Khách đổi ý", "Nhầm suất / ghế", "Lỗi thanh toán", "Sự cố phòng chiếu",
+        };
         public int BookingID { get; set; }
         public int AccountID { get; set; }
         public int? CustomerID { get; set; }

@@ -1,71 +1,66 @@
 using System.Data;
 using CinemaAPP.Data;
 using Microsoft.Data.SqlClient;
-
+using CinemaAPP.Models;
 namespace CinemaAPP.Services
 {
-    public record ShiftEntry(
-        DateTime ShiftDate,
-        int AccountID,
-        string Username,
-        string FullName,
-        ShiftReport? Report,
-        Handover? Handover);
+    
 
     // Đọc / ghi báo cáo chốt ca của nhân viên và xác nhận bàn giao của Quản trị viên trên bảng SHIFT_HANDOVER.
     public class ShiftService
     {
-        public List<ShiftEntry> GetByDate(DateTime day)
+        private const string SelectSql =
+    @"SELECT sh.ShiftHandoverID, sh.ShiftDate, sh.AccountID,
+                     sh.ReportedCash, sh.ReportNote, sh.ReportedAt,
+                     sh.ConfirmedCash, sh.ConfirmNote, sh.ConfirmedAt, sh.ConfirmedBy,
+                     a.Username, a.FullName, ISNULL(c.FullName, N'')
+              FROM SHIFT_HANDOVER sh
+              JOIN ACCOUNT a ON a.AccountID = sh.AccountID
+              LEFT JOIN ACCOUNT c ON c.AccountID = sh.ConfirmedBy";
+        // Đọc một dòng theo đúng thứ tự cột của SelectSql.
+        private static ShiftHandover Read(SqlDataReader r) => new ShiftHandover
         {
-            DateTime shiftDate = day.Date;
+            ShiftHandoverID = r.GetInt32(0),
+            ShiftDate = r.GetDateTime(1),
+            AccountID = r.GetInt32(2),
+            ReportedCash = r.IsDBNull(3) ? null : r.GetDecimal(3),
+            ReportNote = r.IsDBNull(4) ? null : r.GetString(4),
+            ReportedAt = r.IsDBNull(5) ? null : r.GetDateTime(5),
+            ConfirmedCash = r.IsDBNull(6) ? null : r.GetDecimal(6),
+            ConfirmNote = r.IsDBNull(7) ? null : r.GetString(7),
+            ConfirmedAt = r.IsDBNull(8) ? null : r.GetDateTime(8),
+            ConfirmedBy = r.IsDBNull(9) ? null : r.GetInt32(9),
+            Username = r.GetString(10),
+            FullName = r.GetString(11),
+            ConfirmedByName = r.GetString(12),
+        };
+        // Mọi ca có báo cáo hoặc bàn giao trong một ngày (màn Giao dịch & Đối soát).
+        public List<ShiftHandover> GetByDate(DateTime day)
+        {
             using var conn = Db.Open();
-            using var cmd = new SqlCommand(
-                @"SELECT sh.ShiftDate, a.AccountID, a.Username, a.FullName,
-                         sh.ReportedCash, sh.ReportNote, sh.ReportedAt,
-                         sh.ConfirmedCash, sh.ConfirmNote, sh.ConfirmedAt,
-                         ISNULL(c.FullName, N'')
-                  FROM SHIFT_HANDOVER sh
-                  JOIN ACCOUNT a ON a.AccountID = sh.AccountID
-                  LEFT JOIN ACCOUNT c ON c.AccountID = sh.ConfirmedBy
-                  WHERE sh.ShiftDate = @Date
-                  ORDER BY a.Username", conn);
-            cmd.Parameters.Add("@Date", SqlDbType.Date).Value = shiftDate;
+            using var cmd = new SqlCommand(SelectSql + " WHERE sh.ShiftDate = @Date ORDER BY a.Username", conn);
+            cmd.Parameters.Add("@Date", SqlDbType.Date).Value = day.Date;
 
-            var entries = new List<ShiftEntry>();
+            var list = new List<ShiftHandover>();
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
-                entries.Add(ReadEntry(reader));
-
-            SalesDemoStore.SyncDayCache(shiftDate, entries);
-            return entries;
+                list.Add(Read(reader));
+            return list;
         }
 
-        public (ShiftReport? Report, Handover? Handover) GetForStaff(DateTime day, string username)
+        // Ca của một nhân viên trong ngày. null = chưa có dòng nào = ca đang mở.
+        public ShiftHandover? GetForStaff(DateTime day, string username)
         {
-            DateTime shiftDate = day.Date;
             using var conn = Db.Open();
-            using var cmd = new SqlCommand(
-                @"SELECT sh.ShiftDate, a.AccountID, a.Username, a.FullName,
-                         sh.ReportedCash, sh.ReportNote, sh.ReportedAt,
-                         sh.ConfirmedCash, sh.ConfirmNote, sh.ConfirmedAt,
-                         ISNULL(c.FullName, N'')
-                  FROM SHIFT_HANDOVER sh
-                  JOIN ACCOUNT a ON a.AccountID = sh.AccountID
-                  LEFT JOIN ACCOUNT c ON c.AccountID = sh.ConfirmedBy
-                  WHERE sh.ShiftDate = @Date AND a.Username = @Username", conn);
-            cmd.Parameters.Add("@Date", SqlDbType.Date).Value = shiftDate;
+            using var cmd = new SqlCommand(SelectSql + " WHERE sh.ShiftDate = @Date AND a.Username = @Username", conn);
+            cmd.Parameters.Add("@Date", SqlDbType.Date).Value = day.Date;
             cmd.Parameters.Add("@Username", SqlDbType.NVarChar, 50).Value = username;
 
-            ShiftEntry? entry = null;
             using var reader = cmd.ExecuteReader();
-            if (reader.Read())
-                entry = ReadEntry(reader);
-
-            SalesDemoStore.SyncStaffCache(shiftDate, username, entry?.Report, entry?.Handover);
-            return (entry?.Report, entry?.Handover);
+            return reader.Read() ? Read(reader) : null;
         }
 
-        public ShiftReport SubmitShiftReport(DateTime day, int staffAccountId, decimal countedCash, string note)
+        public void SubmitShiftReport(DateTime day, int staffAccountId, decimal countedCash, string note)
         {
             if (countedCash < 0)
                 throw new InvalidOperationException("Số tiền mặt đếm thực tế không hợp lệ.");
@@ -77,15 +72,14 @@ namespace CinemaAPP.Services
             using var conn = Db.Open();
             using var tx = conn.BeginTransaction(IsolationLevel.Serializable);
 
-            string username;
+            
             using (var accountCmd = new SqlCommand(
-                "SELECT Username FROM ACCOUNT WHERE AccountID = @ID AND AccountRole = N'Staff' AND IsActive = 1", conn, tx))
+                "SELECT 1 FROM ACCOUNT WHERE AccountID = @ID AND AccountRole = N'Staff' AND IsActive = 1", conn, tx))
             {
                 accountCmd.Parameters.Add("@ID", SqlDbType.Int).Value = staffAccountId;
-                object? raw = accountCmd.ExecuteScalar();
-                if (raw is not string u)
+
+                if (accountCmd.ExecuteScalar() == null)
                     throw new InvalidOperationException("Cần đăng nhập tài khoản nhân viên đang hoạt động để nộp chốt ca.");
-                username = u;
             }
 
             using (var checkCmd = new SqlCommand(
@@ -105,27 +99,21 @@ namespace CinemaAPP.Services
                 }
             }
 
-            DateTime reportedAt;
             using (var insertCmd = new SqlCommand(
-                @"DECLARE @Now DATETIME2 = SYSDATETIME();
-                  INSERT INTO SHIFT_HANDOVER (ShiftDate, AccountID, ReportedCash, ReportNote, ReportedAt)
-                  VALUES (@Date, @Account, @Cash, @Note, @Now);
-                  SELECT @Now;", conn, tx))
+        @"INSERT INTO SHIFT_HANDOVER (ShiftDate, AccountID, ReportedCash, ReportNote, ReportedAt)
+          VALUES (@Date, @Account, @Cash, @Note, SYSDATETIME())", conn, tx))
             {
                 insertCmd.Parameters.Add("@Date", SqlDbType.Date).Value = shiftDate;
                 insertCmd.Parameters.Add("@Account", SqlDbType.Int).Value = staffAccountId;
                 insertCmd.Parameters.Add("@Cash", SqlDbType.Money).Value = countedCash;
                 insertCmd.Parameters.Add("@Note", SqlDbType.NVarChar, 300).Value = trimmedNote;
-                reportedAt = (DateTime)insertCmd.ExecuteScalar()!;
+                insertCmd.ExecuteNonQuery();
             }
 
             tx.Commit();
-            var report = new ShiftReport(countedCash, trimmedNote, reportedAt);
-            SalesDemoStore.SyncStaffCache(shiftDate, username, report, null);
-            return report;
         }
 
-        public Handover ConfirmHandover(DateTime day, string staffUsername, int adminAccountId, decimal countedCash, string note)
+        public void ConfirmHandover(DateTime day, string staffUsername, int adminAccountId, decimal countedCash, string note)
         {
             if (countedCash < 0)
                 throw new InvalidOperationException("Số tiền mặt xác nhận không hợp lệ.");
@@ -137,15 +125,12 @@ namespace CinemaAPP.Services
             using var conn = Db.Open();
             using var tx = conn.BeginTransaction(IsolationLevel.Serializable);
 
-            string adminName;
             using (var adminCmd = new SqlCommand(
-                "SELECT FullName FROM ACCOUNT WHERE AccountID = @ID AND AccountRole = N'Admin' AND IsActive = 1", conn, tx))
+                "SELECT 1 FROM ACCOUNT WHERE AccountID = @ID AND AccountRole = N'Admin' AND IsActive = 1", conn, tx))
             {
                 adminCmd.Parameters.Add("@ID", SqlDbType.Int).Value = adminAccountId;
-                object? raw = adminCmd.ExecuteScalar();
-                if (raw is not string name)
+                if (adminCmd.ExecuteScalar() == null)
                     throw new InvalidOperationException("Chỉ tài khoản Quản trị viên đang hoạt động mới được xác nhận bàn giao.");
-                adminName = name;
             }
 
             int staffAccountId;
@@ -159,40 +144,25 @@ namespace CinemaAPP.Services
                 staffAccountId = id;
             }
 
-            bool exists = false;
-            ShiftReport? existingReport = null;
+            bool exists;
             using (var checkCmd = new SqlCommand(
-                @"SELECT ReportedCash, ReportNote, ReportedAt, ConfirmedAt
-                  FROM SHIFT_HANDOVER WITH (UPDLOCK, HOLDLOCK)
+                @"SELECT ConfirmedAt FROM SHIFT_HANDOVER WITH (UPDLOCK, HOLDLOCK)
                   WHERE ShiftDate = @Date AND AccountID = @Staff", conn, tx))
             {
                 checkCmd.Parameters.Add("@Date", SqlDbType.Date).Value = shiftDate;
                 checkCmd.Parameters.Add("@Staff", SqlDbType.Int).Value = staffAccountId;
                 using var reader = checkCmd.ExecuteReader();
-                if (reader.Read())
-                {
-                    exists = true;
-                    if (!reader.IsDBNull(3))
-                        throw new InvalidOperationException("Ca này đã được xác nhận bàn giao trước đó.");
-                    if (!reader.IsDBNull(2))
-                        existingReport = new ShiftReport(
-                            reader.GetDecimal(0),
-                            reader.IsDBNull(1) ? "" : reader.GetString(1),
-                            reader.GetDateTime(2));
-                }
+                exists = reader.Read();                          // có dòng chưa? (nhân viên đã nộp báo cáo)
+                if (exists && !reader.IsDBNull(0))
+                    throw new InvalidOperationException("Ca này đã được xác nhận bàn giao trước đó.");
             }
 
-            DateTime confirmedAt;
             string sql = exists
-                ? @"DECLARE @Now DATETIME2 = SYSDATETIME();
-                    UPDATE SHIFT_HANDOVER
-                    SET ConfirmedCash = @Cash, ConfirmNote = @Note, ConfirmedAt = @Now, ConfirmedBy = @Admin
-                    WHERE ShiftDate = @Date AND AccountID = @Staff;
-                    SELECT @Now;"
-                : @"DECLARE @Now DATETIME2 = SYSDATETIME();
-                    INSERT INTO SHIFT_HANDOVER (ShiftDate, AccountID, ConfirmedCash, ConfirmNote, ConfirmedAt, ConfirmedBy)
-                    VALUES (@Date, @Staff, @Cash, @Note, @Now, @Admin);
-                    SELECT @Now;";
+                    ? @"UPDATE SHIFT_HANDOVER
+                    SET ConfirmedCash = @Cash, ConfirmNote = @Note, ConfirmedAt = SYSDATETIME(), ConfirmedBy = @Admin
+                    WHERE ShiftDate = @Date AND AccountID = @Staff"
+                    : @"INSERT INTO SHIFT_HANDOVER (ShiftDate, AccountID, ConfirmedCash, ConfirmNote, ConfirmedAt, ConfirmedBy)
+                    VALUES (@Date, @Staff, @Cash, @Note, SYSDATETIME(), @Admin)";
 
             using (var saveCmd = new SqlCommand(sql, conn, tx))
             {
@@ -201,39 +171,12 @@ namespace CinemaAPP.Services
                 saveCmd.Parameters.Add("@Cash", SqlDbType.Money).Value = countedCash;
                 saveCmd.Parameters.Add("@Note", SqlDbType.NVarChar, 300).Value = trimmedNote;
                 saveCmd.Parameters.Add("@Admin", SqlDbType.Int).Value = adminAccountId;
-                confirmedAt = (DateTime)saveCmd.ExecuteScalar()!;
+                saveCmd.ExecuteNonQuery();
             }
 
             tx.Commit();
-            var handover = new Handover(countedCash, trimmedNote, confirmedAt, adminName);
-            SalesDemoStore.SyncStaffCache(shiftDate, staffUsername, existingReport, handover);
-            return handover;
+      
         }
 
-        private static ShiftEntry ReadEntry(SqlDataReader reader)
-        {
-            ShiftReport? report = reader.IsDBNull(6)
-                ? null
-                : new ShiftReport(
-                    reader.GetDecimal(4),
-                    reader.IsDBNull(5) ? "" : reader.GetString(5),
-                    reader.GetDateTime(6));
-
-            Handover? handover = reader.IsDBNull(9)
-                ? null
-                : new Handover(
-                    reader.GetDecimal(7),
-                    reader.IsDBNull(8) ? "" : reader.GetString(8),
-                    reader.GetDateTime(9),
-                    reader.GetString(10));
-
-            return new ShiftEntry(
-                reader.GetDateTime(0).Date,
-                reader.GetInt32(1),
-                reader.GetString(2),
-                reader.GetString(3),
-                report,
-                handover);
-        }
     }
 }
