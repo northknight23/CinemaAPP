@@ -3,6 +3,7 @@
 ## Cài đặt
 
 - CSDL mới: chạy script của A `Database/CinemaDB.sql`, sau đó chạy `Database/MigrateBookingPersistence.sql`, rồi chạy `Database/seed.sql` (và các file `seed_*.sql` bổ sung nếu cần).
+- Dữ liệu mẫu cố định (mọi máy giống hệt nhau): sau `CinemaDB.sql` chỉ chạy `Database/seed_codinh_1011_2711.sql` thay cho `seed.sql` + `seed_1011_1311.sql` + `seed_2311_0712.sql`. File gồm dữ liệu 10/11 → 27/11/2026, 10 tài khoản (admin, admin2, nv01 → nv08, mật khẩu `123456`), 120 khách đủ hạng Thường / Bạc / Vàng, hóa đơn, vé và chốt ca viết sẵn bằng INSERT.
 - CSDL cũ: chỉ chạy `Database/MigrateBookingPersistence.sql` trên CSDL đang dùng. Script chạy lại được, không xóa dữ liệu.
 - Sơ đồ giữ hai dãy ghế biên và hai lối đi như giao diện cũ. Ô lối đi chỉ là phần tử ẩn giữ chỗ, không được tính vào sức chứa hoặc gửi vào TICKET.
 - Không sửa `Data/Db.cs`; dùng `CINEMADB_CONN` nếu máy khác dùng SQL Express.
