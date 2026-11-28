@@ -248,7 +248,7 @@ namespace CinemaAPP.ViewModels
                 var (latestMovies, latestSeats, latestSoldIds) = await Task.Run(() =>
                 {
                     var mList = bookingService.GetTodayShowtimes();
-                    List<PhysicalSeat>? seats = null;
+                    List<Seat>? seats = null;
                     HashSet<int>? sold = null;
                     if (currentShowId > 0 && currentRoomId > 0)
                     {
@@ -294,7 +294,7 @@ namespace CinemaAPP.ViewModels
                 if (currentShowId > 0 && latestSeats != null && latestSoldIds != null)
                 {
                     var currentSeatIds = AllSeats().SelectMany(s => s.SeatIDs).ToList();
-                    var latestSeatIds = latestSeats.Select(s => s.ID).ToList();
+                    var latestSeatIds = latestSeats.Select(s => s.SeatID).ToList();
 
                     if (!currentSeatIds.SequenceEqual(latestSeatIds))
                     {
@@ -457,7 +457,7 @@ namespace CinemaAPP.ViewModels
 
             ResetOrder();
             PreviewTicket = result.Ticket;
-            string message = $"Đã lưu đơn {result.Sale.Code} vào SQL Server: {result.Sale.AmountText}.";
+            string message = $"Đã lưu đơn {result.Sale.BookingID} vào SQL Server: {Format.Money(result.Sale.TotalAmount)}.";
             try { LoadSeatMap(); }
             catch { message += " Chưa tải lại được ghế; bấm Tải lại khi kết nối ổn định."; }
             ShowMessage(message, false);
@@ -498,7 +498,7 @@ namespace CinemaAPP.ViewModels
                 PreviewTicket = CreateTicket();
         }
 
-        private PrintableTicket CreateTicket(SaleRecord? sale = null)
+        private PrintableTicket CreateTicket(Booking? sale = null)
         {
             string ageRating = Movies.FirstOrDefault(m => m.Showtimes.Contains(CurrentShowtime))?.AgeRating ?? "";
             string staffName = sale?.StaffName ?? AppSession.CurrentUser?.FullName ?? "Quản trị viên";

@@ -653,7 +653,7 @@ namespace CinemaAPP.ViewModels
             }
         }
 
-        private void ApplyLiveSeatMap(List<RoomShowtimeInfo> showtimes, List<PhysicalSeat> physSeats, HashSet<int> soldIds)
+        private void ApplyLiveSeatMap(List<RoomShowtimeInfo> showtimes, List<Seat> physSeats, HashSet<int> soldIds)
         {
             int? prevId = SelectedRoomShowtime?.ShowtimeID;
 
@@ -671,7 +671,7 @@ namespace CinemaAPP.ViewModels
             _suppressShowtimeReload = false;
 
             var currentSeatIds = SeatMapRows.SelectMany(r => r.Seats).Where(s => !s.IsAisle).SelectMany(s => s.SeatIDs).ToList();
-            var latestSeatIds = physSeats.Select(s => s.ID).ToList();
+            var latestSeatIds = physSeats.Select(s => s.SeatID).ToList();
             if (!currentSeatIds.SequenceEqual(latestSeatIds))
             {
                 var rebuilt = BookingService.BuildSeatRows(physSeats, 0m, currentShow != null ? soldIds : null);

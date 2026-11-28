@@ -9,8 +9,8 @@ using Microsoft.Data.SqlClient;
 namespace CinemaAPP.Services
 {
     public record SeatQuote(int SeatID, decimal Price);
-    public record BookingResult(SaleRecord Sale, PrintableTicket Ticket);
-    public record PhysicalSeat(int ID, string Row, int Number, SeatType Type);
+    public record BookingResult(Booking Sale, PrintableTicket Ticket);
+
 
     public class BookingService
     {
@@ -59,26 +59,33 @@ namespace CinemaAPP.Services
             return movies.Values.ToList();
         }
 
-        public List<PhysicalSeat> GetSeats(int roomId)
+        public List<Seat> GetSeats(int roomId)
         {
             using var conn = Db.Open();
             return ReadSeats(conn, null, roomId);
         }
 
-        private static List<PhysicalSeat> ReadSeats(SqlConnection conn, SqlTransaction? tx, int roomId)
+        private static List<Seat> ReadSeats(SqlConnection conn, SqlTransaction? tx, int roomId)
         {
             using var cmd = new SqlCommand(
                 "SELECT SeatID,RowLabel,SeatNumber,SeatType FROM SEAT "
                 + (tx == null ? "" : "WITH (UPDLOCK,HOLDLOCK) ")
                 + "WHERE RoomID=@Room ORDER BY RowLabel,SeatNumber", conn, tx);
             cmd.Parameters.Add("@Room", SqlDbType.Int).Value = roomId;
-            var seats = new List<PhysicalSeat>();
+            var seats = new List<Seat>();
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
                 if (!Enum.TryParse<SeatType>(reader.GetString(3), true, out var type) || !Enum.IsDefined(type))
                     throw new InvalidOperationException("Phòng có loại ghế không hợp lệ, cần cập nhật dữ liệu ghế.");
-                seats.Add(new PhysicalSeat(reader.GetInt32(0), reader.GetString(1), reader.GetInt32(2), type));
+                seats.Add(new Seat
+                {
+                    SeatID = reader.GetInt32(0),
+                    RoomID = roomId,
+                    RowLabel = reader.GetString(1),
+                    SeatNumber = reader.GetInt32(2),
+                    SeatType = type
+                });
             }
             return seats;
         }
@@ -103,29 +110,29 @@ namespace CinemaAPP.Services
             return (int)cmd.ExecuteScalar()! == 1;
         }
 
-        public static List<SeatItem> BuildSeatItems(IEnumerable<PhysicalSeat> source, decimal basePrice)
+        public static List<SeatItem> BuildSeatItems(IEnumerable<Seat> source, decimal basePrice)
         {
             var items = new List<SeatItem>();
-            foreach (var row in source.GroupBy(s => s.Row).OrderBy(g => g.Key))
+            foreach (var row in source.GroupBy(s => s.RowLabel).OrderBy(g => g.Key))
             {
-                var seats = row.OrderBy(s => s.Number).ToArray();
+                var seats = row.OrderBy(s => s.SeatNumber).ToArray();
                 for (int i = 0; i < seats.Length; i++)
                 {
                     var seat = seats[i];
-                    var ids = new List<int> { seat.ID };
-                    string number = seat.Number.ToString();
-                    if (seat.Type == SeatType.Couple)
+                    var ids = new List<int> { seat.SeatID };
+                    string number = seat.SeatNumber.ToString();
+                    if (seat.SeatType == SeatType.Couple)
                     {
-                        if (seat.Number % 2 != 1 || i + 1 >= seats.Length
-                            || seats[i + 1].Type != SeatType.Couple || seats[i + 1].Number != seat.Number + 1)
-                            throw new InvalidOperationException($"Ghế đôi hàng {seat.Row} chưa có cặp hợp lệ.");
-                        ids.Add(seats[++i].ID);
-                        number += "-" + seats[i].Number;
+                        if (seat.SeatNumber % 2 != 1 || i + 1 >= seats.Length
+                            || seats[i + 1].SeatType != SeatType.Couple || seats[i + 1].SeatNumber != seat.SeatNumber + 1)
+                            throw new InvalidOperationException($"Ghế đôi hàng {seat.RowLabel} chưa có cặp hợp lệ.");
+                        ids.Add(seats[++i].SeatID);
+                        number += "-" + seats[i].SeatNumber;
                     }
                     items.Add(new SeatItem
                     {
-                        SeatID = seat.ID, SeatIDs = ids, RowLabel = seat.Row, NumberText = number,
-                        Type = seat.Type, Price = SeatPrice(basePrice, seat.Type) * ids.Count,
+                        SeatID = seat.SeatID, SeatIDs = ids, RowLabel = seat.RowLabel, NumberText = number,
+                        Type = seat.SeatType, Price = SeatPrice(basePrice, seat.SeatType) * ids.Count,
                     });
                 }
             }
@@ -134,7 +141,7 @@ namespace CinemaAPP.Services
 
         // Gom ghế thành từng hàng kèm lối đi và trạng thái đã bán (dùng chung cho cả Bán vé và Quản lý phòng).
         public static List<SeatRowItem> BuildSeatRows(
-            IReadOnlyList<PhysicalSeat> seats,
+            IReadOnlyList<Seat> seats,
             decimal basePrice,
             IReadOnlySet<int>? soldSeatIds = null)
         {
@@ -143,7 +150,7 @@ namespace CinemaAPP.Services
             foreach (var group in items.GroupBy(s => s.RowLabel))
             {
                 var row = new SeatRowItem { RowLabel = group.Key };
-                int lastNumber = seats.Where(s => s.Row == group.Key).Max(s => s.Number);
+                int lastNumber = seats.Where(s => s.RowLabel == group.Key).Max(s => s.SeatNumber);
                 foreach (var seat in group)
                 {
                     int number = int.Parse(seat.NumberText.Split('-')[0], CultureInfo.InvariantCulture);
@@ -261,13 +268,26 @@ namespace CinemaAPP.Services
                     update.Parameters.Add("@ID", SqlDbType.Int).Value = customerId.Value;
                     update.ExecuteNonQuery();
                 }
-                var sale = new SaleRecord
+                var sale = new Booking
                 {
-                    BookingID = id, AccountID = accountId, CustomerID = customerId, CreatedAt = now,
-                    MovieTitle = show.MovieTitle, ShowStart = show.StartTime, RoomName = show.RoomName,
-                    ShowFormat = show.ShowFormat, StaffName = fullName, StaffUsername = username,
-                    CustomerName = customerName, CustomerPhone = phone, Method = method,
-                    CashGiven = method == PaymentMethod.Cash ? cashGiven : 0, Total = total, Points = points, PointsUsed = pointsUsed,
+                    BookingID = id,
+                    AccountID = accountId,
+                    CustomerID = customerId,
+                    CreatedAt = now,
+                    TotalAmount = total,
+                    BookingStatus = BookingStatus.Paid,
+                    PaymentMethod = method,
+                    CashGiven = method == PaymentMethod.Cash ? cashGiven : null,
+                    PointsEarned = points,
+                    PointsUsed = pointsUsed,
+                    StaffUsername = username,
+                    StaffName = fullName,
+                    CustomerName = customerName,
+                    CustomerPhone = phone,
+                    MovieTitle = show.MovieTitle,
+                    ShowStart = show.StartTime,
+                    RoomName = show.RoomName,
+                    ShowFormat = show.ShowFormat,
                     Seats = selected.Select(s => new SoldSeat(s.Label, s.Type, s.SeatIDs.Count)).ToList(),
                 };
                 var printable = new PrintableTicket(show, age, fullName, method, customerId.HasValue, pointsUsed,
@@ -283,7 +303,7 @@ namespace CinemaAPP.Services
             // Dispose transaction tự rollback nếu chưa Commit, kể cả lỗi khi thêm một trong nhiều vé.
         }
 
-        public List<SaleRecord> GetSales(DateTime from, DateTime to)
+        public List<Booking> GetSales(DateTime from, DateTime to)
         {
             using var conn = Db.Open();
             using var cmd = new SqlCommand(
@@ -301,7 +321,7 @@ namespace CinemaAPP.Services
                   ORDER BY b.CreatedAt DESC,b.BookingID,se.RowLabel,se.SeatNumber", conn);
             cmd.Parameters.Add("@From", SqlDbType.DateTime2).Value = from;
             cmd.Parameters.Add("@To", SqlDbType.DateTime2).Value = to;
-            var sales = new Dictionary<int, SaleRecord>();
+            var sales = new Dictionary<int, Booking>();
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
@@ -312,20 +332,28 @@ namespace CinemaAPP.Services
                     if (!Enum.TryParse<PaymentMethod>(reader.IsDBNull(5) ? "" : reader.GetString(5), out var m)) method = null;
                     else method = m;
 
-                    sale = new SaleRecord
+                    sale = new Booking
                     {
-                        BookingID = id, AccountID = reader.GetInt32(1),
+                        BookingID = id,
+                        AccountID = reader.GetInt32(1),
                         CustomerID = reader.IsDBNull(2) ? null : reader.GetInt32(2),
-                        CreatedAt = reader.GetDateTime(3), Total = reader.GetDecimal(4), Method = method,
-                        CashGiven = reader.IsDBNull(6) ? 0 : reader.GetDecimal(6),
-                        Points = reader.GetInt32(7), PointsUsed = reader.GetInt32(8),
-                        IsCancelled = !reader.IsDBNull(9) && reader.GetString(9) == BookingStatus.Cancelled.ToString(),
-                        CancelReason = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                        CreatedAt = reader.GetDateTime(3),
+                        TotalAmount = reader.GetDecimal(4),
+                        PaymentMethod = method,
+                        CashGiven = reader.IsDBNull(6) ? null : reader.GetDecimal(6),
+                        PointsEarned = reader.GetInt32(7),
+                        PointsUsed = reader.GetInt32(8),
+                        BookingStatus = Enum.Parse<BookingStatus>(reader.GetString(9)),
+                        CancelReason = reader.IsDBNull(10) ? null : reader.GetString(10),
                         CancelledAt = reader.IsDBNull(11) ? null : reader.GetDateTime(11),
-                        CancelledBy = reader.GetString(12), StaffUsername = reader.GetString(13), StaffName = reader.GetString(14),
+                        CancelledByName = reader.GetString(12),
+                        StaffUsername = reader.GetString(13),
+                        StaffName = reader.GetString(14),
                         CustomerName = reader.IsDBNull(15) ? null : reader.GetString(15),
                         CustomerPhone = reader.IsDBNull(16) ? null : reader.GetString(16),
-                        MovieTitle = reader.GetString(17), ShowStart = reader.GetDateTime(18), RoomName = reader.GetString(19),
+                        MovieTitle = reader.GetString(17),
+                        ShowStart = reader.GetDateTime(18),
+                        RoomName = reader.GetString(19),
                         ShowFormat = reader.IsDBNull(20) ? "" : reader.GetString(20),
                     };
                     sales.Add(id, sale);

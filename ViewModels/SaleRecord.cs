@@ -3,8 +3,7 @@ using CinemaAPP.Models;
 
 namespace CinemaAPP.ViewModels
 {
-    // Một ghế trong đơn đã bán (chỉ để hiện chip ghế ở màn Giao dịch).
-    public record SoldSeat(string Label, SeatType Type, int Count = 1);
+    
 
     // Một nhân viên bán vé (lấy từ người bán của đơn / bảng ACCOUNT).
     public record StaffInfo(string FullName, string Username, string Shift)
@@ -12,46 +11,35 @@ namespace CinemaAPP.ViewModels
         public string Initials => NameHelper.Initials(FullName);
     }
 
-    // Một đơn đã bán = một dòng BOOKING + các TICKET của nó (đọc từ SQL Server).
-    public class SaleRecord : ObservableObject
+    // Một dòng đơn trên các màn Hóa đơn ca / Giao dịch / Tổng quan: dữ liệu Booking + chữ hiển thị.
+    public class SaleRecord
     {
-        public int BookingID { get; init; }
-        public int AccountID { get; init; }
-        public int? CustomerID { get; init; }
-        public DateTime CreatedAt { get; init; }
-        public string MovieTitle { get; init; } = "";
-        public DateTime ShowStart { get; init; }
-        public string RoomName { get; init; } = "";     // "Phòng 2"
-        public string ShowFormat { get; init; } = "";   // "2D" / "3D"
-        public List<SoldSeat> Seats { get; init; } = new List<SoldSeat>();
-        public string StaffName { get; init; } = "";
-        public string StaffUsername { get; init; } = "";
-        public string? CustomerName { get; init; }
-        public string? CustomerPhone { get; init; }
-        public PaymentMethod? Method { get; init; }
-        public decimal CashGiven { get; init; }         // chỉ có khi trả tiền mặt
-        public decimal Total { get; init; }
+        public Booking Data { get; }
+        public SaleRecord(Booking data) { Data = data; }
 
-        public int Points { get; init; }
-        public int PointsUsed { get; init; }
-
-        // ----- Hủy đơn -----
-        private bool isCancelled;
-        public bool IsCancelled
-        {
-            get => isCancelled;
-            set
-            {
-                if (SetProperty(ref isCancelled, value))
-                {
-                    OnPropertyChanged(nameof(StatusText));
-                    OnPropertyChanged(nameof(CancelInfo));
-                }
-            }
-        }
-        public string CancelReason { get; set; } = "";
-        public DateTime? CancelledAt { get; set; }
-        public string CancelledBy { get; set; } = "";
+        // ----- Lấy thẳng từ Model (giữ tên cũ để View và các ViewModel khác không phải sửa) -----
+        public int BookingID => Data.BookingID;
+        public int AccountID => Data.AccountID;
+        public int? CustomerID => Data.CustomerID;
+        public DateTime CreatedAt => Data.CreatedAt;
+        public string MovieTitle => Data.MovieTitle;
+        public DateTime ShowStart => Data.ShowStart;
+        public string RoomName => Data.RoomName;
+        public string ShowFormat => Data.ShowFormat;
+        public List<SoldSeat> Seats => Data.Seats;
+        public string StaffName => Data.StaffName;
+        public string StaffUsername => Data.StaffUsername;
+        public string? CustomerName => Data.CustomerName;
+        public string? CustomerPhone => Data.CustomerPhone;
+        public PaymentMethod? Method => Data.PaymentMethod;
+        public decimal CashGiven => Data.CashGiven ?? 0;
+        public decimal Total => Data.TotalAmount;
+        public int Points => Data.PointsEarned;
+        public int PointsUsed => Data.PointsUsed;
+        public bool IsCancelled => Data.IsCancelled;
+        public string CancelReason => Data.CancelReason ?? "";
+        public DateTime? CancelledAt => Data.CancelledAt;
+        public string CancelledBy => Data.CancelledByName;
 
         // ----- Chỉ để hiển thị -----
         public string Code => "#" + BookingID;

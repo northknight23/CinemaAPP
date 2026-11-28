@@ -666,7 +666,7 @@
                         </RadioButton>
                     </UniformGrid>
 
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer VerticalScrollBarVisibility="Hidden">
                         <StackPanel>
                             <DockPanel>
                                 <Button DockPanel.Dock="Right" Command="{Binding ClearCommand}" VerticalAlignment="Center">

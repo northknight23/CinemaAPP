@@ -244,7 +244,7 @@ namespace CinemaAPP.ViewModels
             Dictionary<string, ShiftHandover> shiftMap = new(StringComparer.OrdinalIgnoreCase);
             try
             {
-                stored = bookingService.GetSales(SelectedDate.From, SelectedDate.To);
+                stored = bookingService.GetSales(SelectedDate.From, SelectedDate.To).Select(b => new SaleRecord(b)).ToList();
                 if (SelectedDate.IsSingleDay)
                 {
                     foreach (var shift in shiftService.GetByDate(SelectedDate.From))
