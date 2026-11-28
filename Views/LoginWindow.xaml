@@ -267,22 +267,22 @@
                     </StackPanel>
                 </Viewbox>
                 <!-- Dải phim chạy ngang -->
-                <Canvas Grid.Row="2" Height="220" Margin="-56,0" VerticalAlignment="Center"
+                <Canvas x:Name="DayPhim" Grid.Row="2" Height="220" Margin="-120,0" VerticalAlignment="Center"
         ClipToBounds="True" Opacity="0.9" RenderTransformOrigin="0.5,0.5">
                     <Canvas.RenderTransform>
                         <RotateTransform Angle="-6.5"/>
                     </Canvas.RenderTransform>
                     <StackPanel Orientation="Horizontal">
                         <StackPanel.RenderTransform>
-                            <TranslateTransform/>
+                            <TranslateTransform x:Name="TransX"/>
                         </StackPanel.RenderTransform>
                         <StackPanel.Triggers>
                             <EventTrigger RoutedEvent="FrameworkElement.Loaded">
                                 <BeginStoryboard>
                                     <Storyboard>
                                         <!-- To = -(độ rộng 1 đoạn) ; Duration càng lớn chạy càng chậm -->
-                                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
-                                         From="0" To="-1152" Duration="0:0:24" RepeatBehavior="Forever"/>
+                                        <DoubleAnimation Storyboard.TargetName="TransX" Storyboard.TargetProperty="X"
+                                         To="-1152" Duration="0:0:24" RepeatBehavior="Forever"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </EventTrigger>
