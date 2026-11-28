@@ -13,11 +13,14 @@ namespace CinemaAPP.Services
 
         // Ngày đầu tháng hiện tại: mốc để so sánh "tháng này" với "tới hết tháng trước"
         public static DateTime MonthStart => new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        public const int PeriodDays = 7;
+        public static DateTime PeriodStart => DateTime.Today.AddDays(-(PeriodDays-1));
 
         // Danh sách khách + thống kê mua vé.
         // OrderCount đếm MỌI đơn (kể cả đơn hủy) vì đơn nào cũng làm khóa ngoại chặn xóa;
         // các cột còn lại chỉ tính đơn đã thanh toán.
         // SpentBeforeMonth / PaidOrdersBeforeMonth: số liệu tính tới đầu tháng này, để thẻ số liệu so với tháng trước.
+        // SpentBeforePeriod / PaidOrdersBefo
         public List<Customer> GetAll()
         {
             using SqlConnection conn = Db.Open();
@@ -28,14 +31,15 @@ namespace CinemaAPP.Services
                          ISNULL(SUM(CASE WHEN b.BookingStatus = @Paid THEN b.TotalAmount END), 0) AS TotalSpent,
                          MAX(CASE WHEN b.BookingStatus = @Paid THEN b.CreatedAt END) AS LastPurchase,
                          MIN(CASE WHEN b.BookingStatus = @Paid THEN b.CreatedAt END) AS FirstPurchase,
-                         ISNULL(SUM(CASE WHEN b.BookingStatus = @Paid AND b.CreatedAt < @MonthStart THEN b.TotalAmount END), 0) AS SpentBeforeMonth,
-                         SUM(CASE WHEN b.BookingStatus = @Paid AND b.CreatedAt < @MonthStart THEN 1 ELSE 0 END) AS PaidOrdersBeforeMonth
+                         ISNULL(SUM(CASE WHEN b.BookingStatus = @Paid AND b.CreatedAt < @PeriodStart THEN b.TotalAmount END), 0) AS SpentBeforePeriod,
+                         SUM(CASE WHEN b.BookingStatus = @Paid AND b.CreatedAt < @PeriodStart THEN 1 ELSE 0 END) AS PaidOrdersBeforePeriod
                   FROM CUSTOMER c
-                  LEFT JOIN BOOKING b ON b.CustomerID = c.CustomerID
+                  LEFT JOIN BOOKING b ON b.CustomerID = c.CustomerID AND b.CreatedAt <@Now
                   GROUP BY c.CustomerID, c.FullName, c.Phone, c.Points
                   ORDER BY c.CustomerID", conn);
             cmd.Parameters.Add("@Paid", SqlDbType.NVarChar, 20).Value = BookingStatus.Paid.ToString();
-            cmd.Parameters.Add("@MonthStart", SqlDbType.DateTime2).Value = MonthStart;
+            cmd.Parameters.Add("@PeriodStart", SqlDbType.DateTime2).Value = PeriodStart;
+            cmd.Parameters.Add("@Now", SqlDbType.DateTime2).Value = DateTime.Now;
 
             var list = new List<Customer>();
             using SqlDataReader r = cmd.ExecuteReader();
@@ -52,8 +56,8 @@ namespace CinemaAPP.Services
                     TotalSpent = r.GetDecimal(6),
                     LastPurchase = r.IsDBNull(7) ? null : r.GetDateTime(7),
                     FirstPurchase = r.IsDBNull(8) ? null : r.GetDateTime(8),
-                    SpentBeforeMonth = r.GetDecimal(9),
-                    PaidOrdersBeforeMonth = r.GetInt32(10)
+                    SpentBeforePeriod = r.GetDecimal(9),
+                    PaidOrdersBeforePeriod = r.GetInt32(10)
                 });
             }
             return list;
@@ -61,11 +65,11 @@ namespace CinemaAPP.Services
 
         // Doanh thu từ khách thành viên (đơn có CustomerID):
         // tháng này (từ ngày 1 tới giờ) và CÙNG SỐ NGÀY của tháng trước, để so sánh công bằng.
-        public (decimal ThisMonth, decimal LastMonth) GetMemberRevenue()
+        public (decimal ThisPeriod, decimal LastPeriod) GetMemberRevenue()
         {
             DateTime now = DateTime.Now;
-            DateTime thisStart = MonthStart;
-            DateTime lastStart = thisStart.AddMonths(-1);
+            DateTime thisStart = PeriodStart;
+            DateTime lastStart = thisStart.AddDays(-PeriodDays);
             DateTime lastEnd = lastStart + (now - thisStart);
             if (lastEnd > thisStart) lastEnd = thisStart;
 

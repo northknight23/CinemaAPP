@@ -16,6 +16,8 @@ namespace CinemaAPP.Models
         public DateTime? FirstPurchase { get; set; }     // chỉ đơn đã thanh toán
         public decimal SpentBeforeMonth { get; set; }    // tổng chi tiêu tính tới đầu tháng này (để so sánh)
         public int PaidOrdersBeforeMonth { get; set; }   // số đơn đã thanh toán tính tới đầu tháng này
+        public decimal SpentBeforePeriod { get; set; }
+        public int PaidOrdersBeforePeriod { get; set; }
 
         // ---- Hạng thành viên (tính theo tổng chi tiêu, không lưu trong CSDL) ----
         public string Tier => MemberTier.Of(TotalSpent);

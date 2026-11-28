@@ -44,7 +44,7 @@ namespace CinemaAPP.ViewModels
         public string GoldTrendText { get; private set; } = "";
         public bool GoldTrendUp { get; private set; } = true;
 
-        private (decimal ThisMonth, decimal LastMonth) memberRevenue;
+        private (decimal ThisPeriod, decimal LastPeriod) memberRevenue;
 
         // ================= Tìm kiếm, lọc hạng, sắp xếp =================
         private string searchText = "";
@@ -288,25 +288,25 @@ namespace CinemaAPP.ViewModels
 
         private void UpdateStats()
         {
-            // Thành viên: so với 30 ngày trước (khách mua lần đầu trong 30 ngày là khách mới)
+            // Thành viên: so với 7 ngày trước 
             int total = all.Count;
-            int newOnes = all.Count(c => c.FirstPurchase >= DateTime.Today.AddDays(-30));
+            int newOnes = all.Count(c => c.FirstPurchase >=CustomerService.PeriodStart);
             MembersValue = Format.Number(total);
             (MembersTrendText, MembersTrendUp) = Trend(total, total - newOnes);
 
-            // Khách quay lại (từ 2 đơn): bây giờ so với lúc đầu tháng
+            // Khách quay lại (từ 2 đơn): theo chu kì
             int returning = all.Count(c => c.PaidOrders >= 2);
-            int returningBefore = all.Count(c => c.PaidOrdersBeforeMonth >= 2);
+            int returningBefore = all.Count(c => c.PaidOrdersBeforePeriod >= 2);
             ReturningValue = Format.Number(returning);
             (ReturningTrendText, ReturningTrendUp) = Trend(returning, returningBefore);
 
-            // Doanh thu thành viên: tháng này so với cùng kỳ tháng trước (đơn vị triệu)
-            RevenueValue = Format.Million(memberRevenue.ThisMonth);
-            (RevenueTrendText, RevenueTrendUp) = Trend(memberRevenue.ThisMonth, memberRevenue.LastMonth);
+            // Doanh thu thành viên: so theo chu ki 7 ngay
+            RevenueValue = Format.Million(memberRevenue.ThisPeriod);
+            (RevenueTrendText, RevenueTrendUp) = Trend(memberRevenue.ThisPeriod, memberRevenue.LastPeriod);
 
-            // Hạng Vàng: bây giờ so với lúc đầu tháng
+            // Hạng Vàng: so theo chu ki 7 ngay
             int gold = all.Count(c => c.Tier == MemberTier.Gold);
-            int goldBefore = all.Count(c => c.SpentBeforeMonth >= MemberTier.GoldFrom);
+            int goldBefore = all.Count(c => c.SpentBeforePeriod >= MemberTier.GoldFrom);
             GoldValue = Format.Number(gold);
             (GoldTrendText, GoldTrendUp) = Trend(gold, goldBefore);
 
