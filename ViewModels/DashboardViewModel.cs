@@ -205,7 +205,7 @@ namespace CinemaAPP.ViewModels
                     ySame: revenue.GetSummary(yesterday, yesterdaySameTime), // hôm qua tính tới giờ này
                     sales: booking.GetSales(salesFrom, to)));                 // từng đơn: chỉ cần 7 ngày cho cột hoạt động
                 var stats = BuildDailyStats(from, to, result.daily, result.shows);
-                Fill(stats, result.sales, result.ySame);
+                Fill(stats, result.sales.Select(b => new SaleRecord(b)).ToList(), result.ySame);
                 Message = "";             // tải được → tắt thông báo lỗi cũ (nếu có)
             }
             catch (Exception)

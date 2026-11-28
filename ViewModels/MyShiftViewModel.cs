@@ -217,7 +217,7 @@ namespace CinemaAPP.ViewModels
             List<SaleRecord> stored;
             try
             {
-                stored = bookingService.GetSales(ShiftDay, ShiftDay.AddDays(1));
+                stored = bookingService.GetSales(ShiftDay, ShiftDay.AddDays(1)).Select(b=>new SaleRecord(b)).ToList();
                 currentShift = shiftService.GetForStaff(ShiftDay, StaffUsername);
             }
             catch (Exception ex)

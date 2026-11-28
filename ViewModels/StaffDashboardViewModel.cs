@@ -150,7 +150,7 @@ namespace CinemaAPP.ViewModels
                     shows: dashboard.GetRange(from, to),
                     sales: booking.GetSales(from, to),
                     shift: shifts.GetForStaff(from, StaffUsername)));
-                Fill(result.shows, result.sales, DateTime.Now);
+                Fill(result.shows, result.sales.Select(b => new SaleRecord(b)).ToList(), DateTime.Now);
                 currentShift = result.shift;
                 OnPropertyChanged(nameof(ShiftStatusKind));
                 OnPropertyChanged(nameof(ShiftStatusText));
